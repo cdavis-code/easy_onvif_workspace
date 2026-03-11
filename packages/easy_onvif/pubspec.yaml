@@ -13,19 +13,19 @@ environment:
 resolution: workspace
 
 dependencies:
-  convert: ^3.1.1
-  crypto: ^3.0.5
-  dio: ^5.8.0+1
+  convert: ^3.1.2
+  crypto: ^3.0.7
+  dio: ^5.9.2
   ffi: ^2.2.0
   html_unescape: ^2.0.0
-  http: ^1.3.0
+  http: ^1.6.0
   http_parser: ^4.1.2
   intl: ^0.20.2
   json_annotation: ^4.11.0
   loggy: ^2.0.3
-  path: ^1.9.0
+  path: ^1.9.1
   uuid: ^4.5.3
-  xml: ^6.6.0
+  xml: ^6.6.1
   xml2json: ^6.2.7
   yaml: ^3.1.3
 
