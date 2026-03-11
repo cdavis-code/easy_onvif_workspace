@@ -36,6 +36,16 @@
             ],
         },
         {
+            "name": "onvif device-management get-geolocation",
+            "request": "launch",
+            "type": "dart",
+            "program": "packages/easy_onvif_cli/bin/onvif.dart",
+            "args": [
+                "device-management",
+                "get-geolocation"
+            ],
+        },
+        {
             "name": "onvif device-management get-system-support-information",
             "request": "launch",
             "type": "dart",

@@ -1,1 +1,1 @@
-{"version":2,"entries":[{"package":"easy_onvif_workspace","rootUri":"../","packageUri":"lib/"}]}
+{"version":2,"entries":[{"package":"easy_onvif_workspace","rootUri":"../","packageUri":"lib/"},{"package":"easy_onvif","rootUri":"../packages/easy_onvif/","packageUri":"lib/"},{"package":"easy_onvif_cli","rootUri":"../packages/easy_onvif_cli/","packageUri":"lib/"}]}
