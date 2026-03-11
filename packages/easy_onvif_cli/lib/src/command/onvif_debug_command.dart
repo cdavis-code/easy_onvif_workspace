@@ -368,12 +368,11 @@ class OnvifDebugCommand extends Command with UiLoggy {
         skipWhenNull: media2profileToken == null,
       );
 
-      final videoEncoderConfigurationToken =
-          media2profiles
-              ?.first
-              .configurations
-              ?.videoEncoderConfiguration
-              ?.token;
+      final videoEncoderConfigurationToken = media2profiles
+          ?.first
+          .configurations
+          ?.videoEncoderConfiguration
+          ?.token;
 
       await test(
         'GetVideoEncoderInstances',
@@ -491,11 +490,10 @@ class OnvifDebugCommand extends Command with UiLoggy {
       ),
     );
 
-    final spinner =
-        CliSpin(
-          text: 'Archiving results',
-          spinner: CliSpinners.line,
-        ).start(); // Chai
+    final spinner = CliSpin(
+      text: 'Archiving results',
+      spinner: CliSpinners.line,
+    ).start(); // Chai
 
     Timer(Duration(milliseconds: 1000), () {
       // Change spinner color

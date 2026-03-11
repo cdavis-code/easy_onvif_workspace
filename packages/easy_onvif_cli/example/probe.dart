@@ -7,6 +7,7 @@ void main(List<String> arguments) async {
 
   for (var device in multicastProbe.onvifDevices) {
     print(
-        '${device.name} ${device.location} ${device.hardware} ${device.xAddr}');
+      '${device.name} ${device.location} ${device.hardware} ${device.xAddr}',
+    );
   }
 }

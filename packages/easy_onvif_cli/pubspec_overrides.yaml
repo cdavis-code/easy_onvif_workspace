@@ -1,4 +1,2 @@
-# melos_managed_dependency_overrides: easy_onvif
-dependency_overrides:
-  easy_onvif:
-    path: ../easy_onvif
+# melos_managed_dependency_overrides:
+dependency_overrides: {}

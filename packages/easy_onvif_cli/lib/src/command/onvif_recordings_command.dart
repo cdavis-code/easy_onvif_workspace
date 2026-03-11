@@ -159,10 +159,9 @@ class OnvifCreateRecordingJobRecordingsCommand extends OnvifHelperCommand {
       ..addOption(
         'job-configuration-mode',
         valueHelp: 'string',
-        allowed:
-            RecordingJobConfigurationMode.values
-                .map((mode) => mode.value)
-                .toList(),
+        allowed: RecordingJobConfigurationMode.values
+            .map((mode) => mode.value)
+            .toList(),
         help:
             '''The mode of the job. If it is idle, nothing shall happen. If it is active, the device shall try to obtain data from the receivers. A client shall use GetRecordingJobState to determine if data transfer is really taking place.
 
@@ -434,10 +433,9 @@ class OnvifSetRecordingJobModeRecordingsCommand extends OnvifHelperCommand {
         'mode',
         valueHelp: 'string',
         mandatory: true,
-        allowed:
-            RecordingJobConfigurationMode.values
-                .map((mode) => mode.value)
-                .toList(),
+        allowed: RecordingJobConfigurationMode.values
+            .map((mode) => mode.value)
+            .toList(),
         help: 'The new mode for the recording job.',
       );
   }

@@ -10,16 +10,12 @@ void main(List<String> arguments) async {
 
   // configure device connection
   final onvif = await Onvif.connect(
-      host: config['host'],
-      username: config['username'],
-      password: config['password'],
-      logOptions: const LogOptions(
-        LogLevel.debug,
-        stackTraceLevel: LogLevel.off,
-      ),
-      printer: const PrettyPrinter(
-        showColors: true,
-      ));
+    host: config['host'],
+    username: config['username'],
+    password: config['password'],
+    logOptions: const LogOptions(LogLevel.debug, stackTraceLevel: LogLevel.off),
+    printer: const PrettyPrinter(showColors: true),
+  );
 
   final recordingJobConfiguration = RecordingJobConfiguration(
     recordingToken: 'OnvifRecordingToken_1',
@@ -34,8 +30,9 @@ void main(List<String> arguments) async {
     ),
   );
 
-  var createRecordingJobResponse =
-      await onvif.recordings.createRecordingJob(recordingJobConfiguration);
+  var createRecordingJobResponse = await onvif.recordings.createRecordingJob(
+    recordingJobConfiguration,
+  );
 
   print(createRecordingJobResponse.jobConfiguration);
 

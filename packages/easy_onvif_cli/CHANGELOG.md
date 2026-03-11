@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.3+1
+
+* dependency bump
+
 ## 3.1.3
 
 * dependency bump

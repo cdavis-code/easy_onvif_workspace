@@ -210,8 +210,8 @@ class OnvifGetServiceCapabilities1MediaCommand extends OnvifHelperCommand {
     await initializeOnvif();
 
     try {
-      final mediaServiceCapabilities =
-          await media.media1.getServiceCapabilities();
+      final mediaServiceCapabilities = await media.media1
+          .getServiceCapabilities();
 
       print(mediaServiceCapabilities);
     } on DioException catch (err) {

@@ -215,15 +215,14 @@ class OnvifFindRecordingsSearchCommand extends OnvifHelperCommand {
             argResults?['scope-include-sources-token']) !=
         null;
 
-    final sourceToken =
-        needsSourceToken
-            ? [
-              SourceToken(
-                type: argResults?['scope-include-sources-type'],
-                token: argResults?['scope-include-sources-token'],
-              ),
-            ]
-            : null;
+    final sourceToken = needsSourceToken
+        ? [
+            SourceToken(
+              type: argResults?['scope-include-sources-type'],
+              token: argResults?['scope-include-sources-token'],
+            ),
+          ]
+        : null;
 
     final needsSearchScope =
         (sourceToken ??
@@ -231,17 +230,16 @@ class OnvifFindRecordingsSearchCommand extends OnvifHelperCommand {
             argResults?['scope-recording-information-filter']) !=
         null;
 
-    final searchScope =
-        needsSearchScope
-            ? SearchScope(
-              includedSources: sourceToken,
-              includedRecordings: argResults?['scope-include-recordings']
-                  .toString()
-                  .split(','),
-              recordingInformationFilter:
-                  argResults?['scope-recording-information-filter'],
-            )
-            : null;
+    final searchScope = needsSearchScope
+        ? SearchScope(
+            includedSources: sourceToken,
+            includedRecordings: argResults?['scope-include-recordings']
+                .toString()
+                .split(','),
+            recordingInformationFilter:
+                argResults?['scope-recording-information-filter'],
+          )
+        : null;
 
     try {
       final searchToken = await search.findRecordings(

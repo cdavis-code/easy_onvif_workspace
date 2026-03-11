@@ -25,6 +25,9 @@ class OnvifDeviceManagementCommand extends Command {
     addSubcommand(OnvifGetDeviceInformationResponseDeviceManagementCommand());
     addSubcommand(OnvifGetDnsDeviceManagementCommand());
     addSubcommand(OnvifGetDynamicDnsDeviceManagementCommand());
+
+    addSubcommand(OnvifGetGeoLocationDeviceManagementCommand());
+
     addSubcommand(OnvifGetHostnameDeviceManagementCommand());
     addSubcommand(OnvifGetIPAddressFilterDeviceManagementCommand());
     addSubcommand(OnvifGetNetworkProtocolsDeviceManagementCommand());
@@ -251,8 +254,8 @@ class OnvifGetDeviceInformationResponseDeviceManagementCommand
     await initializeOnvif();
 
     try {
-      final getDeviceInformationResponse =
-          await deviceManagement.getDeviceInformation();
+      final getDeviceInformationResponse = await deviceManagement
+          .getDeviceInformation();
 
       print(getDeviceInformationResponse);
     } on DioException catch (err) {
@@ -329,6 +332,28 @@ class OnvifGetDynamicDnsDeviceManagementCommand extends OnvifHelperCommand {
       final dynamicDnsInformation = await deviceManagement.getDynamicDns();
 
       print(dynamicDnsInformation);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+class OnvifGetGeoLocationDeviceManagementCommand extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation lists all existing geo location configurations for the device.';
+
+  @override
+  String get name => 'get-geolocation';
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final geoLocation = await deviceManagement.getGeoLocation();
+
+      print(geoLocation);
     } on DioException catch (err) {
       throw UsageException('API usage error:', err.usage);
     }
@@ -452,8 +477,8 @@ class OnvifGetServiceCapabilitiesDeviceManagementCommand
     await initializeOnvif();
 
     try {
-      final deviceServiceCapabilities =
-          await deviceManagement.getServiceCapabilities();
+      final deviceServiceCapabilities = await deviceManagement
+          .getServiceCapabilities();
 
       print(deviceServiceCapabilities);
     } on DioException catch (err) {
@@ -547,8 +572,8 @@ class OnvifGetStorageConfigurationsDeviceManagementCommand
     await initializeOnvif();
 
     try {
-      final systemDateAndTime =
-          await deviceManagement.getStorageConfigurations();
+      final systemDateAndTime = await deviceManagement
+          .getStorageConfigurations();
 
       print(systemDateAndTime);
     } on DioException catch (err) {

@@ -10,16 +10,15 @@ void main(List<String> arguments) async {
 
   // configure device connection
   final onvif = await Onvif.connect(
-      host: config['host'],
-      username: config['username'],
-      password: config['password'],
-      logOptions: const LogOptions(
-        LogLevel.debug,
-        stackTraceLevel: LogLevel.error,
-      ),
-      printer: const PrettyPrinter(
-        showColors: true,
-      ));
+    host: config['host'],
+    username: config['username'],
+    password: config['password'],
+    logOptions: const LogOptions(
+      LogLevel.debug,
+      stackTraceLevel: LogLevel.error,
+    ),
+    printer: const PrettyPrinter(showColors: true),
+  );
 
   var profiles = await onvif.media.getProfiles(); // Access Class: READ_MEDIA
 
@@ -35,9 +34,10 @@ void main(List<String> arguments) async {
 
   print(preset);
 
-//print the preset values
+  //print the preset values
   print(
-      'preset: ${preset.token} - ${preset.name} ${preset.position?.panTilt?.x}  ${preset.position?.panTilt?.y}  ${preset.position?.zoom?.x}');
+    'preset: ${preset.token} - ${preset.name} ${preset.position?.panTilt?.x}  ${preset.position?.panTilt?.y}  ${preset.position?.zoom?.x}',
+  );
 
   var serialized = preset.toJson();
 

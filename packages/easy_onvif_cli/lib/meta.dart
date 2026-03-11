@@ -6,5 +6,5 @@ library;
 import 'dart:convert' show json;
 
 final pubSpec = json.decode(
-  '{"description":"A pure Dart library designed primarily for command line automation of Onvif compatible devices.","homepage":"https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_cli","documentation":"null","repository":"https://github.com/faithoflifedev/easy_onvif_workspace","issueTracker":"null","name":"easy_onvif_cli","publish_to":"null","version":"3.1.3"}',
+  '{"description":"A pure Dart library designed primarily for command line automation of Onvif compatible devices.","homepage":"https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_cli","documentation":"null","repository":"https://github.com/faithoflifedev/easy_onvif_workspace","issueTracker":"null","name":"easy_onvif_cli","publish_to":"null","version":"3.1.3+1"}',
 );

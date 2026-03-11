@@ -5,9 +5,10 @@ description: An example
 repository: https://github.com/faithoflifedev/easy_onvif_workspace/packages/easy_onvif_cli/example
 
 publish_to: none
+# resolution: workspace
 
 environment:
-  sdk: ">=3.2.0 <4.0.0"
+  sdk: ">=3.7.0 <4.0.0"
 
 dependencies:
   easy_onvif:

@@ -190,10 +190,9 @@ class OnvifContinuousMovePtzCommand extends OnvifHelperCommand {
     await initializeOnvif();
 
     try {
-      int? timeout =
-          argResults?['timeout'] != null
-              ? int.parse(argResults?['timeout'])
-              : null;
+      int? timeout = argResults?['timeout'] != null
+          ? int.parse(argResults?['timeout'])
+          : null;
 
       final velocity = PtzSpeed(
         panTilt: Vector2D.fromString(
@@ -630,18 +629,17 @@ class OnvifGotoHomePositionPtzCommand extends OnvifHelperCommand {
         profileToken,
         speed:
             argResults?['pan-tilt-x'] != null &&
-                    argResults?['pan-tilt-y'] != null
-                ? PtzSpeed(
-                  panTilt: Vector2D.fromString(
-                    x: argResults!['pan-tilt-x'],
-                    y: argResults!['pan-tilt-y'],
-                  ),
-                  zoom:
-                      argResults?['zoom'] != null
-                          ? Vector1D.fromString(x: argResults!['zoom'])
-                          : null,
-                )
-                : null,
+                argResults?['pan-tilt-y'] != null
+            ? PtzSpeed(
+                panTilt: Vector2D.fromString(
+                  x: argResults!['pan-tilt-x'],
+                  y: argResults!['pan-tilt-y'],
+                ),
+                zoom: argResults?['zoom'] != null
+                    ? Vector1D.fromString(x: argResults!['zoom'])
+                    : null,
+              )
+            : null,
       );
     } on DioException catch (err) {
       throw UsageException('API usage error:', err.usage);
@@ -708,18 +706,17 @@ class OnvifGotoPresetPtzCommand extends OnvifHelperCommand {
         presetToken: argResults!['preset-token'],
         speed:
             argResults?['pan-tilt-x'] != null &&
-                    argResults?['pan-tilt-y'] != null
-                ? PtzSpeed(
-                  panTilt: Vector2D.fromString(
-                    x: argResults!['pan-tilt-x'],
-                    y: argResults!['pan-tilt-y'],
-                  ),
-                  zoom:
-                      argResults?['zoom'] != null
-                          ? Vector1D.fromString(x: argResults!['zoom'])
-                          : null,
-                )
-                : null,
+                argResults?['pan-tilt-y'] != null
+            ? PtzSpeed(
+                panTilt: Vector2D.fromString(
+                  x: argResults!['pan-tilt-x'],
+                  y: argResults!['pan-tilt-y'],
+                ),
+                zoom: argResults?['zoom'] != null
+                    ? Vector1D.fromString(x: argResults!['zoom'])
+                    : null,
+              )
+            : null,
       );
     } on DioException catch (err) {
       throw UsageException('API usage error:', err.usage);
@@ -1070,8 +1067,9 @@ class OnvifMoveDownPtzCommand extends OnvifHelperCommand {
   void run() async {
     await initializeOnvif();
 
-    final step =
-        argResults?['step'] != null ? double.parse(argResults!['step']) : 0.005;
+    final step = argResults?['step'] != null
+        ? double.parse(argResults!['step'])
+        : 0.005;
 
     try {
       await ptz.moveDown(argResults!['profile-token'], step * -1.0);
@@ -1111,8 +1109,9 @@ class OnvifMoveLeftPtzCommand extends OnvifHelperCommand {
   void run() async {
     await initializeOnvif();
 
-    final step =
-        argResults?['step'] != null ? double.parse(argResults!['step']) : 0.005;
+    final step = argResults?['step'] != null
+        ? double.parse(argResults!['step'])
+        : 0.005;
 
     try {
       await ptz.moveLeft(argResults!['profile-token'], step * -1.0);
@@ -1152,8 +1151,9 @@ class OnvifMoveRightPtzCommand extends OnvifHelperCommand {
   void run() async {
     await initializeOnvif();
 
-    final step =
-        argResults?['step'] != null ? double.parse(argResults!['step']) : 0.005;
+    final step = argResults?['step'] != null
+        ? double.parse(argResults!['step'])
+        : 0.005;
 
     try {
       await ptz.moveRight(argResults!['profile-token'], step);
@@ -1194,8 +1194,9 @@ class OnvifMoveUpPtzCommand extends OnvifHelperCommand {
   void run() async {
     await initializeOnvif();
 
-    final step =
-        argResults?['step'] != null ? double.parse(argResults!['step']) : 0.005;
+    final step = argResults?['step'] != null
+        ? double.parse(argResults!['step'])
+        : 0.005;
 
     try {
       await ptz.moveUp(argResults!['profile-token'], step);
@@ -1276,8 +1277,9 @@ class OnvifZoomInPtzCommand extends OnvifHelperCommand {
   void run() async {
     await initializeOnvif();
 
-    final step =
-        argResults?['step'] != null ? double.parse(argResults!['step']) : 0.025;
+    final step = argResults?['step'] != null
+        ? double.parse(argResults!['step'])
+        : 0.025;
 
     try {
       await ptz.zoomIn(argResults!['profile-token'], step);
@@ -1317,8 +1319,9 @@ class OnvifZoomOutPtzCommand extends OnvifHelperCommand {
   void run() async {
     await initializeOnvif();
 
-    final step =
-        argResults?['step'] != null ? double.parse(argResults!['step']) : 0.005;
+    final step = argResults?['step'] != null
+        ? double.parse(argResults!['step'])
+        : 0.005;
 
     try {
       await ptz.zoomOut(argResults!['profile-token'], step);
