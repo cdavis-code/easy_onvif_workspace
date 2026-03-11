@@ -14,10 +14,9 @@ VideoSource _$VideoSourceFromJson(Map<String, dynamic> json) => VideoSource(
   resolution: VideoResolution.fromJson(
     json['Resolution'] as Map<String, dynamic>,
   ),
-  imaging:
-      json['Imaging'] == null
-          ? null
-          : Imaging.fromJson(json['Imaging'] as Map<String, dynamic>),
+  imaging: json['Imaging'] == null
+      ? null
+      : Imaging.fromJson(json['Imaging'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$VideoSourceToJson(VideoSource instance) =>

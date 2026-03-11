@@ -63,8 +63,9 @@ class Imaging extends Operation {
 
     if (responseEnvelope.body.response == null) throw Exception();
 
-    final presets =
-        GetPresetsResponse.fromJson(responseEnvelope.body.response!).presets;
+    final presets = GetPresetsResponse.fromJson(
+      responseEnvelope.body.response!,
+    ).presets;
 
     limit = (limit! > presets.length) ? presets.length : limit;
 

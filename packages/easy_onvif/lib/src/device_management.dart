@@ -26,10 +26,9 @@ typedef DeviceManagementRequest = soap.DeviceManagementRequest;
 class DeviceManagement extends Operation with UiLoggy {
   DeviceManagement({required super.transport, required super.uri});
 
-  Function get requestFunction =>
-      transport.overrideSpecificationAuthentication
-          ? transport.securedRequest
-          : transport.request;
+  Function get requestFunction => transport.overrideSpecificationAuthentication
+      ? transport.securedRequest
+      : transport.request;
 
   /// This operation creates new device users and corresponding credentials on a
   /// device for authentication purposes. The device shall support creation of
@@ -203,6 +202,26 @@ class DeviceManagement extends Operation with UiLoggy {
     return GetDnsResponse.fromJson(
       responseEnvelope.body.response!,
     ).dnsInformation;
+  }
+
+  /// This operation lists all existing geo location configurations for the device.
+  ///
+  /// Access Class: READ_SYSTEM
+  Future<dynamic> getGeoLocation() async {
+    loggy.debug('getGeoLocation');
+
+    final responseEnvelope = await transport.request(
+      uri,
+      soap.Body(request: DeviceManagementRequest.getGeoLocation()),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return GetGeoLocationResponse.fromJson(
+      responseEnvelope.body.response!,
+    ).location;
   }
 
   /// This operation is used by an endpoint to get the hostname from a device.

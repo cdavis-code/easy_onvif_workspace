@@ -7,10 +7,9 @@ part of 'header.dart';
 // **************************************************************************
 
 Header _$HeaderFromJson(Map<String, dynamic> json) => Header(
-  appSequence:
-      json['AppSequence'] == null
-          ? null
-          : AppSequence.fromJson(json['AppSequence'] as Map<String, dynamic>),
+  appSequence: json['AppSequence'] == null
+      ? null
+      : AppSequence.fromJson(json['AppSequence'] as Map<String, dynamic>),
   mappedMessageID: json['MessageID'] as Map<String, dynamic>?,
   mappedRelatesTo: json['RelatesTo'] as Map<String, dynamic>?,
   mappedTo: json['To'] as Map<String, dynamic>?,

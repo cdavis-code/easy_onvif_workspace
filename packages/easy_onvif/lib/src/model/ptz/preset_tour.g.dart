@@ -16,12 +16,9 @@ PresetTour _$PresetTourFromJson(Map<String, dynamic> json) => PresetTour(
   startingCondition: PtzPresetTourStartingCondition.fromJson(
     json['StartingCondition'] as Map<String, dynamic>,
   ),
-  tourSpot:
-      json['TourSpot'] == null
-          ? null
-          : PtzPresetTourSpot.fromJson(
-            json['TourSpot'] as Map<String, dynamic>,
-          ),
+  tourSpot: json['TourSpot'] == null
+      ? null
+      : PtzPresetTourSpot.fromJson(json['TourSpot'] as Map<String, dynamic>),
   extension: json['Extension'],
 );
 

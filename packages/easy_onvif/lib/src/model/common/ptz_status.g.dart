@@ -8,10 +8,9 @@ part of 'ptz_status.dart';
 
 PtzStatus _$PtzStatusFromJson(Map<String, dynamic> json) => PtzStatus(
   position: PtzVector.fromJson(json['Position'] as Map<String, dynamic>),
-  moveStatus:
-      json['MoveStatus'] == null
-          ? null
-          : MoveStatus.fromJson(json['MoveStatus'] as Map<String, dynamic>),
+  moveStatus: json['MoveStatus'] == null
+      ? null
+      : MoveStatus.fromJson(json['MoveStatus'] as Map<String, dynamic>),
   error: OnvifUtil.nullableStringMappedFromXml(
     json['Error'] as Map<String, dynamic>?,
   ),

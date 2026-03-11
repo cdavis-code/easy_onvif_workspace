@@ -9,12 +9,11 @@ part of 'get_system_uris_response.dart';
 GetSystemUrisResponse _$GetSystemUrisResponseFromJson(
   Map<String, dynamic> json,
 ) => GetSystemUrisResponse(
-  systemLogUris:
-      json['SystemLogUris'] == null
-          ? null
-          : SystemLogUriList.fromJson(
-            json['SystemLogUris'] as Map<String, dynamic>,
-          ),
+  systemLogUris: json['SystemLogUris'] == null
+      ? null
+      : SystemLogUriList.fromJson(
+          json['SystemLogUris'] as Map<String, dynamic>,
+        ),
   supportInfoUri: OnvifUtil.nullableStringMappedFromXml(
     json['SupportInfoUri'] as Map<String, dynamic>?,
   ),

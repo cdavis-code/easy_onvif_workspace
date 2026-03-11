@@ -55,11 +55,11 @@ class PtzPresetTourStartingCondition {
 
   static PtzPresetTourDirection? _fix(Map<String, dynamic>? value) =>
       value == null
-          ? null
-          : $enumDecode(
-            _$PtzPresetTourDirectionEnumMap,
-            OnvifUtil.stringMappedFromXml(value),
-          );
+      ? null
+      : $enumDecode(
+          _$PtzPresetTourDirectionEnumMap,
+          OnvifUtil.stringMappedFromXml(value),
+        );
 
   @override
   String toString() => jsonEncode(toJson());

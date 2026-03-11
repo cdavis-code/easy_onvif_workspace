@@ -20,4 +20,8 @@ class MulticastProbe {
       );
 
   Future<void> probe() => _multicastProbeImpl.probe();
+
+  Future<void> hello() => _multicastProbeImpl.hello();
+
+  Future<void> bye() => _multicastProbeImpl.bye();
 }

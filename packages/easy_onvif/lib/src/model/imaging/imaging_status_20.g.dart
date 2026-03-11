@@ -8,12 +8,11 @@ part of 'imaging_status_20.dart';
 
 ImagingStatus20 _$ImagingStatus20FromJson(Map<String, dynamic> json) =>
     ImagingStatus20(
-      focusStatus20:
-          json['FocusStatus20'] == null
-              ? null
-              : FocusStatus20.fromJson(
-                json['FocusStatus20'] as Map<String, dynamic>,
-              ),
+      focusStatus20: json['FocusStatus20'] == null
+          ? null
+          : FocusStatus20.fromJson(
+              json['FocusStatus20'] as Map<String, dynamic>,
+            ),
       extension: json['Extension'] as Map<String, dynamic>?,
     );
 

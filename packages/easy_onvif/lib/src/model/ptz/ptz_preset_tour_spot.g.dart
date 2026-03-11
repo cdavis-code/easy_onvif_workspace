@@ -9,10 +9,9 @@ part of 'ptz_preset_tour_spot.dart';
 PtzPresetTourSpot _$PtzPresetTourSpotFromJson(Map<String, dynamic> json) =>
     PtzPresetTourSpot(
       presetDetail: json['PresetDetail'] as String,
-      speed:
-          json['Speed'] == null
-              ? null
-              : PtzSpeed.fromJson(json['Speed'] as Map<String, dynamic>),
+      speed: json['Speed'] == null
+          ? null
+          : PtzSpeed.fromJson(json['Speed'] as Map<String, dynamic>),
       stayTime: json['StayTime'] as String?,
       extension: json['Extension'],
     );

@@ -29,6 +29,12 @@ class MulticastProbeImpl extends BaseMulticastProbe {
 
   @override
   Future<void> probe() => _multicastProbeIo.probe();
+
+  @override
+  Future<void> hello() => _multicastProbeIo.sendHello();
+
+  @override
+  Future<void> bye() => _multicastProbeIo.sendBye();
 }
 
 class MulticastProbeIo with UiLoggy {
@@ -79,10 +85,9 @@ class MulticastProbeIo with UiLoggy {
   MulticastProbeIo.windows({int? timeout, bool? releaseMode}) {
     final env = Platform.environment;
 
-    var discoveryDllPath =
-        env.containsKey('ONVIF_DISCOVERY_DLL')
-            ? env['ONVIF_DISCOVERY_DLL']!
-            : join(Directory.current.path, 'bin', 'discovery.dll');
+    var discoveryDllPath = env.containsKey('ONVIF_DISCOVERY_DLL')
+        ? env['ONVIF_DISCOVERY_DLL']!
+        : join(Directory.current.path, 'bin', 'discovery.dll');
 
     if (releaseMode != null) {
       discoveryDllPath = join(
@@ -111,17 +116,17 @@ class MulticastProbeIo with UiLoggy {
           return DynamicLibrary.open(discoveryDllPath).lookup;
         }();
 
-    final discoveryPtr = lookup<
-      NativeFunction<
-        Int32 Function(Pointer<NativeType>, Pointer<NativeType>, Int32)
-      >
-    >('discovery');
+    final discoveryPtr =
+        lookup<
+          NativeFunction<
+            Int32 Function(Pointer<NativeType>, Pointer<NativeType>, Int32)
+          >
+        >('discovery');
 
-    _discovery =
-        discoveryPtr
-            .asFunction<
-              int Function(Pointer<NativeType>, Pointer<NativeType>, int)
-            >();
+    _discovery = discoveryPtr
+        .asFunction<
+          int Function(Pointer<NativeType>, Pointer<NativeType>, int)
+        >();
 
     probeTimeout = timeout ?? BaseMulticastProbe.defaultTimeout;
   }
@@ -169,9 +174,43 @@ class MulticastProbeIo with UiLoggy {
     await _finish(rawDataGramSocket, probeTimeout);
   }
 
-  Future<void> sendHello() async {}
+  Future<void> sendHello() async {
+    loggy.debug('sendHello');
 
-  Future<void> sendBye() async {}
+    final socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
+
+    final helloMessage = WsDiscovery.hello(
+      messageNumber: 1,
+      xAddrs: ['http://${socket.address.address}/onvif/device_service'],
+    );
+
+    socket.send(
+      helloMessage.toXmlString().codeUnits,
+      broadcastAddress,
+      broadcastPort,
+    );
+
+    socket.close();
+  }
+
+  Future<void> sendBye() async {
+    loggy.debug('sendBye');
+
+    final socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
+
+    final byeMessage = WsDiscovery.bye(
+      messageId: Uuid().v4(),
+      address: Uuid().v4(),
+    );
+
+    socket.send(
+      byeMessage.toXmlString().codeUnits,
+      broadcastAddress,
+      broadcastPort,
+    );
+
+    socket.close();
+  }
 
   void _start(RawDatagramSocket rawDataGramSocket) {
     loggy.debug('hello');

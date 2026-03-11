@@ -9,14 +9,12 @@ part of 'get_video_encoder_configurations_response.dart';
 GetVideoEncoderConfigurationsResponse
 _$GetVideoEncoderConfigurationsResponseFromJson(Map<String, dynamic> json) =>
     GetVideoEncoderConfigurationsResponse(
-      configurations:
-          (json['Configurations'] as List<dynamic>)
-              .map(
-                (e) => VideoEncoder2Configuration.fromJson(
-                  e as Map<String, dynamic>,
-                ),
-              )
-              .toList(),
+      configurations: (json['Configurations'] as List<dynamic>)
+          .map(
+            (e) =>
+                VideoEncoder2Configuration.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
     );
 
 Map<String, dynamic> _$GetVideoEncoderConfigurationsResponseToJson(

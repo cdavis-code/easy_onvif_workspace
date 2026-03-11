@@ -17,14 +17,12 @@ MetadataConfiguration _$MetadataConfigurationFromJson(
   compressionType: json['CompressionType'] as String?,
   geoLocation: json['GeoLocation'] as bool?,
   shapePolygon: json['ShapePolygon'] as bool?,
-  ptzStatus:
-      json['PTZStatus'] == null
-          ? null
-          : PtzFilter.fromJson(json['PTZStatus'] as Map<String, dynamic>),
-  events:
-      json['Events'] == null
-          ? null
-          : Events.fromJson(json['Events'] as Map<String, dynamic>),
+  ptzStatus: json['PTZStatus'] == null
+      ? null
+      : PtzFilter.fromJson(json['PTZStatus'] as Map<String, dynamic>),
+  events: json['Events'] == null
+      ? null
+      : Events.fromJson(json['Events'] as Map<String, dynamic>),
   analytics: OnvifUtil.nullableBoolMappedFromXml(
     json['Analytics'] as Map<String, dynamic>?,
   ),

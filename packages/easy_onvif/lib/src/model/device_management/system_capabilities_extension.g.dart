@@ -21,12 +21,11 @@ SystemCapabilitiesExtension _$SystemCapabilitiesExtensionFromJson(
   httpSupportInformation: OnvifUtil.nullableBoolMappedFromXml(
     json['HttpSupportInformation'] as Map<String, dynamic>?,
   ),
-  extension:
-      json['Extension'] == null
-          ? null
-          : SystemCapabilitiesExtension.fromJson(
-            json['Extension'] as Map<String, dynamic>,
-          ),
+  extension: json['Extension'] == null
+      ? null
+      : SystemCapabilitiesExtension.fromJson(
+          json['Extension'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$SystemCapabilitiesExtensionToJson(

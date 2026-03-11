@@ -13,18 +13,16 @@ MetadataConfigurationOptions _$MetadataConfigurationOptionsFromJson(
   maxContentFilterSize: OnvifUtil.optionalInt(
     json['@MaxContentFilterSize'] as String?,
   ),
-  ptzStatusFilterOptions:
-      json['PTZStatusFilterOptions'] == null
-          ? null
-          : PtzStatusFilterOptions.fromJson(
-            json['PTZStatusFilterOptions'] as Map<String, dynamic>,
-          ),
-  extension:
-      json['Extension'] == null
-          ? null
-          : MetadataConfigurationOptionsExtension.fromJson(
-            json['Extension'] as Map<String, dynamic>,
-          ),
+  ptzStatusFilterOptions: json['PTZStatusFilterOptions'] == null
+      ? null
+      : PtzStatusFilterOptions.fromJson(
+          json['PTZStatusFilterOptions'] as Map<String, dynamic>,
+        ),
+  extension: json['Extension'] == null
+      ? null
+      : MetadataConfigurationOptionsExtension.fromJson(
+          json['Extension'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$MetadataConfigurationOptionsToJson(

@@ -7,12 +7,11 @@ part of 'imaging.dart';
 // **************************************************************************
 
 Imaging _$ImagingFromJson(Map<String, dynamic> json) => Imaging(
-  backlightCompensation:
-      json['BacklightCompensation'] == null
-          ? null
-          : BacklightCompensation.fromJson(
-            json['BacklightCompensation'] as Map<String, dynamic>,
-          ),
+  backlightCompensation: json['BacklightCompensation'] == null
+      ? null
+      : BacklightCompensation.fromJson(
+          json['BacklightCompensation'] as Map<String, dynamic>,
+        ),
   brightness: OnvifUtil.nullableDoubleMappedFromXml(
     json['Brightness'] as Map<String, dynamic>?,
   ),
@@ -22,30 +21,26 @@ Imaging _$ImagingFromJson(Map<String, dynamic> json) => Imaging(
   contrast: OnvifUtil.nullableDoubleMappedFromXml(
     json['Contrast'] as Map<String, dynamic>?,
   ),
-  exposure:
-      json['Exposure'] == null
-          ? null
-          : Exposure.fromJson(json['Exposure'] as Map<String, dynamic>),
-  focus:
-      json['Focus'] == null
-          ? null
-          : Focus.fromJson(json['Focus'] as Map<String, dynamic>),
+  exposure: json['Exposure'] == null
+      ? null
+      : Exposure.fromJson(json['Exposure'] as Map<String, dynamic>),
+  focus: json['Focus'] == null
+      ? null
+      : Focus.fromJson(json['Focus'] as Map<String, dynamic>),
   irCutFilter: OnvifUtil.nullableStringMappedFromXml(
     json['IrCutFilter'] as Map<String, dynamic>?,
   ),
   sharpness: OnvifUtil.nullableDoubleMappedFromXml(
     json['Sharpness'] as Map<String, dynamic>?,
   ),
-  wideDynamicRange:
-      json['WideDynamicRange'] == null
-          ? null
-          : WideDynamicRange.fromJson(
-            json['WideDynamicRange'] as Map<String, dynamic>,
-          ),
-  whiteBalance:
-      json['WhiteBalance'] == null
-          ? null
-          : WhiteBalance.fromJson(json['WhiteBalance'] as Map<String, dynamic>),
+  wideDynamicRange: json['WideDynamicRange'] == null
+      ? null
+      : WideDynamicRange.fromJson(
+          json['WideDynamicRange'] as Map<String, dynamic>,
+        ),
+  whiteBalance: json['WhiteBalance'] == null
+      ? null
+      : WhiteBalance.fromJson(json['WhiteBalance'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ImagingToJson(Imaging instance) => <String, dynamic>{

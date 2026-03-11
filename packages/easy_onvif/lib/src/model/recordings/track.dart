@@ -46,11 +46,11 @@ class Track {
 
   static RecordingJobState? _nullableRecordingJobState(dynamic json) =>
       json != null
-          ? $enumDecode(
-            _$RecordingJobStateEnumMap,
-            OnvifUtil.stringMappedFromXml(json),
-          )
-          : null;
+      ? $enumDecode(
+          _$RecordingJobStateEnumMap,
+          OnvifUtil.stringMappedFromXml(json),
+        )
+      : null;
 
   void toXml() {
     Transport.builder.element(

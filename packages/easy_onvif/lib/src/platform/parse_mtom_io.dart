@@ -10,8 +10,9 @@ String parseMtom(Response<Uint8List> response, {String? writeLogToFolder}) {
   String? xmlString;
 
   if (headerMap.containsKey('content-type')) {
-    final contentType =
-        ContentType.parse(headerMap['content-type']!.first).parameters;
+    final contentType = ContentType.parse(
+      headerMap['content-type']!.first,
+    ).parameters;
 
     if (contentType['boundary'] == null) throw Exception('No boundary found');
 

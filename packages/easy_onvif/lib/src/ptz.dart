@@ -229,10 +229,9 @@ class Ptz extends Operation {
 
     if (responseEnvelope.body.response == null) throw Exception();
 
-    final ptzConfigurations =
-        GetConfigurationsResponse.fromJson(
-          responseEnvelope.body.response!,
-        ).ptzConfigurations;
+    final ptzConfigurations = GetConfigurationsResponse.fromJson(
+      responseEnvelope.body.response!,
+    ).ptzConfigurations;
 
     _clearDefaults();
 
@@ -267,8 +266,9 @@ class Ptz extends Operation {
 
     if (responseEnvelope.body.response == null) throw Exception();
 
-    final presets =
-        GetPresetsResponse.fromJson(responseEnvelope.body.response!).presets;
+    final presets = GetPresetsResponse.fromJson(
+      responseEnvelope.body.response!,
+    ).presets;
 
     limit = (limit! > presets.length) ? presets.length : limit;
 

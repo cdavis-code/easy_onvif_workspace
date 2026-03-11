@@ -16,12 +16,11 @@ SystemCapabilities _$SystemCapabilitiesFromJson(
   systemLogging: SystemCapabilities._complexBool(json['SystemLogging']),
   firmwareUpgrade: SystemCapabilities._complexBool(json['FirmwareUpgrade']),
   supportedVersions: SystemCapabilities._fromJson(json['SupportedVersions']),
-  extension:
-      json['Extension'] == null
-          ? null
-          : SystemCapabilitiesExtension.fromJson(
-            json['Extension'] as Map<String, dynamic>,
-          ),
+  extension: json['Extension'] == null
+      ? null
+      : SystemCapabilitiesExtension.fromJson(
+          json['Extension'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$SystemCapabilitiesToJson(SystemCapabilities instance) =>

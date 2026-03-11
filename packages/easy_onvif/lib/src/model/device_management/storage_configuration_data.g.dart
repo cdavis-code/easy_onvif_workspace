@@ -16,10 +16,9 @@ StorageConfigurationData _$StorageConfigurationDataFromJson(
   storageUri: OnvifUtil.nullableStringMappedFromXml(
     json['StorageUri'] as Map<String, dynamic>?,
   ),
-  user:
-      json['User'] == null
-          ? null
-          : User.fromJson(json['User'] as Map<String, dynamic>),
+  user: json['User'] == null
+      ? null
+      : User.fromJson(json['User'] as Map<String, dynamic>),
   extension: json['Extension'] as Map<String, dynamic>?,
 );
 

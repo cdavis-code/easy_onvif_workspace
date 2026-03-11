@@ -46,23 +46,18 @@ PtzConfiguration _$PtzConfigurationFromJson(
   defaultContinuousZoomVelocitySpace: PtzConfiguration._nullableMappedToSpace(
     json['DefaultContinuousZoomVelocitySpace'] as Map<String, dynamic>?,
   ),
-  defaultPtzSpeed:
-      json['PtzSpeed'] == null
-          ? null
-          : PtzSpeed.fromJson(json['PtzSpeed'] as Map<String, dynamic>),
+  defaultPtzSpeed: json['PtzSpeed'] == null
+      ? null
+      : PtzSpeed.fromJson(json['PtzSpeed'] as Map<String, dynamic>),
   defaultPtzTimeout: OnvifUtil.nullableStringMappedFromXml(
     json['DefaultPTZTimeout'] as Map<String, dynamic>?,
   ),
-  panTiltLimits:
-      json['PanTiltLimits'] == null
-          ? null
-          : PanTiltLimits.fromJson(
-            json['PanTiltLimits'] as Map<String, dynamic>,
-          ),
-  zoomLimits:
-      json['ZoomLimits'] == null
-          ? null
-          : ZoomLimits.fromJson(json['ZoomLimits'] as Map<String, dynamic>),
+  panTiltLimits: json['PanTiltLimits'] == null
+      ? null
+      : PanTiltLimits.fromJson(json['PanTiltLimits'] as Map<String, dynamic>),
+  zoomLimits: json['ZoomLimits'] == null
+      ? null
+      : ZoomLimits.fromJson(json['ZoomLimits'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$PtzConfigurationToJson(PtzConfiguration instance) =>

@@ -9,12 +9,11 @@ part of 'ptz_preset_tour_status.dart';
 PtzPresetTourStatus _$PtzPresetTourStatusFromJson(Map<String, dynamic> json) =>
     PtzPresetTourStatus(
       state: PtzPresetTourStatus._fix(json['State'] as Map<String, dynamic>),
-      currentTourSpot:
-          json['CurrentTourSpot'] == null
-              ? null
-              : PtzPresetTourSpot.fromJson(
-                json['CurrentTourSpot'] as Map<String, dynamic>,
-              ),
+      currentTourSpot: json['CurrentTourSpot'] == null
+          ? null
+          : PtzPresetTourSpot.fromJson(
+              json['CurrentTourSpot'] as Map<String, dynamic>,
+            ),
       extension: json['Extension'],
     );
 

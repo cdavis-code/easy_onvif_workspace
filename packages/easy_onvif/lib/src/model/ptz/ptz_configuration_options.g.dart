@@ -14,12 +14,11 @@ PtzConfigurationOptions _$PtzConfigurationOptionsFromJson(
   ptzTimeout: DurationRange.fromJson(
     json['PTZTimeout'] as Map<String, dynamic>,
   ),
-  ptControlDirection:
-      json['PTControlDirection'] == null
-          ? null
-          : PtControlDirectionOptions.fromJson(
-            json['PTControlDirection'] as Map<String, dynamic>,
-          ),
+  ptControlDirection: json['PTControlDirection'] == null
+      ? null
+      : PtControlDirectionOptions.fromJson(
+          json['PTControlDirection'] as Map<String, dynamic>,
+        ),
   extension: json['Extension'] as Map<String, dynamic>?,
 );
 

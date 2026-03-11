@@ -19,17 +19,15 @@ RecordingJobConfiguration _$RecordingJobConfigurationFromJson(
   priority: OnvifUtil.intMappedFromXml(
     json['Priority'] as Map<String, dynamic>,
   ),
-  source:
-      json['Source'] == null
-          ? null
-          : RecordingJobSource.fromJson(json['Source'] as Map<String, dynamic>),
+  source: json['Source'] == null
+      ? null
+      : RecordingJobSource.fromJson(json['Source'] as Map<String, dynamic>),
   extension: json['Extension'] as Map<String, dynamic>?,
-  eventFilter:
-      json['EventFilter'] == null
-          ? null
-          : RecordingEventFilter.fromJson(
-            json['EventFilter'] as Map<String, dynamic>,
-          ),
+  eventFilter: json['EventFilter'] == null
+      ? null
+      : RecordingEventFilter.fromJson(
+          json['EventFilter'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$RecordingJobConfigurationToJson(

@@ -63,10 +63,9 @@ class SystemCapabilities {
   @override
   String toString() => json.encode(toJson());
 
-  static bool _complexBool(dynamic value) =>
-      value.runtimeType == String
-          ? OnvifUtil.stringToBool(value)
-          : OnvifUtil.boolMappedFromXml(value);
+  static bool _complexBool(dynamic value) => value.runtimeType == String
+      ? OnvifUtil.stringToBool(value)
+      : OnvifUtil.boolMappedFromXml(value);
 
   static List<Version> _fromJson(dynamic json) => OnvifUtil.jsonList<Version>(
     json,

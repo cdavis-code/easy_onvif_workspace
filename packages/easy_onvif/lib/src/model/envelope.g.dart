@@ -7,9 +7,8 @@ part of 'envelope.dart';
 // **************************************************************************
 
 Envelope _$EnvelopeFromJson(Map<String, dynamic> json) => Envelope(
-  header:
-      json['Header'] == null
-          ? null
-          : Header.fromJson(json['Header'] as Map<String, dynamic>),
+  header: json['Header'] == null
+      ? null
+      : Header.fromJson(json['Header'] as Map<String, dynamic>),
   body: Body.fromJson(json['Body'] as Map<String, dynamic>),
 );

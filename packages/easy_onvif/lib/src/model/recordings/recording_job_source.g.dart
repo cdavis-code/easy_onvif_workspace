@@ -8,12 +8,9 @@ part of 'recording_job_source.dart';
 
 RecordingJobSource _$RecordingJobSourceFromJson(Map<String, dynamic> json) =>
     RecordingJobSource(
-      sourceToken:
-          json['SourceToken'] == null
-              ? null
-              : SourceToken.fromJson(
-                json['SourceToken'] as Map<String, dynamic>,
-              ),
+      sourceToken: json['SourceToken'] == null
+          ? null
+          : SourceToken.fromJson(json['SourceToken'] as Map<String, dynamic>),
       autoCreateReceiver: OnvifUtil.nullableBoolMappedFromXml(
         json['AutoCreateReceiver'] as Map<String, dynamic>?,
       ),

@@ -17,29 +17,21 @@ VideoEncoderConfiguration _$VideoEncoderConfigurationFromJson(
   encoding: OnvifUtil.nullableStringMappedFromXml(
     json['Encoding'] as Map<String, dynamic>?,
   ),
-  resolution:
-      json['Resolution'] == null
-          ? null
-          : VideoResolution.fromJson(
-            json['Resolution'] as Map<String, dynamic>,
-          ),
+  resolution: json['Resolution'] == null
+      ? null
+      : VideoResolution.fromJson(json['Resolution'] as Map<String, dynamic>),
   quality: OnvifUtil.nullableDoubleMappedFromXml(
     json['Quality'] as Map<String, dynamic>?,
   ),
-  rateControl:
-      json['RateControl'] == null
-          ? null
-          : VideoRateControl.fromJson(
-            json['RateControl'] as Map<String, dynamic>,
-          ),
-  mpeg4:
-      json['MPEG4'] == null
-          ? null
-          : Mpeg4.fromJson(json['MPEG4'] as Map<String, dynamic>),
-  h264:
-      json['H264'] == null
-          ? null
-          : H264.fromJson(json['H264'] as Map<String, dynamic>),
+  rateControl: json['RateControl'] == null
+      ? null
+      : VideoRateControl.fromJson(json['RateControl'] as Map<String, dynamic>),
+  mpeg4: json['MPEG4'] == null
+      ? null
+      : Mpeg4.fromJson(json['MPEG4'] as Map<String, dynamic>),
+  h264: json['H264'] == null
+      ? null
+      : H264.fromJson(json['H264'] as Map<String, dynamic>),
   multiCast: OnvifUtil.emptyOrMulticastConfiguration(
     json['Multicast'] as Map<String, dynamic>?,
   ),

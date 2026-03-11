@@ -34,10 +34,9 @@ class User implements XmlSerializable {
   factory User.fromYamlMap(YamlMap yamlMap) => User(
     username: yamlMap['username'],
     password: yamlMap['password'],
-    userLevel:
-        UserLevel.values.contains(yamlMap['userLevel'])
-            ? UserLevel.values.byName(yamlMap['userLevel'].toString())
-            : UserLevel.user,
+    userLevel: UserLevel.values.contains(yamlMap['userLevel'])
+        ? UserLevel.values.byName(yamlMap['userLevel'].toString())
+        : UserLevel.user,
     extension: yamlMap['extension'],
   );
 

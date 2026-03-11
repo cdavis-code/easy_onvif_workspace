@@ -18,12 +18,11 @@ RealTimeStreamingCapabilities _$RealTimeStreamingCapabilitiesFromJson(
   rtp_rtsp_tcp: OnvifUtil.nullableBoolMappedFromXml(
     json['RTP_RTSP_TCP'] as Map<String, dynamic>?,
   ),
-  extension:
-      json['extension'] == null
-          ? null
-          : MediaCapabilitiesExtension.fromJson(
-            json['extension'] as Map<String, dynamic>,
-          ),
+  extension: json['extension'] == null
+      ? null
+      : MediaCapabilitiesExtension.fromJson(
+          json['extension'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$RealTimeStreamingCapabilitiesToJson(

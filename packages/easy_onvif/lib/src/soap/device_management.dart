@@ -188,12 +188,11 @@ class DeviceManagementRequest {
     builder.element(
       'SetIPAddressFilter',
       namespace: Xmlns.trc,
-      nest:
-          () => ipAddressFilter.buildXml(
-            builder,
-            tag: 'IPAddressFilter',
-            namespace: Xmlns.tds,
-          ),
+      nest: () => ipAddressFilter.buildXml(
+        builder,
+        tag: 'IPAddressFilter',
+        namespace: Xmlns.tds,
+      ),
     );
 
     return builder.buildFragment();

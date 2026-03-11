@@ -62,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
     super.initState();
   }
 
-  _initialize() async {
+  Future<void> _initialize() async {
     final yamlData = await services.rootBundle.loadString('assets/config.yaml');
 
     config = loadYaml(yamlData);

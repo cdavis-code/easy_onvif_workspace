@@ -47,10 +47,9 @@ class OnvifUtil {
       host: parsedUri.host,
       port: parsedUri.port,
       pathSegments: parsedUri.pathSegments,
-      queryParameters:
-          parsedUri.queryParameters.isNotEmpty
-              ? parsedUri.queryParameters
-              : null,
+      queryParameters: parsedUri.queryParameters.isNotEmpty
+          ? parsedUri.queryParameters
+          : null,
     ).toString();
   }
 
@@ -104,10 +103,9 @@ class OnvifUtil {
 
   static bool stringToBool(String value) => value.toLowerCase() == 'true';
 
-  static bool stringOrMappedToBool(dynamic value) =>
-      value.runtimeType == String
-          ? stringToBool(value as String)
-          : boolMappedFromXml(value as Map<String, dynamic>);
+  static bool stringOrMappedToBool(dynamic value) => value.runtimeType == String
+      ? stringToBool(value as String)
+      : boolMappedFromXml(value as Map<String, dynamic>);
 
   static List<int>? nullableIntMappedFromXmlList(String? value) =>
       value?.toString().split(',').map((item) => int.parse(item)).toList();
@@ -132,8 +130,8 @@ class OnvifUtil {
 
   static bool boolMappedFromXml(Map<String, dynamic> value) =>
       value.containsKey('\$')
-          ? stringToBool(stringMappedFromXml(value))
-          : false;
+      ? stringToBool(stringMappedFromXml(value))
+      : false;
 
   static bool? nullableBoolMappedFromXml(Map<String, dynamic>? value) =>
       value != null ? boolMappedFromXml(value) : null;
@@ -162,15 +160,14 @@ class OnvifUtil {
 
   static String? nullableStringMappedFromXml(Map<String, dynamic>? value) =>
       value != null && value.containsKey('\$')
-          ? stringMappedFromXml(value)
-          : null;
+      ? stringMappedFromXml(value)
+      : null;
 
   static MulticastConfiguration? emptyOrMulticastConfiguration(
     Map<String, dynamic>? json,
-  ) =>
-      json != null && json.keys.isNotEmpty
-          ? MulticastConfiguration.fromJson(json)
-          : null;
+  ) => json != null && json.keys.isNotEmpty
+      ? MulticastConfiguration.fromJson(json)
+      : null;
 
   static List<T>? nullableJsonList<T>(
     dynamic json,
@@ -179,10 +176,10 @@ class OnvifUtil {
 
   static List<T> jsonList<T>(dynamic json, T Function(dynamic) fromJson) =>
       json != null
-          ? json is List
-              ? json.map((e) => fromJson(e)).toList()
-              : [fromJson(json)]
-          : <T>[];
+      ? json is List
+            ? json.map((e) => fromJson(e)).toList()
+            : [fromJson(json)]
+      : <T>[];
 
   // The tryParse is used to work-around the non-compliant date returned by the
   // TL-IPC43AN-4 device

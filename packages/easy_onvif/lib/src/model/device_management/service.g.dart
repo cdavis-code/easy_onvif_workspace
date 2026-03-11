@@ -12,10 +12,9 @@ Service _$ServiceFromJson(Map<String, dynamic> json) => Service(
   ),
   xAddr: OnvifUtil.stringMappedFromXml(json['XAddr'] as Map<String, dynamic>),
   version: Version.fromJson(json['Version'] as Map<String, dynamic>),
-  capabilities:
-      json['Capabilities'] == null
-          ? null
-          : Capabilities.fromJson(json['Capabilities'] as Map<String, dynamic>),
+  capabilities: json['Capabilities'] == null
+      ? null
+      : Capabilities.fromJson(json['Capabilities'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{

@@ -21,10 +21,9 @@ Map<String, dynamic> _$ProfileCapabilitiesToJson(
   ProfileCapabilities instance,
 ) => <String, dynamic>{
   '@MaximumNumberOfProfiles': instance.maximumNumberOfProfiles,
-  'ConfigurationsSupported':
-      instance.configurationEnumeration
-          ?.map((e) => _$ConfigurationEnumerationEnumMap[e]!)
-          .toList(),
+  'ConfigurationsSupported': instance.configurationEnumeration
+      ?.map((e) => _$ConfigurationEnumerationEnumMap[e]!)
+      .toList(),
 };
 
 const _$ConfigurationEnumerationEnumMap = {

@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.3+1
+
+* device_management - HostnameInformation, fixed when null
+* media1 - GetStreamUri, fixed namespace
+* media1 - GetMetadataConfigurationResponse - Events, is a list of Filters
+* ptz - GetServiceCapabilities, can be empty
+* ptz - Stop, is now a zero velocity ContinuousMove
+
 ## 3.1.3
 
 * device_management - HostnameInformation, fixed when null

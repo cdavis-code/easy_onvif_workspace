@@ -20,10 +20,9 @@ NetworkCapabilities _$NetworkCapabilitiesFromJson(Map<String, dynamic> json) =>
       dynDNS: OnvifUtil.nullableBoolMappedFromXml(
         json['DynDNS'] as Map<String, dynamic>?,
       ),
-      extension:
-          json['Extension'] == null
-              ? null
-              : Extension.fromJson(json['Extension'] as Map<String, dynamic>),
+      extension: json['Extension'] == null
+          ? null
+          : Extension.fromJson(json['Extension'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$NetworkCapabilitiesToJson(

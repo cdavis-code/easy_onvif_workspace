@@ -165,11 +165,11 @@ class PtzConfiguration {
 
   static Space? _nullableMappedToSpace(Map<String, dynamic>? value) =>
       value != null
-          ? $enumDecodeNullable(
-            _$SpaceEnumMap,
-            OnvifUtil.stringMappedFromXml(value),
-          )
-          : null;
+      ? $enumDecodeNullable(
+          _$SpaceEnumMap,
+          OnvifUtil.stringMappedFromXml(value),
+        )
+      : null;
 }
 
 // enum SearchState {

@@ -16,6 +16,7 @@ export 'src/model/device_management/get_device_information_response.dart';
 export 'src/model/device_management/get_discovery_mode_response.dart';
 export 'src/model/device_management/get_dns_response.dart';
 export 'src/model/device_management/get_dynamic_dns_response.dart';
+export 'src/model/device_management/get_geolocation_response.dart';
 export 'src/model/device_management/get_hostname_response.dart';
 export 'src/model/device_management/get_ipaddress_filter_response.dart';
 export 'src/model/device_management/get_endpoint_reference_response.dart';

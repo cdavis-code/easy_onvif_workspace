@@ -20,9 +20,8 @@ class Nonce {
   String toBase64() => base64.encode(bytes);
 
   @override
-  String toString() =>
-      bytes
-          .map((element) => element.toRadixString(16).padLeft(2, '0'))
-          .toList()
-          .join();
+  String toString() => bytes
+      .map((element) => element.toRadixString(16).padLeft(2, '0'))
+      .toList()
+      .join();
 }

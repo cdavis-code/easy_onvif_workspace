@@ -14,10 +14,9 @@ RecordingJobStateInformation _$RecordingJobStateInformationFromJson(
   ),
   state: OnvifUtil.stringMappedFromXml(json['State'] as Map<String, dynamic>),
   sources: RecordingJobStateInformation._fromJson(json['Sources']),
-  tracks:
-      json['Tracks'] == null
-          ? null
-          : Tracks.fromJson(json['Tracks'] as Map<String, dynamic>),
+  tracks: json['Tracks'] == null
+      ? null
+      : Tracks.fromJson(json['Tracks'] as Map<String, dynamic>),
   extension: json['Extension'] as Map<String, dynamic>?,
 );
 

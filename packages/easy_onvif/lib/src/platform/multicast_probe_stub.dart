@@ -9,4 +9,10 @@ class MulticastProbeImpl extends BaseMulticastProbe {
 
   @override
   Future<void> probe() async => throw Exception('Stub implementation');
+
+  @override
+  Future<void> hello() async => throw Exception('Stub implementation');
+
+  @override
+  Future<void> bye() async => throw Exception('Stub implementation');
 }
