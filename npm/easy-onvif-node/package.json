@@ -1,0 +1,46 @@
+{
+  "name": "easy-onvif-node",
+  "version": "0.1.0",
+  "description": "ONVIF client for Node.js, compiled from the Dart `easy_onvif` package with dart2js. Supports WS-Discovery over UDP multicast and the Device / Media / PTZ SOAP surface.",
+  "type": "module",
+  "main": "./index.mjs",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs"
+    }
+  },
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "dist/easy_onvif.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "onvif",
+    "ws-discovery",
+    "rtsp",
+    "ip-camera",
+    "nvr",
+    "ptz",
+    "dart"
+  ],
+  "author": "faithoflifedev",
+  "license": "MIT",
+  "homepage": "https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faithoflifedev/easy_onvif_workspace.git"
+  },
+  "bugs": {
+    "url": "https://github.com/faithoflifedev/easy_onvif_workspace/issues"
+  },
+  "scripts": {
+    "test": "node --no-warnings test/smoke.mjs"
+  }
+}

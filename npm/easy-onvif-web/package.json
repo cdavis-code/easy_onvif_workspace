@@ -1,0 +1,42 @@
+{
+  "name": "easy-onvif-web",
+  "version": "0.1.0",
+  "description": "Browser ONVIF client compiled from the Dart `easy_onvif` package with dart2wasm. Uses fetch + digest auth; WS-Discovery is unavailable because browsers cannot open UDP sockets.",
+  "type": "module",
+  "main": "./index.mjs",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.mjs"
+    }
+  },
+  "files": [
+    "index.mjs",
+    "index.d.ts",
+    "dist/easy_onvif.wasm",
+    "dist/easy_onvif.mjs",
+    "dist/easy_onvif.support.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "onvif",
+    "rtsp",
+    "ip-camera",
+    "ptz",
+    "browser",
+    "dart",
+    "wasm"
+  ],
+  "author": "faithoflifedev",
+  "license": "MIT",
+  "homepage": "https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faithoflifedev/easy_onvif_workspace.git"
+  },
+  "bugs": {
+    "url": "https://github.com/faithoflifedev/easy_onvif_workspace/issues"
+  }
+}

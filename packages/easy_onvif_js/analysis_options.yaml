@@ -1,0 +1,15 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  errors:
+    # dart2wasm requires `dart:js_interop` APIs that are still marked as
+    # experimental in some SDK versions. Silence only that specific warning.
+    experimental_member_use: ignore
+
+linter:
+  rules:
+    avoid_print: false

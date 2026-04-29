@@ -1,0 +1,20 @@
+# Dart build artifacts
+.dart_tool/
+.packages
+pubspec.lock
+build/
+
+# dart2wasm output (checked in only after a release build)
+build/node/
+build/web/
+
+# npm artifacts: compiled output goes into each package's dist/ folder
+npm/easy-onvif-node/dist/
+npm/easy-onvif-web/dist/
+npm/*/node_modules/
+npm/*/*.tgz
+
+# OS / editor noise
+.DS_Store
+.idea/
+.vscode/

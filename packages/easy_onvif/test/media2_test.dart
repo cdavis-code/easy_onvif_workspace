@@ -9,7 +9,7 @@ void main() {
     group('Happytimesoft', () {
       test('GetMetadataConfigurationOptionsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/media2/GetMetadataConfigurationOptionsResponse.xml',
+          '../../test_data/xml/happytimesoft/media2/GetMetadataConfigurationOptionsResponse.xml',
         );
 
         expect(
@@ -22,7 +22,7 @@ void main() {
 
       test('GetMetadataConfigurationsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/media2/GetMetadataConfigurationsResponse.xml',
+          '../../test_data/xml/happytimesoft/media2/GetMetadataConfigurationsResponse.xml',
         );
 
         expect(
@@ -35,7 +35,7 @@ void main() {
 
       test('GetProfilesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/media2/GetProfilesResponse.xml',
+          '../../test_data/xml/happytimesoft/media2/GetProfilesResponse.xml',
         );
 
         expect(
@@ -48,7 +48,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/media2/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/happytimesoft/media2/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -61,7 +61,7 @@ void main() {
 
       test('GetSnapshotUriResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/media2/GetSnapshotUriResponse.xml',
+          '../../test_data/xml/happytimesoft/media2/GetSnapshotUriResponse.xml',
         );
 
         expect(
@@ -72,7 +72,7 @@ void main() {
 
       test('GetStreamUriResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/media2/GetStreamUriResponse.xml',
+          '../../test_data/xml/happytimesoft/media2/GetStreamUriResponse.xml',
         );
 
         expect(
@@ -84,7 +84,7 @@ void main() {
 
       test('StartMulticastStreamingResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/media2/StartMulticastStreamingResponse.xml',
+          '../../test_data/xml/happytimesoft/media2/StartMulticastStreamingResponse.xml',
         );
 
         expect(
@@ -97,7 +97,7 @@ void main() {
 
       test('StopMulticastStreamingResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/media2/StopMulticastStreamingResponse.xml',
+          '../../test_data/xml/happytimesoft/media2/StopMulticastStreamingResponse.xml',
         );
 
         expect(
@@ -110,7 +110,7 @@ void main() {
     group('ENP1A14-IR_25X', () {
       test('GetMetadataConfigurationOptionsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/media2/GetMetadataConfigurationOptionsResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/media2/GetMetadataConfigurationOptionsResponse.xml',
         );
 
         expect(
@@ -123,7 +123,7 @@ void main() {
 
       test('GetMetadataConfigurationsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/media2/GetMetadataConfigurationsResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/media2/GetMetadataConfigurationsResponse.xml',
         );
 
         expect(
@@ -136,7 +136,7 @@ void main() {
 
       test('GetProfilesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/media2/GetProfilesResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/media2/GetProfilesResponse.xml',
         );
 
         expect(
@@ -149,7 +149,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/media2/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/media2/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -162,7 +162,7 @@ void main() {
 
       test('GetSnapshotUriResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/media2/GetSnapshotUriResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/media2/GetSnapshotUriResponse.xml',
         );
 
         expect(
@@ -173,7 +173,7 @@ void main() {
 
       test('GetStreamUriResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/media2/GetStreamUriResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/media2/GetStreamUriResponse.xml',
         );
 
         expect(
@@ -185,7 +185,7 @@ void main() {
 
       test('StartMulticastStreamingResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/media2/StartMulticastStreamingResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/media2/StartMulticastStreamingResponse.xml',
         );
 
         expect(
@@ -198,7 +198,7 @@ void main() {
 
       test('StopMulticastStreamingResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/media2/StopMulticastStreamingResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/media2/StopMulticastStreamingResponse.xml',
         );
 
         expect(
@@ -211,7 +211,7 @@ void main() {
     group('GX728MF-IR28', () {
       test('GetMetadataConfigurationOptionsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/media2/GetMetadataConfigurationOptionsResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/media2/GetMetadataConfigurationOptionsResponse.xml',
         );
 
         expect(
@@ -224,7 +224,7 @@ void main() {
 
       test('GetMetadataConfigurationsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/media2/GetMetadataConfigurationsResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/media2/GetMetadataConfigurationsResponse.xml',
         );
 
         expect(
@@ -237,7 +237,7 @@ void main() {
 
       test('GetProfilesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/media2/GetProfilesResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/media2/GetProfilesResponse.xml',
         );
 
         expect(
@@ -250,7 +250,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/media2/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/media2/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -263,7 +263,7 @@ void main() {
 
       test('GetSnapshotUriResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/media2/GetSnapshotUriResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/media2/GetSnapshotUriResponse.xml',
         );
 
         expect(
@@ -276,7 +276,7 @@ void main() {
     group('IPG-8150PSS', () {
       test('GetMetadataConfigurationOptionsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/GetMetadataConfigurationOptionsResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/GetMetadataConfigurationOptionsResponse.xml',
         );
 
         expect(
@@ -289,7 +289,7 @@ void main() {
 
       test('GetMetadataConfigurationsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/GetMetadataConfigurationsResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/GetMetadataConfigurationsResponse.xml',
         );
 
         expect(
@@ -302,7 +302,7 @@ void main() {
 
       test('GetProfilesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/GetProfilesResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/GetProfilesResponse.xml',
         );
 
         expect(
@@ -315,7 +315,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -328,7 +328,7 @@ void main() {
 
       test('GetSnapshotUriResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/GetSnapshotUriResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/GetSnapshotUriResponse.xml',
         );
 
         expect(
@@ -339,7 +339,7 @@ void main() {
 
       test('GetStreamUriResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/GetStreamUriResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/GetStreamUriResponse.xml',
         );
 
         expect(
@@ -350,7 +350,7 @@ void main() {
 
       test('GetVideoEncoderConfigurationsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/GetVideoEncoderConfigurationsResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/GetVideoEncoderConfigurationsResponse.xml',
         );
 
         expect(
@@ -363,7 +363,7 @@ void main() {
 
       test('GetVideoSourceConfigurationOptionsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/GetVideoSourceConfigurationOptionsResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/GetVideoSourceConfigurationOptionsResponse.xml',
         );
 
         expect(
@@ -376,7 +376,7 @@ void main() {
 
       test('StartMulticastStreamingResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/StartMulticastStreamingResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/StartMulticastStreamingResponse.xml',
         );
 
         expect(
@@ -389,7 +389,7 @@ void main() {
 
       test('StopMulticastStreamingResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/StopMulticastStreamingResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/StopMulticastStreamingResponse.xml',
         );
 
         expect(
@@ -402,7 +402,7 @@ void main() {
     group('SUNBA', () {
       test('GetMetadataConfigurationOptionsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/media2/GetMetadataConfigurationOptionsResponse.xml',
+          '../../test_data/xml/SUNBA/media2/GetMetadataConfigurationOptionsResponse.xml',
         );
 
         expect(
@@ -415,7 +415,7 @@ void main() {
 
       test('GetMetadataConfigurationsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/media2/GetMetadataConfigurationsResponse.xml',
+          '../../test_data/xml/SUNBA/media2/GetMetadataConfigurationsResponse.xml',
         );
 
         expect(
@@ -428,7 +428,7 @@ void main() {
 
       test('GetProfilesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/media2/GetProfilesResponse.xml',
+          '../../test_data/xml/SUNBA/media2/GetProfilesResponse.xml',
         );
 
         expect(
@@ -441,7 +441,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/media2/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/SUNBA/media2/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -454,7 +454,7 @@ void main() {
 
       test('GetSnapshotUriResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/media2/GetSnapshotUriResponse.xml',
+          '../../test_data/xml/SUNBA/media2/GetSnapshotUriResponse.xml',
         );
 
         expect(
@@ -465,7 +465,7 @@ void main() {
 
       test('GetStreamUriResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/media2/GetStreamUriResponse.xml',
+          '../../test_data/xml/SUNBA/media2/GetStreamUriResponse.xml',
         );
 
         expect(
@@ -476,7 +476,7 @@ void main() {
 
       test('GetVideoEncoderConfigurationsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/media2/GetVideoEncoderConfigurationsResponse.xml',
+          '../../test_data/xml/SUNBA/media2/GetVideoEncoderConfigurationsResponse.xml',
         );
 
         expect(
@@ -489,7 +489,7 @@ void main() {
 
       test('GetVideoSourceConfigurationOptionsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/media2/GetVideoSourceConfigurationOptionsResponse.xml',
+          '../../test_data/xml/SUNBA/media2/GetVideoSourceConfigurationOptionsResponse.xml',
         );
 
         expect(
@@ -502,7 +502,7 @@ void main() {
 
       test('StartMulticastStreamingResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/StartMulticastStreamingResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/StartMulticastStreamingResponse.xml',
         );
 
         expect(
@@ -515,7 +515,7 @@ void main() {
 
       test('StopMulticastStreamingResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/media2/StopMulticastStreamingResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/media2/StopMulticastStreamingResponse.xml',
         );
 
         expect(

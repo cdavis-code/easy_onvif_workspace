@@ -4,7 +4,8 @@ import 'platform/base_multicast_probe.dart';
 
 import 'platform/multicast_probe_stub.dart'
     if (dart.library.io) 'platform/multicast_probe_io.dart'
-    if (dart.library.html) 'platform/multicast_probe_web.dart';
+    if (dart.library.html) 'platform/multicast_probe_web.dart'
+    if (dart.library.js_interop) 'platform/multicast_probe_web.dart';
 
 class MulticastProbe {
   static final defaultTimeout = BaseMulticastProbe.defaultTimeout;

@@ -12,6 +12,7 @@ workspace:
   # - packages/easy_onvif/example
   - packages/easy_onvif_cli
   # - packages/easy_onvif_cli/example
+  - packages/easy_onvif_js
 
 melos:
   packages:
@@ -40,6 +41,22 @@ melos:
 
     build:
       exec: dart run build_runner build
+
+    build:npm:
+      description: Build both `easy-onvif-node` and `easy-onvif-web` npm artifacts via dart2wasm.
+      run: melos run build:npm:node && melos run build:npm:web
+
+    build:npm:node:
+      description: Build the `easy-onvif-node` npm artifact via dart2wasm.
+      run: bash packages/easy_onvif_js/tool/build_node.sh
+
+    build:npm:web:
+      description: Build the `easy-onvif-web` npm artifact via dart2wasm.
+      run: bash packages/easy_onvif_js/tool/build_web.sh
+
+    smoke:npm:node:
+      description: Smoke-test the compiled `easy-onvif-node` bundle.
+      run: node packages/easy_onvif_js/tool/smoke_test_node.mjs
 
     build:delete:
       run: false

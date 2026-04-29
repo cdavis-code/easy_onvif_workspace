@@ -9,7 +9,7 @@ void main() {
     group('unknown', () {
       test('GetCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/unknown/device_management/GetCapabilitiesResponse.xml',
+          '../../test_data/xml/unknown/device_management/GetCapabilitiesResponse.xml',
         );
 
         expect(
@@ -24,7 +24,7 @@ void main() {
     group('Happytimesoft', () {
       test('CreateUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/CreateUsersResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/CreateUsersResponse.xml',
         );
 
         expect(
@@ -35,7 +35,7 @@ void main() {
 
       test('DeleteUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/DeleteUsersResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/DeleteUsersResponse.xml',
         );
 
         expect(
@@ -46,7 +46,7 @@ void main() {
 
       test('GetCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetCapabilitiesResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetCapabilitiesResponse.xml',
         );
 
         expect(
@@ -59,7 +59,7 @@ void main() {
 
       test('GetDeviceInformationResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetDeviceInformationResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetDeviceInformationResponse.xml',
         );
 
         expect(
@@ -70,7 +70,7 @@ void main() {
 
       test('GetDiscoveryModeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetDiscoveryModeResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetDiscoveryModeResponse.xml',
         );
 
         expect(
@@ -83,7 +83,7 @@ void main() {
 
       test('GetDNSResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetDNSResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetDNSResponse.xml',
         );
 
         expect(
@@ -96,7 +96,7 @@ void main() {
 
       test('GetHostnameResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetHostnameResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetHostnameResponse.xml',
         );
 
         expect(
@@ -109,7 +109,7 @@ void main() {
 
       test('GetNetworkProtocolsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetNetworkProtocolsResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetNetworkProtocolsResponse.xml',
         );
 
         expect(
@@ -122,7 +122,7 @@ void main() {
 
       test('GetNTPResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetNTPResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetNTPResponse.xml',
         );
 
         expect(
@@ -135,7 +135,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -148,7 +148,7 @@ void main() {
 
       test('GetServicesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetServicesResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetServicesResponse.xml',
         );
 
         expect(
@@ -161,7 +161,7 @@ void main() {
 
       test('GetSystemDateAndTimeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetSystemDateAndTimeResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetSystemDateAndTimeResponse.xml',
         );
 
         expect(
@@ -174,7 +174,7 @@ void main() {
 
       test('GetSystemUrisResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetSystemUrisResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetSystemUrisResponse.xml',
         );
 
         expect(
@@ -187,7 +187,7 @@ void main() {
 
       test('GetUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/happytimesoft/device_management/GetUsersResponse.xml',
+          '../../test_data/xml/happytimesoft/device_management/GetUsersResponse.xml',
         );
 
         expect(
@@ -200,7 +200,7 @@ void main() {
     group('ENP1A14-IR_25X', () {
       test('CreateUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/CreateUsersResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/CreateUsersResponse.xml',
         );
 
         expect(
@@ -211,7 +211,7 @@ void main() {
 
       test('DeleteUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/DeleteUsersResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/DeleteUsersResponse.xml',
         );
 
         expect(
@@ -222,7 +222,7 @@ void main() {
 
       test('GetCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetCapabilitiesResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetCapabilitiesResponse.xml',
         );
 
         expect(
@@ -235,7 +235,7 @@ void main() {
 
       test('GetDeviceInformationResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetDeviceInformationResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetDeviceInformationResponse.xml',
         );
 
         expect(
@@ -246,7 +246,7 @@ void main() {
 
       test('GetDiscoveryModeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetDiscoveryModeResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetDiscoveryModeResponse.xml',
         );
 
         expect(
@@ -259,7 +259,7 @@ void main() {
 
       test('GetDNSResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetDNSResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetDNSResponse.xml',
         );
 
         expect(
@@ -272,7 +272,7 @@ void main() {
 
       test('GetHostnameResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetHostnameResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetHostnameResponse.xml',
         );
 
         expect(
@@ -285,7 +285,7 @@ void main() {
 
       test('GetNetworkProtocolsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetNetworkProtocolsResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetNetworkProtocolsResponse.xml',
         );
 
         expect(
@@ -298,7 +298,7 @@ void main() {
 
       test('GetNTPResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetNTPResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetNTPResponse.xml',
         );
 
         expect(
@@ -311,7 +311,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -324,7 +324,7 @@ void main() {
 
       test('GetServicesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetServicesResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetServicesResponse.xml',
         );
 
         expect(
@@ -337,7 +337,7 @@ void main() {
 
       test('GetSystemDateAndTimeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetSystemDateAndTimeResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetSystemDateAndTimeResponse.xml',
         );
 
         expect(
@@ -350,7 +350,7 @@ void main() {
 
       test('GetSystemUrisResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetSystemUrisResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetSystemUrisResponse.xml',
         );
 
         expect(
@@ -363,7 +363,7 @@ void main() {
 
       test('GetUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/ENP1A14-IR_25X/device_management/GetUsersResponse.xml',
+          '../../test_data/xml/ENP1A14-IR_25X/device_management/GetUsersResponse.xml',
         );
 
         expect(
@@ -376,7 +376,7 @@ void main() {
     group('DCS-6511', () {
       test('CreateUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/CreateUsersResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/CreateUsersResponse.xml',
         );
 
         expect(
@@ -387,7 +387,7 @@ void main() {
 
       test('DeleteUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/DeleteUsersResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/DeleteUsersResponse.xml',
         );
 
         expect(
@@ -398,7 +398,7 @@ void main() {
 
       test('GetCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetCapabilitiesResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetCapabilitiesResponse.xml',
         );
 
         expect(
@@ -411,7 +411,7 @@ void main() {
 
       test('GetDeviceInformationResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetDeviceInformationResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetDeviceInformationResponse.xml',
         );
 
         expect(
@@ -422,7 +422,7 @@ void main() {
 
       test('GetDiscoveryModeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetDiscoveryModeResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetDiscoveryModeResponse.xml',
         );
 
         expect(
@@ -435,7 +435,7 @@ void main() {
 
       test('GetDNSResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetDNSResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetDNSResponse.xml',
         );
 
         expect(
@@ -448,7 +448,7 @@ void main() {
 
       test('GetHostnameResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetHostnameResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetHostnameResponse.xml',
         );
 
         expect(
@@ -461,7 +461,7 @@ void main() {
 
       test('GetNetworkProtocolsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetNetworkProtocolsResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetNetworkProtocolsResponse.xml',
         );
 
         expect(
@@ -474,7 +474,7 @@ void main() {
 
       test('GetNTPResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetNTPResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetNTPResponse.xml',
         );
 
         expect(
@@ -487,7 +487,7 @@ void main() {
 
       test('GetSystemDateAndTimeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetSystemDateAndTimeResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetSystemDateAndTimeResponse.xml',
         );
 
         expect(
@@ -500,7 +500,7 @@ void main() {
 
       test('GetSystemUrisResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetSystemUrisResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetSystemUrisResponse.xml',
         );
 
         expect(
@@ -511,7 +511,7 @@ void main() {
 
       test('GetUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/DCS-6511/device_management/GetUsersResponse.xml',
+          '../../test_data/xml/DCS-6511/device_management/GetUsersResponse.xml',
         );
 
         expect(
@@ -524,7 +524,7 @@ void main() {
     group('GX728MF-IR28', () {
       test('CreateUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/CreateUsersResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/CreateUsersResponse.xml',
         );
 
         expect(
@@ -535,7 +535,7 @@ void main() {
 
       test('DeleteUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/DeleteUsersResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/DeleteUsersResponse.xml',
         );
 
         expect(
@@ -546,7 +546,7 @@ void main() {
 
       test('GetCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetCapabilitiesResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetCapabilitiesResponse.xml',
         );
 
         expect(
@@ -559,7 +559,7 @@ void main() {
 
       test('GetDeviceInformationResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetDeviceInformationResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetDeviceInformationResponse.xml',
         );
 
         expect(
@@ -570,7 +570,7 @@ void main() {
 
       test('GetDiscoveryModeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetDiscoveryModeResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetDiscoveryModeResponse.xml',
         );
 
         expect(
@@ -583,7 +583,7 @@ void main() {
 
       test('GetDNSResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetDNSResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetDNSResponse.xml',
         );
 
         expect(
@@ -596,7 +596,7 @@ void main() {
 
       test('GetHostnameResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetHostnameResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetHostnameResponse.xml',
         );
 
         expect(
@@ -609,7 +609,7 @@ void main() {
 
       test('GetNetworkProtocolsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetNetworkProtocolsResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetNetworkProtocolsResponse.xml',
         );
 
         expect(
@@ -622,7 +622,7 @@ void main() {
 
       test('GetNTPResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetNTPResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetNTPResponse.xml',
         );
 
         expect(
@@ -635,7 +635,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -648,7 +648,7 @@ void main() {
 
       test('GetServicesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetServicesResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetServicesResponse.xml',
         );
 
         expect(
@@ -661,7 +661,7 @@ void main() {
 
       test('GetSystemDateAndTimeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetSystemDateAndTimeResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetSystemDateAndTimeResponse.xml',
         );
 
         expect(
@@ -674,7 +674,7 @@ void main() {
 
       test('GetUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/GX728MF-IR28/device_management/GetUsersResponse.xml',
+          '../../test_data/xml/GX728MF-IR28/device_management/GetUsersResponse.xml',
         );
 
         expect(
@@ -687,7 +687,7 @@ void main() {
     group('IPG-8150PSS', () {
       test('CreateUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/CreateUsersResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/CreateUsersResponse.xml',
         );
 
         expect(
@@ -698,7 +698,7 @@ void main() {
 
       test('DeleteUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/DeleteUsersResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/DeleteUsersResponse.xml',
         );
 
         expect(
@@ -709,7 +709,7 @@ void main() {
 
       test('Fault', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/Fault.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/Fault.xml',
         );
 
         expect(
@@ -720,7 +720,7 @@ void main() {
 
       test('GetCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetCapabilitiesResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetCapabilitiesResponse.xml',
         );
 
         expect(
@@ -733,7 +733,7 @@ void main() {
 
       test('GetDeviceInformationResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetDeviceInformationResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetDeviceInformationResponse.xml',
         );
 
         expect(
@@ -744,7 +744,7 @@ void main() {
 
       test('GetDiscoveryModeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetDiscoveryModeResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetDiscoveryModeResponse.xml',
         );
 
         expect(
@@ -757,7 +757,7 @@ void main() {
 
       test('GetDNSResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetDNSResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetDNSResponse.xml',
         );
 
         expect(
@@ -770,7 +770,7 @@ void main() {
 
       test('GetHostnameResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetHostnameResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetHostnameResponse.xml',
         );
 
         expect(
@@ -783,7 +783,7 @@ void main() {
 
       test('GetNetworkProtocolsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetNetworkProtocolsResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetNetworkProtocolsResponse.xml',
         );
 
         expect(
@@ -796,7 +796,7 @@ void main() {
 
       test('GetNTPResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetNTPResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetNTPResponse.xml',
         );
 
         expect(
@@ -809,7 +809,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -822,7 +822,7 @@ void main() {
 
       test('GetServicesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetServicesResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetServicesResponse.xml',
         );
 
         expect(
@@ -835,7 +835,7 @@ void main() {
 
       test('GetSystemDateAndTimeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetSystemDateAndTimeResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetSystemDateAndTimeResponse.xml',
         );
 
         expect(
@@ -848,7 +848,7 @@ void main() {
 
       test('GetSystemLogResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetSystemLogResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetSystemLogResponse.xml',
         );
 
         expect(
@@ -861,7 +861,7 @@ void main() {
 
       test('GetSystemUrisResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetSystemUrisResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetSystemUrisResponse.xml',
         );
 
         expect(
@@ -872,7 +872,7 @@ void main() {
 
       test('GetUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/GetUsersResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/GetUsersResponse.xml',
         );
 
         expect(
@@ -883,7 +883,7 @@ void main() {
 
       test('SystemRebootResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPG-8150PSS/device_management/SystemRebootResponse.xml',
+          '../../test_data/xml/IPG-8150PSS/device_management/SystemRebootResponse.xml',
         );
 
         expect(
@@ -896,7 +896,7 @@ void main() {
     group('SUNBA', () {
       test('Fault', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/Fault.xml',
+          '../../test_data/xml/SUNBA/device_management/Fault.xml',
         );
 
         expect(
@@ -907,7 +907,7 @@ void main() {
 
       test('GetCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetCapabilitiesResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetCapabilitiesResponse.xml',
         );
 
         expect(
@@ -920,7 +920,7 @@ void main() {
 
       test('GetDeviceInformationResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetDeviceInformationResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetDeviceInformationResponse.xml',
         );
         expect(
           GetDeviceInformationResponse.fromJson(envelope.body.response!).model,
@@ -930,7 +930,7 @@ void main() {
 
       test('GetDiscoveryModeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetDiscoveryModeResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetDiscoveryModeResponse.xml',
         );
 
         expect(
@@ -943,7 +943,7 @@ void main() {
 
       test('GetDNSResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetDNSResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetDNSResponse.xml',
         );
 
         expect(
@@ -956,7 +956,7 @@ void main() {
 
       test('GetHostnameResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetHostnameResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetHostnameResponse.xml',
         );
 
         expect(
@@ -969,7 +969,7 @@ void main() {
 
       test('GetNetworkProtocolsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetNetworkProtocolsResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetNetworkProtocolsResponse.xml',
         );
 
         expect(
@@ -982,7 +982,7 @@ void main() {
 
       test('GetNTPResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetNTPResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetNTPResponse.xml',
         );
 
         expect(
@@ -995,7 +995,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -1008,7 +1008,7 @@ void main() {
 
       test('GetServicesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetServicesResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetServicesResponse.xml',
         );
 
         expect(
@@ -1021,7 +1021,7 @@ void main() {
 
       test('GetSystemDateAndTimeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetSystemDateAndTimeResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetSystemDateAndTimeResponse.xml',
         );
 
         expect(
@@ -1034,7 +1034,7 @@ void main() {
 
       test('GetSystemLogResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetSystemLogResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetSystemLogResponse.xml',
         );
 
         expect(
@@ -1047,7 +1047,7 @@ void main() {
 
       test('GetUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetUsersResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetUsersResponse.xml',
         );
 
         expect(
@@ -1058,7 +1058,7 @@ void main() {
 
       test('SystemSupportInformation', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/GetSystemSupportInformationResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/GetSystemSupportInformationResponse.xml',
         );
 
         expect(
@@ -1071,7 +1071,7 @@ void main() {
 
       test('SystemRebootResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/SUNBA/device_management/SystemRebootResponse.xml',
+          '../../test_data/xml/SUNBA/device_management/SystemRebootResponse.xml',
         );
 
         expect(
@@ -1084,7 +1084,7 @@ void main() {
     group('IPD-H4K8M05-BS', () {
       test('Fault', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/Fault.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/Fault.xml',
         );
 
         expect(
@@ -1095,7 +1095,7 @@ void main() {
 
       test('GetCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetCapabilitiesResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetCapabilitiesResponse.xml',
         );
 
         expect(
@@ -1108,7 +1108,7 @@ void main() {
 
       test('GetDeviceInformationResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetDeviceInformationResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetDeviceInformationResponse.xml',
         );
         expect(
           GetDeviceInformationResponse.fromJson(envelope.body.response!).model,
@@ -1118,7 +1118,7 @@ void main() {
 
       test('GetDiscoveryModeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetDiscoveryModeResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetDiscoveryModeResponse.xml',
         );
 
         expect(
@@ -1131,7 +1131,7 @@ void main() {
 
       test('GetDNSResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetDNSResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetDNSResponse.xml',
         );
 
         expect(
@@ -1144,7 +1144,7 @@ void main() {
 
       test('GetHostnameResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetHostnameResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetHostnameResponse.xml',
         );
 
         expect(
@@ -1157,7 +1157,7 @@ void main() {
 
       test('GetNetworkProtocolsResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetNetworkProtocolsResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetNetworkProtocolsResponse.xml',
         );
 
         expect(
@@ -1170,7 +1170,7 @@ void main() {
 
       test('GetNTPResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetNTPResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetNTPResponse.xml',
         );
 
         expect(
@@ -1183,7 +1183,7 @@ void main() {
 
       test('GetServiceCapabilitiesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetServiceCapabilitiesResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetServiceCapabilitiesResponse.xml',
         );
 
         expect(
@@ -1196,7 +1196,7 @@ void main() {
 
       test('GetServicesResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetServicesResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetServicesResponse.xml',
         );
 
         expect(
@@ -1209,7 +1209,7 @@ void main() {
 
       test('GetSystemDateAndTimeResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetSystemDateAndTimeResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetSystemDateAndTimeResponse.xml',
         );
 
         expect(
@@ -1222,7 +1222,7 @@ void main() {
 
       // test('GetSystemLogResponse', () {
       //   final envelope = Envelope.fromXmlFile(
-      //     'test/xml/IPD-H4K8M05-BS/device_management/GetSystemLogResponse.xml',
+      //     '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetSystemLogResponse.xml',
       //   );
 
       //   expect(
@@ -1235,7 +1235,7 @@ void main() {
 
       test('GetUsersResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetUsersResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetUsersResponse.xml',
         );
 
         expect(
@@ -1246,7 +1246,7 @@ void main() {
 
       test('SystemSupportInformation', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/GetSystemSupportInformationResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/GetSystemSupportInformationResponse.xml',
         );
 
         expect(
@@ -1259,7 +1259,7 @@ void main() {
 
       test('SystemRebootResponse', () {
         final envelope = Envelope.fromXmlFile(
-          'test/xml/IPD-H4K8M05-BS/device_management/SystemRebootResponse.xml',
+          '../../test_data/xml/IPD-H4K8M05-BS/device_management/SystemRebootResponse.xml',
         );
 
         expect(
