@@ -3,6 +3,7 @@ version: 3.1.4
 homepage: https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_cli
 description: A pure Dart library designed primarily for command line automation of Onvif compatible devices.
 repository: https://github.com/faithoflifedev/easy_onvif_workspace
+issue_tracker: https://github.com/faithoflifedev/easy_onvif_workspace/issues
 
 funding:
   - https://www.buymeacoffee.com/faithoflif2

@@ -1,0 +1,12 @@
+# Debug and build artifacts
+debug/
+.pt-build/
+
+# Tool scripts (not needed by package users)
+tool/
+
+# IDE files
+*.iml
+
+# Logs
+*.log

@@ -3,6 +3,7 @@ version: 3.1.4
 homepage: https://github.com/faithoflifedev/easy_onvif_workspace/blob/main/packages/easy_onvif
 description: This package can work with a variety of ONVIF compatible devices allowing for IP Cameras and NVRs (network video recorders) to be integrated into Dart and Flutter applications.
 repository: https://github.com/faithoflifedev/easy_onvif_workspace
+issue_tracker: https://github.com/faithoflifedev/easy_onvif_workspace/issues
 
 funding:
   - https://www.buymeacoffee.com/faithoflif2
