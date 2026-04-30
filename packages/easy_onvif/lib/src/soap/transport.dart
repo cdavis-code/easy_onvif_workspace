@@ -50,17 +50,24 @@ class Transport with UiLoggy {
         case 400:
           loggy.error('ERROR RESPONSE:\n${error.response?.data}');
 
-          final jsonMap = OnvifUtil.xmlToMap(error.response?.data);
+          final jsonData = error.response?.data;
+          final jsonMap = OnvifUtil.xmlToMap(jsonData as String);
 
           final envelope = Envelope.fromJson(jsonMap);
 
           if (envelope.body.hasFault) {
-            throw Exception('Error code: ${envelope.body.fault}');
+            // Log detailed fault for debugging, throw sanitized message
+            loggy.error('ONVIF fault: ${envelope.body.fault}');
+            throw Exception(
+              'ONVIF operation failed. Please check device logs for details.',
+            );
           }
           break;
       }
 
-      throw Exception(error);
+      // Log full error context, throw generic message to prevent info leakage
+      loggy.error('Transport error: $error');
+      throw Exception('Network communication failed. Please try again.');
     }
 
     return response;
@@ -87,20 +94,27 @@ class Transport with UiLoggy {
         case 400:
           loggy.error('ERROR RESPONSE:\n${error.response?.data}');
 
-          final jsonMap = OnvifUtil.xmlToMap(error.response?.data);
+          final jsonData = error.response?.data;
+          final jsonMap = OnvifUtil.xmlToMap(jsonData as String);
 
           final envelope = Envelope.fromJson(jsonMap);
 
           if (envelope.body.hasFault) {
-            throw Exception('Error code: ${envelope.body.fault}');
+            // Log detailed fault for debugging, throw sanitized message
+            loggy.error('ONVIF fault: ${envelope.body.fault}');
+            throw Exception(
+              'ONVIF operation failed. Please check device logs for details.',
+            );
           }
           break;
       }
 
-      throw Exception(error);
+      // Log full error context, throw generic message to prevent info leakage
+      loggy.error('Transport error: $error');
+      throw Exception('Network communication failed. Please try again.');
     }
 
-    return Envelope.fromXmlString(response.data);
+    return Envelope.fromXmlString(response.data as String);
   }
 
   static XmlDocumentFragment quickTag(String tagName, String nameSpace) {

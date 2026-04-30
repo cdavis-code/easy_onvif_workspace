@@ -33,7 +33,7 @@ class ModalOptions {
       return OnvifUtil.nullableStringMappedFromXmlList(json);
     } else {
       // json from serialized object
-      return [OnvifUtil.stringMappedFromXml(json)];
+      return [OnvifUtil.stringMappedFromXml(json as Map<String, dynamic>)];
     }
   }
 }

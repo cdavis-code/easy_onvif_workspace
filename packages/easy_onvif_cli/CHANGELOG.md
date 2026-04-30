@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.4
+
+* Added `topics` to pubspec.yaml for improved discoverability
+* Dependency bump (easy_onvif ^3.1.4)
+* Removed tracked `.iml` files from git (now properly ignored)
+
 ## 3.1.3+1
 
 * dependency bump

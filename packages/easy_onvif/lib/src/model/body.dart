@@ -19,7 +19,9 @@ class Body implements XmlSerializable {
 
   factory Body.fromJson(Map<String, dynamic> json) {
     // Check if there's a fault first
-    final fault = json['Fault'] == null ? null : Fault.fromJson(json['Fault']);
+    final fault = json['Fault'] == null
+        ? null
+        : Fault.fromJson(json['Fault'] as Map<String, dynamic>);
 
     // Find response key (any key that's not 'Fault')
     final responseKeys = json.keys.where((key) => key != 'Fault').toList();

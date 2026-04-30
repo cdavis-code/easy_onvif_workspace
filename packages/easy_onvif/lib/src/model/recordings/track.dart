@@ -48,7 +48,7 @@ class Track {
       json != null
       ? $enumDecode(
           _$RecordingJobStateEnumMap,
-          OnvifUtil.stringMappedFromXml(json),
+          OnvifUtil.stringMappedFromXml(json as Map<String, dynamic>),
         )
       : null;
 

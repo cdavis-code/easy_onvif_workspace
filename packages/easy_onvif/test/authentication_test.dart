@@ -61,22 +61,26 @@ void main() {
 
       expect(
         OnvifUtil.stringMappedFromXml(
-          usernameJson['UsernameToken']['Username'],
+          usernameJson['UsernameToken']['Username'] as Map<String, dynamic>,
         ),
         'admin',
       );
       expect(
         OnvifUtil.stringMappedFromXml(
-          usernameJson['UsernameToken']['Password'],
+          usernameJson['UsernameToken']['Password'] as Map<String, dynamic>,
         ),
         'iJSWNCOtYP5YI9F5j4z4/hkM/yo=',
       );
       expect(
-        OnvifUtil.stringMappedFromXml(usernameJson['UsernameToken']['Nonce']),
+        OnvifUtil.stringMappedFromXml(
+          usernameJson['UsernameToken']['Nonce'] as Map<String, dynamic>,
+        ),
         'AQIDBAUGBwgJCgsMDQ4PEA==',
       );
       expect(
-        OnvifUtil.stringMappedFromXml(usernameJson['UsernameToken']['Created']),
+        OnvifUtil.stringMappedFromXml(
+          usernameJson['UsernameToken']['Created'] as Map<String, dynamic>,
+        ),
         '2024-01-20T21:10:00.000Z',
       );
     });

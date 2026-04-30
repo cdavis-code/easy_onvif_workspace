@@ -31,7 +31,7 @@ class OnvifUtil {
 
     if (!rootMap.containsKey('Envelope')) throw Exception();
 
-    return rootMap['Envelope'];
+    return rootMap['Envelope'] as Map<String, dynamic>;
   }
 
   static String authenticatingUri(
@@ -60,7 +60,7 @@ class OnvifUtil {
   }) async {
     final auth = base64.encode(utf8.encode('$username:$password'));
 
-    final response = await Dio().get(
+    final response = await Dio().get<ResponseBody>(
       snapshotUri.uri,
       options: Options(
         responseType: ResponseType.stream,
@@ -70,7 +70,7 @@ class OnvifUtil {
 
     final bytesBuilder = BytesBuilder();
 
-    await for (final chunk in response.data.stream) {
+    await for (final chunk in response.data!.stream) {
       bytesBuilder.add(chunk);
     }
 
@@ -114,7 +114,11 @@ class OnvifUtil {
       stringToList(stringMappedFromXml(value));
 
   static List<String>? nullableStringMappedFromXmlList(List<dynamic>? value) =>
-      value?.map((element) => stringMappedFromXml(element)).toList();
+      value
+          ?.map(
+            (element) => stringMappedFromXml(element as Map<String, dynamic>),
+          )
+          .toList();
 
   static bool? nullableStringToBool(String? value) =>
       value != null ? stringToBool(value) : null;
@@ -148,7 +152,8 @@ class OnvifUtil {
   static double? nullableDoubleMappedFromXml(Map<String, dynamic>? value) =>
       value != null ? doubleMappedFromXml(value) : null;
 
-  static String stringMappedFromXml(Map<String, dynamic> value) => value['\$'];
+  static String stringMappedFromXml(Map<String, dynamic> value) =>
+      value['\$'] as String;
 
   // static String mappedString(Map<String, dynamic> value) => value['\$'];
 

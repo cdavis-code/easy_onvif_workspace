@@ -4,3 +4,5 @@ analyzer:
   exclude:
     # workaround for https://github.com/dart-lang/sdk/issues/42910
     - "lib/**.g.dart"
+  language:
+    strict-casts: true

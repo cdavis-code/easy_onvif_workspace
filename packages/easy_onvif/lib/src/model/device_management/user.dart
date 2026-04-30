@@ -32,12 +32,12 @@ class User implements XmlSerializable {
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   factory User.fromYamlMap(YamlMap yamlMap) => User(
-    username: yamlMap['username'],
-    password: yamlMap['password'],
+    username: yamlMap['username'] as String,
+    password: yamlMap['password'] as String?,
     userLevel: UserLevel.values.contains(yamlMap['userLevel'])
         ? UserLevel.values.byName(yamlMap['userLevel'].toString())
         : UserLevel.user,
-    extension: yamlMap['extension'],
+    extension: yamlMap['extension'] as Map<String, dynamic>?,
   );
 
   Map<String, dynamic> toJson() => _$UserToJson(this);

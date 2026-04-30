@@ -1,3 +1,29 @@
-.dart_tool
+# Dart/Flutter tooling
+.dart_tool/
+
+# OS files
 .DS_Store
 **/.DS_Store
+Thumbs.db
+
+# Environment files (may contain camera credentials)
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.idea/
+*.iml
+.vscode/settings.json
+.vscode/launch.json
+
+# Build artifacts
+build/
+*.js.map
+*.wasm
+
+# Logs
+*.log
+
+# Test coverage
+coverage/

@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.1.4
+
+* Added `topics` to pubspec.yaml for improved discoverability
+* Enhanced `.gitignore` to exclude sensitive files and build artifacts
+* Sanitized error messages in transport layer to prevent information leakage
+* Replaced silent `catch (_)` with logged `catch (e)` for better debugging
+* Enabled `strict-casts` analyzer flag and fixed 24 type-safety issues
+* Removed tracked `.iml` files from git (now properly ignored)
+
 ## 3.1.3+1
 
 * device_management - HostnameInformation, fixed when null

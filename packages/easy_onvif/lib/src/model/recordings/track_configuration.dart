@@ -28,8 +28,10 @@ class TrackConfiguration {
   @override
   String toString() => json.encode(toJson());
 
-  static TrackType _trackType(dynamic json) =>
-      $enumDecode(_$TrackTypeEnumMap, OnvifUtil.stringMappedFromXml(json));
+  static TrackType _trackType(dynamic json) => $enumDecode(
+    _$TrackTypeEnumMap,
+    OnvifUtil.stringMappedFromXml(json as Map<String, dynamic>),
+  );
 }
 
 enum TrackType {

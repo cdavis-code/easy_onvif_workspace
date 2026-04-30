@@ -137,7 +137,7 @@ class ProbeMatch with UiLoggy {
       return OnvifUtil.stringMappedFromXml(json as Map<String, dynamic>);
     } else {
       // json from serialized object
-      return json;
+      return json as String;
     }
   }
 }

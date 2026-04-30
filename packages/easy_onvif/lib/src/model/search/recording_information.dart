@@ -67,7 +67,7 @@ class RecordingInformation {
 
   static RecordingStatus _recordingStatus(dynamic json) => $enumDecode(
     _$RecordingStatusEnumMap,
-    OnvifUtil.stringMappedFromXml(json),
+    OnvifUtil.stringMappedFromXml(json as Map<String, dynamic>),
   );
 }
 

@@ -10,8 +10,8 @@ class Reason {
   Reason({this.lang, this.note});
 
   factory Reason.fromJson(Map<String, dynamic> json) => Reason(
-    lang: json['Text']['@xml:lang'],
-    note: OnvifUtil.stringMappedFromXml(json['Text']),
+    lang: json['Text']?['@xml:lang'] as String?,
+    note: OnvifUtil.stringMappedFromXml(json['Text'] as Map<String, dynamic>),
   );
 
   Map<String, dynamic> toJson() => <String, dynamic>{

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:easy_onvif/device_management.dart';
 import 'package:easy_onvif/soap.dart' as soap;
+import 'package:easy_onvif/soap.dart' show Envelope;
 import 'package:loggy/loggy.dart';
 
 import 'operation.dart';
@@ -101,12 +102,16 @@ class DeviceManagement extends Operation with UiLoggy {
   }) async {
     loggy.debug('getCapabilities');
 
-    final responseEnvelope = await requestFunction(
-      uri,
-      soap.Body(
-        request: DeviceManagementRequest.capabilities(capabilityCategory.value),
-      ),
-    );
+    final responseEnvelope =
+        await requestFunction(
+              uri,
+              soap.Body(
+                request: DeviceManagementRequest.capabilities(
+                  capabilityCategory.value,
+                ),
+              ),
+            )
+            as Envelope;
 
     if (responseEnvelope.body.hasFault) {
       throw Exception(responseEnvelope.body.fault.toString());
@@ -338,12 +343,14 @@ class DeviceManagement extends Operation with UiLoggy {
   Future<List<Service>> getServices({bool includeCapability = false}) async {
     loggy.debug('getServices');
 
-    final responseEnvelope = await requestFunction(
-      uri,
-      soap.Body(
-        request: DeviceManagementRequest.getServices(includeCapability),
-      ),
-    );
+    final responseEnvelope =
+        await requestFunction(
+              uri,
+              soap.Body(
+                request: DeviceManagementRequest.getServices(includeCapability),
+              ),
+            )
+            as Envelope;
 
     if (responseEnvelope.body.hasFault) {
       throw Exception(responseEnvelope.body.fault.toString());

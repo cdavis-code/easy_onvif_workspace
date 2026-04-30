@@ -8,13 +8,13 @@ part 'time.g.dart';
 @JsonSerializable()
 class Time {
   @JsonKey(name: 'Hour', fromJson: OnvifUtil.intMappedFromXml)
-  final dynamic hour;
+  final int hour;
 
   @JsonKey(name: 'Minute', fromJson: OnvifUtil.intMappedFromXml)
-  final dynamic minute;
+  final int minute;
 
   @JsonKey(name: 'Second', fromJson: OnvifUtil.intMappedFromXml)
-  final dynamic second;
+  final int second;
 
   Time({required this.hour, required this.minute, required this.second});
 

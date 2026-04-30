@@ -67,7 +67,7 @@ class RecordingJobConfiguration implements XmlSerializable {
     dynamic json,
   ) => $enumDecode(
     _$RecordingJobConfigurationModeEnumMap,
-    OnvifUtil.stringMappedFromXml(json),
+    OnvifUtil.stringMappedFromXml(json as Map<String, dynamic>),
   );
 
   @override

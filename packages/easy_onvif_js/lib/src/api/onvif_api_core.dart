@@ -110,7 +110,9 @@ Object? _deepJsonify(Object? value) {
       );
     }
     return _deepJsonify(json);
-  } catch (_) {
+  } catch (e) {
+    // Fallback for non-serializable values — log for debugging
+    print('[easy_onvif_js] _deepJsonify fallback: $e');
     return value.toString();
   }
 }
