@@ -7,13 +7,6 @@ dev_dependencies:
   melos: ^7.5.1
   publish_tools: ^1.0.0+11
 
-workspace:
-  - packages/easy_onvif
-  # - packages/easy_onvif/example
-  - packages/easy_onvif_cli
-  # - packages/easy_onvif_cli/example
-  - packages/easy_onvif_js
-
 melos:
   packages:
   - packages/**
