@@ -30,14 +30,13 @@ jobs:
       # Note: This workflow uses the latest stable version of the Dart SDK.
       # You can specify other versions if desired, see documentation here:
       # https://github.com/dart-lang/setup-dart/blob/main/README.md
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
       # - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
 
       - name: Install dependencies
-        run: |
-          cd packages/easy_onvif && dart pub get && cd ../..
-          cd packages/easy_onvif_cli && dart pub get && cd ../..
-          cd packages/easy_onvif_js && dart pub get && cd ../..
+        run: dart run melos bootstrap
 
       # Uncomment this step to verify the use of 'dart format' on each commit.
       # - name: Verify formatting
