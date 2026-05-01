@@ -17,6 +17,7 @@ workspace:
 melos:
   packages:
   - packages/**
+  - '!packages/**/example'
 
   command:
     version:
