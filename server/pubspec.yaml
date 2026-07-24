@@ -1,0 +1,35 @@
+name: easy_onvif_server
+description: >-
+  A Flutter application that acts as an ONVIF device, serving the SOAP API
+  consumed by the easy_onvif client. Uses the host device camera/microphone for
+  the video feed and exposes other hardware (e.g. geolocation) as appropriate.
+
+publish_to: "none"
+
+version: 0.1.0
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+dependencies:
+  camera: ^0.12.0+2
+  camera_desktop: ^1.2.1
+  crypto: ^3.0.7
+  easy_onvif:
+    path: ../packages/easy_onvif
+  flutter_loggy: ^2.0.2
+  geolocator: ^14.0.3
+  loggy: ^2.0.3
+  uuid: ^4.6.0
+  xml: ^6.6.1
+
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
