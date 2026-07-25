@@ -18,6 +18,7 @@ import 'services/onvif_service.dart';
 import 'services/ptz_service.dart';
 import 'services/recording_service.dart';
 import 'services/replay_service.dart';
+import 'services/search_service.dart';
 import 'settings.dart';
 import 'soap/authenticator.dart';
 import 'streaming/file_h264_source.dart';
@@ -133,6 +134,8 @@ class OnvifDevice with UiLoggy {
         RecordingService(manager: recordingManager!),
       if (recordingManager != null && this.settings.services.replay)
         ReplayService(config: config, manager: recordingManager!),
+      if (recordingManager != null && this.settings.services.search)
+        SearchService(manager: recordingManager!),
     ];
 
     dispatcher = SoapDispatcher(
