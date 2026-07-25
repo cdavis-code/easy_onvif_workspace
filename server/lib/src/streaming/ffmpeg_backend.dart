@@ -28,6 +28,9 @@ class FfmpegBackend implements StreamBackend {
   RtspServer? _rtspServer;
   String? _profileToken;
 
+  @override
+  NalStreamSource? get nalSource => _source;
+
   FfmpegBackend({
     required this.config,
     this.ffmpegPath = 'ffmpeg',

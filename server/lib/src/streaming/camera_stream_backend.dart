@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../config.dart';
 import 'camera_h264_source.dart';
 import 'h264_encoder.dart';
+import 'h264_source.dart';
 import 'rtsp_server.dart';
 import 'stream_backend.dart';
 
@@ -30,6 +31,9 @@ class CameraStreamBackend implements StreamBackend {
 
   CameraH264Source? _source;
   RtspServer? _rtspServer;
+
+  @override
+  NalStreamSource? get nalSource => _source;
 
   /// Channel to the native encoder, used to grab a JPEG still of the latest
   /// camera frame for the snapshot endpoint.

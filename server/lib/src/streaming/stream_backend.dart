@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'h264_source.dart';
+
 /// Abstraction over the component that produces the RTSP video stream.
 ///
 /// `GetStreamUri` returns the URL produced by [start]. The first working
@@ -19,6 +21,11 @@ abstract interface class StreamBackend {
   /// Grabs a single JPEG frame from the running stream, or `null` if no frame
   /// is available. Used for the HTTP snapshot endpoint and the in-app preview.
   Future<Uint8List?> snapshot();
+
+  /// The live H.264 NAL source feeding the RTSP server, or `null` when the
+  /// backend is not running or does not expose one. Used by the recording
+  /// engine to tap the stream without opening the camera twice.
+  NalStreamSource? get nalSource;
 }
 
 /// A [StreamBackend] that advertises an RTSP URL derived from [urlFor] without
@@ -47,4 +54,7 @@ class StubStreamBackend implements StreamBackend {
 
   @override
   Future<Uint8List?> snapshot() async => null;
+
+  @override
+  NalStreamSource? get nalSource => null;
 }
