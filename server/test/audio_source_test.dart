@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:easy_onvif_server/src/streaming/audio_source.dart';
 import 'package:easy_onvif_server/src/streaming/ffmpeg_audio_source.dart';
+import 'package:easy_onvif_server/src/streaming/native_audio_source.dart';
 
 void main() {
   test('AlawFramer chunks a byte stream into timestamped 20 ms frames', () {
@@ -36,5 +39,21 @@ void main() {
     expect(frames.length, greaterThan(30));
     expect(frames.every((f) => f.data.length == 160), isTrue);
     expect(frames[1].timestamp - frames[0].timestamp, 160);
+  });
+
+  test('NativeAudioSource converts PCM16 chunks into A-law frames', () async {
+    final source = NativeAudioSource();
+    final frames = <AudioFrame>[];
+    final subscription = source.frames.listen(frames.add);
+
+    // 320 zero samples = 640 bytes PCM16 = two 20 ms frames of A-law 0xD5.
+    source.addPcmBytes(Uint8List(640));
+
+    await Future<void>.delayed(Duration.zero);
+    await subscription.cancel();
+
+    expect(frames, hasLength(2));
+    expect(frames.first.data.every((byte) => byte == 0xD5), isTrue);
+    expect(frames[1].timestamp, 160);
   });
 }

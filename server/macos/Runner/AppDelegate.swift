@@ -8,6 +8,10 @@ class AppDelegate: FlutterAppDelegate {
   private let encoder = VideoToolboxEncoder()
   private var encoderEventSink: FlutterEventSink?
 
+  /// Microphone capture bridged to Dart's NativeAudioSource.
+  private let audioCapture = AudioCaptureSource()
+  private var audioEventSink: FlutterEventSink?
+
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
   }
@@ -27,6 +31,7 @@ class AppDelegate: FlutterAppDelegate {
 
       registerPermissionChannel(messenger: messenger)
       registerEncoderChannels(messenger: messenger)
+      registerAudioChannels(messenger: messenger)
     }
 
     super.applicationDidFinishLaunching(notification)
@@ -108,6 +113,46 @@ class AppDelegate: FlutterAppDelegate {
     })
   }
 
+  /// Channels backing `NativeAudioSource`: control + PCM16/8 kHz event stream.
+  private func registerAudioChannels(messenger: FlutterBinaryMessenger) {
+    let control = FlutterMethodChannel(
+      name: "easy_onvif_server/audio_capture",
+      binaryMessenger: messenger
+    )
+
+    control.setMethodCallHandler { [weak self] call, result in
+      guard let self = self else { return }
+
+      switch call.method {
+      case "start":
+        let args = call.arguments as? [String: Any] ?? [:]
+        let deviceUid = args["deviceUid"] as? String ?? ""
+        do {
+          try self.audioCapture.start(deviceUid: deviceUid)
+          result(nil)
+        } catch {
+          result(FlutterError(code: "audio_start", message: error.localizedDescription, details: nil))
+        }
+
+      case "stop":
+        self.audioCapture.stop()
+        result(nil)
+
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+
+    let events = FlutterEventChannel(
+      name: "easy_onvif_server/audio_capture/events",
+      binaryMessenger: messenger
+    )
+
+    events.setStreamHandler(AudioStreamHandler(capture: audioCapture) { [weak self] sink in
+      self?.audioEventSink = sink
+    })
+  }
+
   /// Requests access to [mediaType], showing the system prompt the first time,
   /// and returns whether access is authorized.
   private static func requestAccess(for mediaType: AVMediaType, result: @escaping FlutterResult) {
@@ -145,6 +190,32 @@ private final class EncoderStreamHandler: NSObject, FlutterStreamHandler {
 
   func onCancel(withArguments arguments: Any?) -> FlutterError? {
     encoder.onOutput = nil
+    onSink(nil)
+    return nil
+  }
+}
+
+/// Bridges microphone PCM chunks to a Flutter event stream.
+private final class AudioStreamHandler: NSObject, FlutterStreamHandler {
+  private let capture: AudioCaptureSource
+  private let onSink: (FlutterEventSink?) -> Void
+
+  init(capture: AudioCaptureSource, onSink: @escaping (FlutterEventSink?) -> Void) {
+    self.capture = capture
+    self.onSink = onSink
+    super.init()
+  }
+
+  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+    onSink(events)
+    capture.onPcm = { data in
+      DispatchQueue.main.async { events(FlutterStandardTypedData(bytes: data)) }
+    }
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    capture.onPcm = nil
     onSink(nil)
     return nil
   }
