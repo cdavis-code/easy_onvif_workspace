@@ -46,3 +46,17 @@
 #   lat: 43.65
 #   lon: -79.38
 #   elevation: 76.0
+#
+# media:
+#   video:
+#     source: camera             # camera | display | test
+#     device: ""                 # raw platform id, empty = default:
+#                                #   camera: plugin device name (macOS/mobile),
+#                                #     dshow name (Windows), /dev/video0 (Linux)
+#                                #   display: CGDirectDisplayID (macOS),
+#                                #     gdigrab target (Windows), :0.0 (Linux)
+#   audio:
+#     enabled: false             # serve G.711 audio as a second RTSP track
+#     device: ""                 # raw platform id, empty = default input:
+#                                #   CoreAudio device UID (macOS),
+#                                #   dshow name (Windows), hw:1 / pulse (Linux)

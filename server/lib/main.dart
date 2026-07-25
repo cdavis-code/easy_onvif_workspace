@@ -11,8 +11,12 @@ import 'package:easy_onvif_server/src/config.dart';
 import 'package:easy_onvif_server/src/hardware/flutter_adapter.dart';
 import 'package:easy_onvif_server/src/onvif_device.dart';
 import 'package:easy_onvif_server/src/settings.dart';
+import 'package:easy_onvif_server/src/streaming/audio_source.dart';
 import 'package:easy_onvif_server/src/streaming/camera_stream_backend.dart';
+import 'package:easy_onvif_server/src/streaming/ffmpeg_audio_source.dart';
 import 'package:easy_onvif_server/src/streaming/ffmpeg_backend.dart';
+import 'package:easy_onvif_server/src/streaming/native_audio_source.dart';
+import 'package:easy_onvif_server/src/streaming/screen_capture_backend.dart';
 import 'package:easy_onvif_server/src/streaming/stream_backend.dart';
 
 void main() {
@@ -115,51 +119,97 @@ class _ServerHomePageState extends State<ServerHomePage> {
     }
   }
 
-  /// Picks an ffmpeg video input for the current platform: the default webcam
-  /// where a capture backend is known, otherwise a generated test pattern.
-  List<String> _platformVideoInput() {
-    if (Platform.isMacOS) {
-      return [
-        '-f',
-        'avfoundation',
-        '-framerate',
-        '15',
-        '-video_size',
-        '1280x720',
-        '-i',
-        '0',
-      ];
-    }
+  /// ffmpeg video input for Windows/Linux (and the desktop test pattern),
+  /// built from the configured source kind and raw device identifier.
+  List<String> _videoInputArgs(MediaSettings media) {
+    switch (media.videoSource) {
+      case VideoSourceKind.test:
+        return ['-f', 'lavfi', '-i', 'testsrc=size=1280x720:rate=15'];
 
-    if (Platform.isLinux) {
-      return [
-        '-f',
-        'v4l2',
-        '-framerate',
-        '15',
-        '-video_size',
-        '1280x720',
-        '-i',
-        '/dev/video0',
-      ];
-    }
+      case VideoSourceKind.display:
+        if (Platform.isWindows) {
+          return [
+            '-f',
+            'gdigrab',
+            '-framerate',
+            '15',
+            '-i',
+            media.videoDevice.isEmpty ? 'desktop' : media.videoDevice,
+          ];
+        }
+        return [
+          '-f',
+          'x11grab',
+          '-framerate',
+          '15',
+          '-video_size',
+          '1280x720',
+          '-i',
+          media.videoDevice.isEmpty ? ':0.0' : media.videoDevice,
+        ];
 
+      case VideoSourceKind.camera:
+        if (Platform.isWindows) {
+          return [
+            '-f',
+            'dshow',
+            '-framerate',
+            '15',
+            '-video_size',
+            '1280x720',
+            '-i',
+            'video=${media.videoDevice.isEmpty ? 'Integrated Camera' : media.videoDevice}',
+          ];
+        }
+        return [
+          '-f',
+          'v4l2',
+          '-framerate',
+          '15',
+          '-video_size',
+          '1280x720',
+          '-i',
+          media.videoDevice.isEmpty ? '/dev/video0' : media.videoDevice,
+        ];
+    }
+  }
+
+  /// ffmpeg audio input for Windows/Linux. ALSA ids (`hw:…`) go to ALSA;
+  /// anything else goes to PulseAudio on Linux and dshow on Windows.
+  List<String> _audioInputArgs(MediaSettings media) {
     if (Platform.isWindows) {
       return [
         '-f',
         'dshow',
-        '-framerate',
-        '15',
-        '-video_size',
-        '1280x720',
         '-i',
-        'video=Integrated Camera',
+        'audio=${media.audioDevice.isEmpty ? 'default' : media.audioDevice}',
       ];
     }
 
-    // Mobile / unknown: fall back to a generated test pattern. Real camera
-    // frame ingestion is a follow-up (RTSP Phase 2/3).
-    return ['-f', 'lavfi', '-i', 'testsrc=size=1280x720:rate=15'];
+    if (media.audioDevice.startsWith('hw:')) {
+      return ['-f', 'alsa', '-i', media.audioDevice];
+    }
+
+    return [
+      '-f',
+      'pulse',
+      '-i',
+      media.audioDevice.isEmpty ? 'default' : media.audioDevice,
+    ];
+  }
+
+  AudioStreamSource? _createAudioSource(ServerSettings settings) {
+    if (!settings.media.audioEnabled) return null;
+
+    if (Platform.isWindows || Platform.isLinux) {
+      return FfmpegAudioSource(
+        ffmpegPath: _resolveFfmpegPath(),
+        inputArgs: _audioInputArgs(settings.media),
+      );
+    }
+
+    // macOS/iOS/Android capture the microphone natively.
+    return NativeAudioSource(deviceUid: settings.media.audioDevice);
   }
 
   /// Locates the `ffmpeg` executable. GUI apps launched from Finder/Spotlight
@@ -179,22 +229,47 @@ class _ServerHomePageState extends State<ServerHomePage> {
     return 'ffmpeg';
   }
 
-  /// Chooses the streaming backend for the current platform.
-  ///
-  /// On mobile (iOS/Android) and macOS the device camera is captured in-process
-  /// and encoded directly via [CameraStreamBackend] (macOS uses `camera_desktop`
-  /// for capture and VideoToolbox for H.264). On Windows/Linux, [FfmpegBackend]
-  /// shells out to `ffmpeg` (webcam or test pattern).
-  StreamBackend _createStreamBackend(ServerConfig config) {
-    if (Platform.isIOS || Platform.isAndroid || Platform.isMacOS) {
-      return CameraStreamBackend(config: config, frameRate: 15);
+  /// Chooses the streaming backend from the platform and the configured
+  /// video source. Mobile is camera-only (display/test fall back to camera);
+  /// macOS uses native capture (camera plugin or ScreenCaptureKit);
+  /// Windows/Linux shell out to ffmpeg for every source kind.
+  StreamBackend _createStreamBackend(ServerSettings settings) {
+    final media = settings.media;
+    final audio = _createAudioSource(settings);
+
+    if (Platform.isIOS || Platform.isAndroid) {
+      return CameraStreamBackend(
+        config: settings.config,
+        frameRate: 15,
+        cameraDevice: media.videoDevice,
+        audioSource: audio,
+      );
+    }
+
+    if (Platform.isMacOS && media.videoSource == VideoSourceKind.camera) {
+      return CameraStreamBackend(
+        config: settings.config,
+        frameRate: 15,
+        cameraDevice: media.videoDevice,
+        audioSource: audio,
+      );
+    }
+
+    if (Platform.isMacOS && media.videoSource == VideoSourceKind.display) {
+      return ScreenCaptureStreamBackend(
+        config: settings.config,
+        frameRate: 15,
+        displayId: media.videoDevice,
+        audioSource: audio,
+      );
     }
 
     return FfmpegBackend(
-      config: config,
+      config: settings.config,
       ffmpegPath: _resolveFfmpegPath(),
       frameRate: 15,
-      inputArgs: _platformVideoInput(),
+      inputArgs: _videoInputArgs(media),
+      audioSource: audio,
     );
   }
 
@@ -202,22 +277,22 @@ class _ServerHomePageState extends State<ServerHomePage> {
     setState(() => _busy = true);
 
     try {
-      // macOS attributes camera access to the host app; request the grant up
-      // front so the in-process AVFoundation capture works without a separate
-      // prompt racing the encoder startup.
-      await _ensureCameraPermission();
+      // Runtime settings override the compiled-in defaults; the bundled asset
+      // documents the schema and yields defaults when no override exists.
+      // Loaded first so the permission prompts match the configured sources.
+      final bundled = await rootBundle.loadString('assets/settings.yaml');
+      final settings = await ServerSettings.load(fallbackYaml: bundled);
+
+      // macOS attributes capture access to the host app; request the grants up
+      // front so in-process capture works without a prompt racing the encoder.
+      await _ensurePermissions(settings);
 
       // Where the stream backend owns the camera (mobile + macOS), the camera
       // plugin must not also open it (one consumer per device); the preview
       // reuses the backend's controller instead.
       final adapter = FlutterAdapter(enableCamera: !_useNativeCamera);
 
-      // Runtime settings override the compiled-in defaults; the bundled asset
-      // documents the schema and yields defaults when no override exists.
-      final bundled = await rootBundle.loadString('assets/settings.yaml');
-      final settings = await ServerSettings.load(fallbackYaml: bundled);
-
-      final backend = _createStreamBackend(settings.config);
+      final backend = _createStreamBackend(settings);
 
       final device = OnvifDevice(
         config: settings.config,
@@ -261,18 +336,26 @@ class _ServerHomePageState extends State<ServerHomePage> {
     }
   }
 
-  /// Ensures the macOS camera permission has been requested. On macOS the
-  /// ffmpeg subprocess cannot trigger a TCC prompt itself, so the host app must
-  /// obtain the grant; the child then inherits access. A no-op elsewhere.
-  Future<void> _ensureCameraPermission() async {
+  /// Requests the macOS TCC grants the configured sources need (camera or
+  /// screen recording, plus microphone when audio is enabled). A no-op
+  /// elsewhere; mobile platforms prompt through their own capture stacks.
+  Future<void> _ensurePermissions(ServerSettings settings) async {
     if (!Platform.isMacOS) return;
 
     try {
-      await _permissionsChannel.invokeMethod<bool>('requestCamera');
+      if (settings.media.videoSource == VideoSourceKind.display) {
+        await _permissionsChannel.invokeMethod<bool>('requestScreenCapture');
+      } else {
+        await _permissionsChannel.invokeMethod<bool>('requestCamera');
+      }
+
+      if (settings.media.audioEnabled) {
+        await _permissionsChannel.invokeMethod<bool>('requestMicrophone');
+      }
     } catch (error) {
-      // Best effort: if the channel is unavailable ffmpeg will surface the
-      // failure via its stderr, which the backend logs.
-      debugPrint('Camera permission request failed: $error');
+      // Best effort: if the channel is unavailable the capture layer surfaces
+      // the failure itself (e.g. ffmpeg stderr or an encoder log).
+      debugPrint('Permission request failed: $error');
     }
   }
 
@@ -339,6 +422,16 @@ class _ServerHomePageState extends State<ServerHomePage> {
         'rtsp://$_host:${config.rtspPort}/onvif/'
         '${Uri.encodeComponent('Profile_1')}';
 
+    final media = (_settings ?? const ServerSettings()).media;
+    final source = switch (media.videoSource) {
+      VideoSourceKind.camera =>
+        'Camera${media.videoDevice.isEmpty ? '' : ': ${media.videoDevice}'}',
+      VideoSourceKind.display =>
+        'Display${media.videoDevice.isEmpty ? ' (main)' : ' ${media.videoDevice}'}',
+      VideoSourceKind.test => 'Test pattern',
+    };
+    final sourceLabel = media.audioEnabled ? '$source + audio' : source;
+
     return Scaffold(
       appBar: AppBar(title: const Text('ONVIF Server')),
       body: SafeArea(
@@ -352,6 +445,7 @@ class _ServerHomePageState extends State<ServerHomePage> {
                 host: _host,
                 deviceUrl: deviceUrl,
                 rtspUrl: rtspUrl,
+                source: sourceLabel,
                 username: config.username,
                 password: config.password,
               ),
@@ -369,7 +463,8 @@ class _ServerHomePageState extends State<ServerHomePage> {
                 running: _running,
                 previewFrame: _previewFrame,
                 nativeController: _nativeCameraController,
-                useCameraPreview: _useNativeCamera,
+                useCameraPreview:
+                    _useNativeCamera && _nativeCameraController != null,
               ),
               const SizedBox(height: 24),
               FilledButton.icon(
@@ -390,6 +485,7 @@ class _StatusCard extends StatelessWidget {
   final String host;
   final String deviceUrl;
   final String rtspUrl;
+  final String source;
   final String username;
   final String password;
 
@@ -398,6 +494,7 @@ class _StatusCard extends StatelessWidget {
     required this.host,
     required this.deviceUrl,
     required this.rtspUrl,
+    required this.source,
     required this.username,
     required this.password,
   });
@@ -426,6 +523,7 @@ class _StatusCard extends StatelessWidget {
             const Divider(),
             _row(context, 'Device service', deviceUrl),
             _row(context, 'RTSP stream', rtspUrl),
+            _row(context, 'Source', source),
             _row(context, 'Username', username),
             _row(context, 'Password', password),
           ],

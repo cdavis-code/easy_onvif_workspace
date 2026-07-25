@@ -31,6 +31,9 @@ class CameraStreamBackend implements StreamBackend {
   final H264Encoder? encoder;
   final int frameRate;
 
+  /// Raw camera-plugin device name from settings; empty = default camera.
+  final String cameraDevice;
+
   @override
   final AudioStreamSource? audioSource;
 
@@ -53,6 +56,7 @@ class CameraStreamBackend implements StreamBackend {
     required this.config,
     this.encoder,
     this.frameRate = 15,
+    this.cameraDevice = '',
     this.audioSource,
   });
 
@@ -66,7 +70,25 @@ class CameraStreamBackend implements StreamBackend {
 
   @override
   Future<String> start(String profileToken, {required String host}) async {
-    _source ??= CameraH264Source(encoder: encoder, frameRate: frameRate);
+    CameraDescription? camera;
+
+    if (cameraDevice.isNotEmpty) {
+      final cameras = await availableCameras();
+
+      // Raw identifier: match the camera plugin's device name; silently fall
+      // back to the default camera when no name matches.
+      camera = cameras
+          .where(
+            (c) => c.name.toLowerCase().contains(cameraDevice.toLowerCase()),
+          )
+          .firstOrNull;
+    }
+
+    _source ??= CameraH264Source(
+      encoder: encoder,
+      frameRate: frameRate,
+      camera: camera,
+    );
 
     await _source!.start();
 

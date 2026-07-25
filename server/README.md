@@ -12,6 +12,8 @@ develop and test ONVIF integrations without physical camera hardware.
   authentication.
 - **Live RTSP streaming** — an embedded RTSP server serves H.264 encoded by
   `ffmpeg` (RTP over TCP interleaved).
+- **Audio streaming** — the selected input device is served as a G.711 (PCMA)
+  track in the same RTSP stream, recorded to `.alaw` sidecars, and replayed.
 - **Real recording pipeline** — recording jobs capture the live H.264 stream
   to disk as Annex-B segments; Search queries the on-disk indexes and Replay
   serves the recorded footage back over RTSP.
@@ -112,7 +114,47 @@ geolocation:       # GetGeoLocation fallback when no platform fix
   lat: 43.65
   lon: -79.38
   elevation: 76.0
+media:
+  video:
+    source: camera             # camera | display | test
+    device: ""                 # raw platform id, empty = default:
+                               #   camera: plugin device name (macOS/mobile),
+                               #     dshow name (Windows), /dev/video0 (Linux)
+                               #   display: CGDirectDisplayID (macOS),
+                               #     gdigrab target (Windows), :0.0 (Linux)
+  audio:
+    enabled: false             # serve G.711 audio as a second RTSP track
+    device: ""                 # raw platform id, empty = default input:
+                               #   CoreAudio device UID (macOS),
+                               #   dshow name (Windows), hw:1 / pulse (Linux)
 ```
+
+### Choosing what to stream
+
+`media.video.source` selects the video source:
+
+| Source    | macOS                        | Windows/Linux            | iOS/Android |
+| --------- | ---------------------------- | ------------------------ | ----------- |
+| `camera`  | camera plugin + VideoToolbox | ffmpeg (dshow / v4l2)    | camera plugin + hardware encoder |
+| `display` | ScreenCaptureKit (12.3+)     | ffmpeg (gdigrab / x11grab) | not supported (falls back to camera) |
+| `test`    | ffmpeg lavfi test pattern    | ffmpeg lavfi test pattern | not supported (falls back to camera) |
+
+Device identifiers are raw platform values passed unmodified to the capture
+layer. To discover them:
+
+- **Cameras:** `ffmpeg -f avfoundation -list_devices true -i ""` (macOS),
+  `ffmpeg -list_devices true -f dshow -i dummy` (Windows),
+  `v4l2-ctl --list-devices` (Linux).
+- **Displays:** `system_profiler SPDisplaysDataType` or the Displays settings
+  pane for the CGDirectDisplayID (macOS); gdigrab accepts `desktop` or
+  `title=<window>` (Windows); X11 display names like `:0.0` (Linux).
+- **Audio inputs:** `SwitchAudioSource -a` or Audio MIDI Setup for CoreAudio
+  UIDs (macOS); `ffmpeg -list_devices true -f dshow -i dummy` (Windows);
+  `hw:<n>` ALSA ids or PulseAudio source names (Linux).
+
+On macOS, `source: display` needs the **Screen Recording** permission — the
+app requests it on first start, and macOS requires an app restart after the
+grant.
 
 ### Recording storage
 
@@ -123,6 +165,7 @@ Each recording lives in its own directory under the recordings root:
   OnvifRecordingToken_1/
     index.json          # metadata: source, frame rate, segment time ranges
     seg_00001.h264      # keyframe-aligned Annex-B segments (SPS/PPS prefixed)
+    seg_00001.alaw      # G.711 A-law audio sidecar (8000 bytes/second)
     seg_00002.h264
 ```
 
