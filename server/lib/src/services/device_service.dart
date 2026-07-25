@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:easy_onvif/soap.dart' show Xmlns;
 import 'package:xml/xml.dart';
 
 import '../config.dart';
 import '../hardware/device_state.dart';
 import '../hardware/hardware_adapter.dart';
+import '../log_buffer.dart';
 import '../settings.dart';
 import '../soap/envelope_builder.dart';
 import '../soap/request_context.dart';
@@ -31,12 +34,16 @@ class DeviceService implements OnvifService {
   bool handles(String namespace) => namespace == Xmlns.tds;
 
   /// Operations that do not require WS-Security authentication.
+  ///
+  /// `GetIPAddressFilter` is listed because the `easy_onvif` client sends it
+  /// without a WS-Security header (it uses the unsecured request path).
   static const preAuthOperations = {
     'GetSystemDateAndTime',
     'GetCapabilities',
     'GetServices',
     'GetHostname',
     'GetServiceCapabilities',
+    'GetIPAddressFilter',
   };
 
   @override
@@ -69,6 +76,18 @@ class DeviceService implements OnvifService {
         return _getUsers();
       case 'GetSystemUris':
         return _getSystemUris();
+      case 'GetSystemLog':
+        return _getSystemLog();
+      case 'GetSystemSupportInformation':
+        return _getSystemSupportInformation();
+      case 'GetEndpointReference':
+        return _getEndpointReference();
+      case 'GetIPAddressFilter':
+        return _getIpAddressFilter();
+      case 'GetStorageConfigurations':
+        return _getStorageConfigurations();
+      case 'GetStorageConfiguration':
+        return _getStorageConfiguration();
       case 'GetGeoLocation':
         return _getGeoLocation();
       case 'CreateUsers':
@@ -516,6 +535,133 @@ class DeviceService implements OnvifService {
   String _getSystemUris() {
     return SoapEnvelopeBuilder.response((b) {
       b.element('GetSystemUrisResponse', namespace: Xmlns.tds, nest: () {});
+    });
+  }
+
+  String _getSystemLog() {
+    final lines = BufferedLoggyPrinter.lines;
+    final text = lines.isEmpty
+        ? 'No log entries recorded.'
+        : lines.join('\n');
+
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetSystemLogResponse',
+        namespace: Xmlns.tds,
+        nest: () {
+          b.element(
+            'SystemLog',
+            namespace: Xmlns.tds,
+            nest: () {
+              b.element('String', namespace: Xmlns.tt, nest: text);
+            },
+          );
+        },
+      );
+    });
+  }
+
+  String _getSystemSupportInformation() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetSystemSupportInformationResponse',
+        namespace: Xmlns.tds,
+        nest: () {
+          b.element(
+            'SupportInformation',
+            namespace: Xmlns.tds,
+            nest: () {
+              b.element(
+                'String',
+                namespace: Xmlns.tt,
+                nest:
+                    'OS: ${Platform.operatingSystemVersion}\n'
+                    'Dart: ${Platform.version}',
+              );
+            },
+          );
+        },
+      );
+    });
+  }
+
+  String _getEndpointReference() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetEndpointReferenceResponse',
+        namespace: Xmlns.tds,
+        nest: () {
+          b.element('GUID', namespace: Xmlns.tds, nest: config.endpointUuid);
+        },
+      );
+    });
+  }
+
+  String _getIpAddressFilter() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetIPAddressFilterResponse',
+        namespace: Xmlns.tds,
+        nest: () {
+          b.element(
+            'IPAddressFilter',
+            namespace: Xmlns.tds,
+            nest: () {
+              b.element('Type', namespace: Xmlns.tt, nest: 'Allow');
+            },
+          );
+        },
+      );
+    });
+  }
+
+  /// The directory recordings are (or would be) written to; reported by the
+  /// storage configuration operations.
+  String get _recordingDirectory =>
+      settings.recordingDirectory ??
+      '${Directory.systemTemp.path}/easy_onvif_recordings';
+
+  void _writeStorageConfiguration(XmlBuilder b, {required String element}) {
+    b.element(
+      element,
+      namespace: Xmlns.tds,
+      attributes: {'token': 'StorageToken_1'},
+      nest: () {
+        b.element(
+          'Data',
+          namespace: Xmlns.tds,
+          attributes: {'type': 'Local'},
+          nest: () {
+            b.element(
+              'LocalPath',
+              namespace: Xmlns.tds,
+              nest: _recordingDirectory,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _getStorageConfigurations() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetStorageConfigurationsResponse',
+        namespace: Xmlns.tds,
+        nest: () =>
+            _writeStorageConfiguration(b, element: 'StorageConfigurations'),
+      );
+    });
+  }
+
+  String _getStorageConfiguration() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetStorageConfigurationResponse',
+        namespace: Xmlns.tds,
+        nest: () =>
+            _writeStorageConfiguration(b, element: 'StorageConfiguration'),
+      );
     });
   }
 

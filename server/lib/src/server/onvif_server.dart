@@ -93,17 +93,46 @@ class OnvifServer with UiLoggy {
 
     final responseXml = await dispatcher.dispatch(body, host: _hostOf(request));
 
-    request.response
-      ..statusCode = HttpStatus.ok
-      ..headers.contentType = ContentType(
+    request.response.statusCode = HttpStatus.ok;
+
+    if (responseXml.contains('GetSystemLogResponse')) {
+      // The `easy_onvif` client parses GetSystemLog strictly as an MTOM
+      // (multipart/related) response and rejects plain SOAP XML.
+      _writeMtomResponse(request.response, responseXml);
+    } else {
+      request.response.headers.contentType = ContentType(
         'application',
         'soap+xml',
         charset: 'utf-8',
       );
 
-    request.response.write(responseXml);
+      request.response.write(responseXml);
+    }
 
     await request.response.close();
+  }
+
+  /// Wraps [xml] in a single-part MTOM (XOP) body, matching the shape real
+  /// devices use for log downloads.
+  void _writeMtomResponse(HttpResponse response, String xml) {
+    const boundary = 'MIMEBoundary_easy_onvif_server';
+
+    response.headers.contentType = ContentType(
+      'multipart',
+      'related',
+      parameters: {'boundary': boundary, 'type': 'application/xop+xml'},
+    );
+
+    response.write(
+      '\r\n--$boundary\r\n'
+      'Content-Type: application/xop+xml; charset=utf-8; '
+      'type="application/soap+xml"\r\n'
+      'Content-Transfer-Encoding: 8bit\r\n'
+      'Content-ID: <soap@easy-onvif-server>\r\n'
+      '\r\n'
+      '$xml'
+      '\r\n--$boundary--',
+    );
   }
 
   Future<void> _handleSnapshot(HttpRequest request) async {

@@ -4,6 +4,7 @@ import 'config.dart';
 import 'discovery/ws_discovery_server.dart';
 import 'hardware/device_state.dart';
 import 'hardware/hardware_adapter.dart';
+import 'log_buffer.dart';
 import 'server/onvif_server.dart';
 import 'server/soap_dispatcher.dart';
 import 'services/device_service.dart';
@@ -107,11 +108,14 @@ class OnvifDevice with UiLoggy {
     LoggyPrinter printer = const PrettyPrinter(showColors: false),
   }) async {
     // Initialize logging up front so the hardware adapter (which logs during
-    // camera startup) has a configured loggy.
-    Loggy.initLoggy(logPrinter: printer, logOptions: logOptions);
+    // camera startup) has a configured loggy. The printer is wrapped in a
+    // ring buffer so `GetSystemLog` can return real device log lines.
+    final bufferedPrinter = BufferedLoggyPrinter(printer);
+
+    Loggy.initLoggy(logPrinter: bufferedPrinter, logOptions: logOptions);
 
     await hardware.startCamera();
-    await server.start(logOptions: logOptions, printer: printer);
+    await server.start(logOptions: logOptions, printer: bufferedPrinter);
     await discovery?.start();
 
     // Start the RTSP stream eagerly so it is reachable immediately (e.g. by
