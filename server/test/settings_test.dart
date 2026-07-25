@@ -119,7 +119,7 @@ geolocation:
 
   group('service flags', () {
     test('disabled services are not advertised and fault when called', () async {
-      const config = ServerConfig(httpPort: 8095, rtspPort: 8561);
+      const config = ServerConfig(httpPort: 8100, rtspPort: 8566);
 
       final device = OnvifDevice(
         config: config,
@@ -169,7 +169,7 @@ services:
     });
 
     test('enabled services are advertised by default', () async {
-      const config = ServerConfig(httpPort: 8094, rtspPort: 8559);
+      const config = ServerConfig(httpPort: 8101, rtspPort: 8567);
 
       final device = OnvifDevice(
         config: config,
