@@ -1,4 +1,5 @@
 import 'package:easy_onvif/soap.dart' show Xmlns;
+import 'package:xml/xml.dart';
 
 import '../config.dart';
 import '../hardware/device_state.dart';
@@ -42,6 +43,14 @@ class Media2Service implements OnvifService {
         return _getServiceCapabilities();
       case 'GetMetadataConfigurations':
         return _empty('GetMetadataConfigurationsResponse');
+      case 'GetVideoEncoderConfigurations':
+        return _getVideoEncoderConfigurations();
+      case 'GetVideoEncoderInstances':
+        return _getVideoEncoderInstances();
+      case 'GetVideoSourceConfigurationOptions':
+        return _getVideoSourceConfigurationOptions();
+      case 'GetMetadataConfigurationOptions':
+        return _getMetadataConfigurationOptions();
       case 'StartMulticastStreaming':
         return _empty('StartMulticastStreamingResponse');
       case 'StopMulticastStreaming':
@@ -146,6 +155,147 @@ class Media2Service implements OnvifService {
         },
       );
     });
+  }
+
+  /// Describes the encoder used for the live stream; the resolution and frame
+  /// rate constants match the actual encoded stream (1280×720 @ 15 fps, see
+  /// `_platformVideoInput` in the ffmpeg backend).
+  String _getVideoEncoderConfigurations() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetVideoEncoderConfigurationsResponse',
+        namespace: Xmlns.tr2,
+        nest: () {
+          b.element(
+            'Configurations',
+            namespace: Xmlns.tr2,
+            attributes: {
+              'token': 'VideoEncoderConfig_1',
+              'GovLength': '15',
+              'Profile': 'Main',
+            },
+            nest: () {
+              b.element('Name', namespace: Xmlns.tt, nest: 'VideoEncoder_1');
+              b.element('UseCount', namespace: Xmlns.tt, nest: '1');
+              b.element('Encoding', namespace: Xmlns.tt, nest: 'H264');
+              b.element(
+                'Resolution',
+                namespace: Xmlns.tt,
+                nest: () {
+                  b.element('Width', namespace: Xmlns.tt, nest: '1280');
+                  b.element('Height', namespace: Xmlns.tt, nest: '720');
+                },
+              );
+              b.element(
+                'RateControl',
+                namespace: Xmlns.tt,
+                nest: () {
+                  b.element('FrameRateLimit', namespace: Xmlns.tt, nest: '15');
+                  b.element('BitrateLimit', namespace: Xmlns.tt, nest: '2048');
+                },
+              );
+              b.element('Quality', namespace: Xmlns.tt, nest: '5.0');
+            },
+          );
+        },
+      );
+    });
+  }
+
+  String _getVideoEncoderInstances() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetVideoEncoderInstancesResponse',
+        namespace: Xmlns.tr2,
+        nest: () {
+          b.element(
+            'Info',
+            namespace: Xmlns.tr2,
+            nest: () {
+              b.element('Total', namespace: Xmlns.tr2, nest: '1');
+            },
+          );
+        },
+      );
+    });
+  }
+
+  /// The device does not support cropped streaming, so the bounds ranges pin
+  /// the capture area to the full video source dimensions.
+  String _getVideoSourceConfigurationOptions() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetVideoSourceConfigurationOptionsResponse',
+        namespace: Xmlns.tr2,
+        nest: () {
+          b.element(
+            'Options',
+            namespace: Xmlns.tr2,
+            nest: () {
+              b.element(
+                'BoundsRange',
+                namespace: Xmlns.tt,
+                nest: () {
+                  _writeIntRange(b, 'XRange', 0, 0);
+                  _writeIntRange(b, 'YRange', 0, 0);
+                  _writeIntRange(b, 'WidthRange', 1280, 1280);
+                  _writeIntRange(b, 'HeightRange', 720, 720);
+                },
+              );
+              b.element(
+                'VideoSourceTokensAvailable',
+                namespace: Xmlns.tt,
+                nest: DeviceState.videoSourceToken,
+              );
+            },
+          );
+        },
+      );
+    });
+  }
+
+  String _getMetadataConfigurationOptions() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetMetadataConfigurationOptionsResponse',
+        namespace: Xmlns.tr2,
+        nest: () {
+          b.element(
+            'Options',
+            namespace: Xmlns.tr2,
+            nest: () {
+              b.element(
+                'PTZStatusFilterOptions',
+                namespace: Xmlns.tt,
+                nest: () {
+                  b.element(
+                    'PanTiltStatusSupported',
+                    namespace: Xmlns.tt,
+                    nest: 'false',
+                  );
+                  b.element(
+                    'ZoomStatusSupported',
+                    namespace: Xmlns.tt,
+                    nest: 'false',
+                  );
+                },
+              );
+            },
+          );
+        },
+      );
+    });
+  }
+
+  void _writeIntRange(XmlBuilder b, String name, int min, int max) {
+    b.element(
+      name,
+      namespace: Xmlns.tt,
+      nest: () {
+        b.element('Min', namespace: Xmlns.tt, nest: '$min');
+        b.element('Max', namespace: Xmlns.tt, nest: '$max');
+      },
+    );
   }
 
   String _empty(String responseName) {

@@ -93,4 +93,55 @@ void main() {
       );
     });
   });
+
+  group('media gaps', () {
+    test('media1 getMetadataConfiguration', () async {
+      final mc = await onvif.media.media1.getMetadataConfiguration(
+        'MetadataConfig_1',
+      );
+
+      expect(mc?.token, 'MetadataConfig_1');
+      expect(mc?.name, isNotEmpty);
+    });
+
+    test('media2 getVideoEncoderConfigurations', () async {
+      // Not exposed by the client Media2 facade; use a low-level request.
+      soap.Transport.builder.element(
+        'GetVideoEncoderConfigurations',
+        nest: () {
+          soap.Transport.builder.namespace(soap.Xmlns.tr2);
+        },
+      );
+
+      final envelope = await onvif.media.media2.transport.securedRequest(
+        onvif.media.media2.uri,
+        soap.Body(request: soap.Transport.builder.buildFragment()),
+      );
+
+      expect(envelope.body.response?['Configurations'], isNotNull);
+    });
+
+    test('media2 getVideoEncoderInstances', () async {
+      final info = await onvif.media.media2.getVideoEncoderInstances(
+        'VideoEncoderConfig_1',
+      );
+
+      expect(info.total, greaterThanOrEqualTo(1));
+    });
+
+    test('media2 getVideoSourceConfigurationOptions', () async {
+      final options = await onvif.media.media2
+          .getVideoSourceConfigurationOptions();
+
+      expect(options.videoSourceTokensAvailable, contains('VideoSource_1'));
+      expect(options.boundsRange.widthRange.max, greaterThan(0));
+    });
+
+    test('media2 getMetadataConfigurationOptions', () async {
+      final options = await onvif.media.media2
+          .getMetadataConfigurationOptions();
+
+      expect(options.ptzStatusFilterOptions, isNotNull);
+    });
+  });
 }

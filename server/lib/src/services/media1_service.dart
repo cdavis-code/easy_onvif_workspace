@@ -49,6 +49,8 @@ class Media1Service implements OnvifService {
         return _getServiceCapabilities();
       case 'GetMetadataConfigurations':
         return _empty('GetMetadataConfigurationsResponse');
+      case 'GetMetadataConfiguration':
+        return _getMetadataConfiguration(ctx);
       case 'StartMulticastStreaming':
         return _empty('StartMulticastStreamingResponse');
       case 'StopMulticastStreaming':
@@ -162,6 +164,39 @@ class Media1Service implements OnvifService {
             attributes: {'token': 'AudioSource_1'},
             nest: () {
               b.element('Channels', namespace: Xmlns.tt, nest: '1');
+            },
+          );
+        },
+      );
+    });
+  }
+
+  /// The token of the single (simulated) metadata configuration.
+  static const _metadataConfigToken = 'MetadataConfig_1';
+
+  String _getMetadataConfiguration(RequestContext ctx) {
+    final token = ctx.param('ConfigurationToken');
+
+    if (token != null && token != _metadataConfigToken) {
+      return SoapEnvelopeBuilder.fault(
+        subcode: 'NoConfig',
+        reason: 'No metadata configuration exists for token "$token".',
+      );
+    }
+
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetMetadataConfigurationResponse',
+        namespace: Xmlns.trt,
+        nest: () {
+          b.element(
+            'Configuration',
+            namespace: Xmlns.trt,
+            attributes: {'token': _metadataConfigToken},
+            nest: () {
+              b.element('Name', namespace: Xmlns.tt, nest: 'Metadata 1');
+              b.element('UseCount', namespace: Xmlns.tt, nest: '1');
+              b.element('SessionTimeout', namespace: Xmlns.tt, nest: 'PT60S');
             },
           );
         },
