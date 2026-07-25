@@ -235,17 +235,23 @@ class RecordingService implements OnvifService {
       );
     }
 
+    if (mode == null) {
+      return SoapEnvelopeBuilder.fault(
+        subcode: 'InvalidArgVal',
+        reason: 'The job configuration is missing a Mode.',
+      );
+    }
+
     final RecordingJob job;
 
     try {
-      job = await manager.createJob(recordingToken, mode ?? 'Idle');
-    } on ArgumentError {
+      job = await manager.createJob(recordingToken, mode);
+    } on ArgumentError catch (error) {
+      if (error.message == 'InvalidMode') return _invalidModeFault(mode);
+
       return _noRecordingFault(recordingToken);
-    } on StateError {
-      return SoapEnvelopeBuilder.fault(
-        subcode: 'NoSource',
-        reason: 'No live stream source is available to record from.',
-      );
+    } on StateError catch (error) {
+      return _jobStateFault(error);
     }
 
     return SoapEnvelopeBuilder.response((b) {
@@ -351,13 +357,12 @@ class RecordingService implements OnvifService {
 
     try {
       await manager.setJobMode(jobToken, mode);
-    } on ArgumentError {
+    } on ArgumentError catch (error) {
+      if (error.message == 'InvalidMode') return _invalidModeFault(mode);
+
       return _noRecordingJobFault(jobToken);
-    } on StateError {
-      return SoapEnvelopeBuilder.fault(
-        subcode: 'NoSource',
-        reason: 'No live stream source is available to record from.',
-      );
+    } on StateError catch (error) {
+      return _jobStateFault(error);
     }
 
     return _empty('SetRecordingJobModeResponse');
@@ -431,6 +436,27 @@ class RecordingService implements OnvifService {
     subcode: 'NoRecordingJob',
     reason: 'No recording job exists for token "$token".',
   );
+
+  String _invalidModeFault(String mode) => SoapEnvelopeBuilder.fault(
+    subcode: 'InvalidArgVal',
+    reason: 'Mode must be "Active" or "Idle" (got "$mode").',
+  );
+
+  /// Maps [RecordingManager] job-state errors to their fault subcodes.
+  String _jobStateFault(StateError error) => switch (error.message) {
+    'MaxRecordingJobs' => SoapEnvelopeBuilder.fault(
+      subcode: 'MaxRecordingJobs',
+      reason: 'The maximum number of recording jobs has been reached.',
+    ),
+    'RecordingActive' => SoapEnvelopeBuilder.fault(
+      subcode: 'InvalidArgVal',
+      reason: 'Another job is already recording into this recording.',
+    ),
+    _ => SoapEnvelopeBuilder.fault(
+      subcode: 'NoSource',
+      reason: 'No live stream source is available to record from.',
+    ),
+  };
 
   String _empty(String responseName) {
     return SoapEnvelopeBuilder.response((b) {

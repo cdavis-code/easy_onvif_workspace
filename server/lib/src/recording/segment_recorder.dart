@@ -25,6 +25,10 @@ class SegmentRecorder {
   int _segmentNumber = 0;
   DateTime? _segmentStartedAt;
 
+  /// Serializes index saves (and pruning) so concurrent rotations and [stop]
+  /// never interleave writes to the same `index.json`.
+  Future<void> _pendingSave = Future.value();
+
   SegmentRecorder({
     required this.index,
     required this.source,
@@ -37,7 +41,14 @@ class SegmentRecorder {
   Future<void> start() async {
     if (_subscription != null) return;
 
-    _segmentNumber = index.segments.length;
+    // Continue numbering past the highest existing segment (segment counts
+    // can be lower than the highest number after retention pruning).
+    _segmentNumber = index.segments.fold(0, (max, segment) {
+      final number =
+          int.tryParse(RegExp(r'\d+').firstMatch(segment.file)?[0] ?? '') ?? 0;
+
+      return number > max ? number : max;
+    });
 
     _subscription = source.nals.listen(_onNal);
   }
@@ -103,12 +114,28 @@ class SegmentRecorder {
 
     _sink = null;
 
-    closing?.close();
-
     _openSegment(now);
 
-    // Persist the index and apply retention after each rotation.
-    unawaited(index.save().then((_) => store.prune(index)));
+    // Flush the closed segment, then persist the index and apply retention —
+    // all serialized on one queue so saves never interleave. IO errors are
+    // logged into the queue's catch rather than crashing the isolate.
+    _enqueueSave(before: closing?.close());
+  }
+
+  /// Appends a save (and prune) to the serialized queue, optionally awaiting
+  /// [before] (e.g. a sink flush) first.
+  void _enqueueSave({Future<void>? before}) {
+    _pendingSave = _pendingSave
+        .then((_) async {
+          if (before != null) await before;
+
+          await index.save();
+          await store.prune(index);
+        })
+        .catchError((Object _) {
+          // The recording directory may already be deleted; the next save (or
+          // stop) will surface persistent problems.
+        });
   }
 
   Future<void> stop() async {
@@ -119,6 +146,7 @@ class SegmentRecorder {
     _sink = null;
     _segment = null;
 
+    await _pendingSave;
     await index.save();
   }
 }

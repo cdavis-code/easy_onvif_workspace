@@ -67,7 +67,11 @@ class RecordingIndex {
       File('${directory.path}/${segment.file}');
 
   Future<void> save() async {
-    await indexFile.writeAsString(
+    // Write-then-rename so a crash mid-write cannot leave a torn index that
+    // would orphan the recording's segments on the next load.
+    final tmp = File('${indexFile.path}.tmp');
+
+    await tmp.writeAsString(
       const JsonEncoder.withIndent('  ').convert({
         'recordingToken': recordingToken,
         'createdUtc': createdUtc.toIso8601String(),
@@ -77,6 +81,8 @@ class RecordingIndex {
         'segments': segments.map((s) => s.toJson()).toList(),
       }),
     );
+
+    await tmp.rename(indexFile.path);
   }
 
   static Future<RecordingIndex?> load(Directory directory) async {

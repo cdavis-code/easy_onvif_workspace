@@ -26,6 +26,7 @@ class RecordingJob {
 /// [SegmentRecorder]s that do the actual disk capture.
 class RecordingManager {
   static const maxRecordings = 5;
+  static const maxRecordingJobs = 5;
 
   final RecordingStore store;
   final StreamBackend backend;
@@ -87,10 +88,16 @@ class RecordingManager {
   }
 
   /// Creates a job; mode `Active` starts capture immediately.
+  ///
+  /// Throws [ArgumentError] for an unknown recording or invalid mode, and
+  /// [StateError] (`MaxRecordingJobs`, `RecordingActive`, `NoSource`) when
+  /// the job cannot be created or started.
   Future<RecordingJob> createJob(String recordingToken, String mode) async {
     final index = store.byToken(recordingToken);
 
     if (index == null) throw ArgumentError('NoRecording');
+    if (mode != 'Active' && mode != 'Idle') throw ArgumentError('InvalidMode');
+    if (_jobs.length >= maxRecordingJobs) throw StateError('MaxRecordingJobs');
 
     final job = RecordingJob(
       jobToken: 'RecordingJobToken_${++_jobCounter}',
@@ -100,7 +107,15 @@ class RecordingManager {
 
     _jobs[job.jobToken] = job;
 
-    if (mode == 'Active') await setJobMode(job.jobToken, 'Active');
+    if (mode == 'Active') {
+      try {
+        await setJobMode(job.jobToken, 'Active');
+      } catch (_) {
+        // Do not leave an orphan Idle job behind when activation fails.
+        _jobs.remove(job.jobToken);
+        rethrow;
+      }
+    }
 
     return job;
   }
@@ -109,9 +124,15 @@ class RecordingManager {
     final job = _jobs[jobToken];
 
     if (job == null) throw ArgumentError('NoRecordingJob');
+    if (mode != 'Active' && mode != 'Idle') throw ArgumentError('InvalidMode');
     if (job.mode == mode) return;
 
     if (mode == 'Active') {
+      // Two recorders on one recording would clobber each other's segments.
+      if (isRecordingActive(job.recordingToken)) {
+        throw StateError('RecordingActive');
+      }
+
       final source = backend.nalSource;
 
       if (source == null) throw StateError('NoSource');
