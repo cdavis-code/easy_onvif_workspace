@@ -88,6 +88,11 @@ class OnvifServer with UiLoggy {
       ..set('Access-Control-Max-Age', '86400');
   }
 
+  /// Matches a `GetSystemLog` operation element in a request body; the
+  /// `easy_onvif` client parses this operation's response (including faults)
+  /// strictly as MTOM (multipart/related) and rejects plain SOAP XML.
+  static final _systemLogRequest = RegExp(r'GetSystemLog\b');
+
   Future<void> _handleSoap(HttpRequest request) async {
     final body = await utf8.decoder.bind(request).join();
 
@@ -95,9 +100,7 @@ class OnvifServer with UiLoggy {
 
     request.response.statusCode = HttpStatus.ok;
 
-    if (responseXml.contains('GetSystemLogResponse')) {
-      // The `easy_onvif` client parses GetSystemLog strictly as an MTOM
-      // (multipart/related) response and rejects plain SOAP XML.
+    if (_systemLogRequest.hasMatch(body)) {
       _writeMtomResponse(request.response, responseXml);
     } else {
       request.response.headers.contentType = ContentType(
@@ -123,15 +126,19 @@ class OnvifServer with UiLoggy {
       parameters: {'boundary': boundary, 'type': 'application/xop+xml'},
     );
 
-    response.write(
-      '\r\n--$boundary\r\n'
-      'Content-Type: application/xop+xml; charset=utf-8; '
-      'type="application/soap+xml"\r\n'
-      'Content-Transfer-Encoding: 8bit\r\n'
-      'Content-ID: <soap@easy-onvif-server>\r\n'
-      '\r\n'
-      '$xml'
-      '\r\n--$boundary--',
+    // Encoded explicitly: HttpResponse.write would use latin1 and throw on
+    // characters above U+00FF (log lines are already sanitized to ASCII).
+    response.add(
+      utf8.encode(
+        '\r\n--$boundary\r\n'
+        'Content-Type: application/xop+xml; charset=utf-8; '
+        'type="application/soap+xml"\r\n'
+        'Content-Transfer-Encoding: 8bit\r\n'
+        'Content-ID: <soap@easy-onvif-server>\r\n'
+        '\r\n'
+        '$xml'
+        '\r\n--$boundary--',
+      ),
     );
   }
 

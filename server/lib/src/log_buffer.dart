@@ -8,27 +8,33 @@ class BufferedLoggyPrinter extends LoggyPrinter {
   final LoggyPrinter inner;
   final int capacity;
 
-  static final Queue<String> _lines = Queue<String>();
-  static int _capacity = 200;
+  final Queue<String> _lines = Queue<String>();
 
-  BufferedLoggyPrinter(this.inner, {this.capacity = 200}) {
-    _capacity = capacity;
-  }
+  BufferedLoggyPrinter(this.inner, {this.capacity = 200});
 
   @override
   void onLog(LogRecord record) {
     inner.onLog(record);
 
     _lines.addLast(
-      '${record.time.toIso8601String()} '
-      '${record.level.name.toUpperCase()} ${record.message}',
+      _sanitize(
+        '${record.time.toIso8601String()} '
+        '${record.level.name.toUpperCase()} ${record.message}',
+      ),
     );
 
-    while (_lines.length > _capacity) {
+    while (_lines.length > capacity) {
       _lines.removeFirst();
     }
   }
 
   /// The buffered log lines, oldest first.
-  static List<String> get lines => List.unmodifiable(_lines);
+  List<String> get lines => List.unmodifiable(_lines);
+
+  /// Restricts a line to printable ASCII (plus tab) so the buffered text can
+  /// be embedded verbatim in an MTOM part: the `easy_onvif` client decodes
+  /// parts bytewise and splits them on any `\r\n--` sequence, so control and
+  /// non-ASCII characters would corrupt the transfer.
+  static String _sanitize(String line) =>
+      line.replaceAll(RegExp(r'[^\x09\x20-\x7E]'), ' ');
 }

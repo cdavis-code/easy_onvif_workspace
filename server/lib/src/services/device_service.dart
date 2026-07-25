@@ -6,7 +6,6 @@ import 'package:xml/xml.dart';
 import '../config.dart';
 import '../hardware/device_state.dart';
 import '../hardware/hardware_adapter.dart';
-import '../log_buffer.dart';
 import '../settings.dart';
 import '../soap/envelope_builder.dart';
 import '../soap/request_context.dart';
@@ -23,12 +22,19 @@ class DeviceService implements OnvifService {
   final HardwareAdapter hardware;
   final ServerSettings settings;
 
+  /// Supplies the buffered device log lines for `GetSystemLog` (wired to the
+  /// device's `BufferedLoggyPrinter` by `OnvifDevice`).
+  final List<String> Function() logLines;
+
   DeviceService({
     required this.config,
     required this.state,
     required this.hardware,
     this.settings = const ServerSettings(),
+    this.logLines = _noLogLines,
   });
+
+  static List<String> _noLogLines() => const [];
 
   @override
   bool handles(String namespace) => namespace == Xmlns.tds;
@@ -77,7 +83,7 @@ class DeviceService implements OnvifService {
       case 'GetSystemUris':
         return _getSystemUris();
       case 'GetSystemLog':
-        return _getSystemLog();
+        return _getSystemLog(ctx);
       case 'GetSystemSupportInformation':
         return _getSystemSupportInformation();
       case 'GetEndpointReference':
@@ -87,7 +93,7 @@ class DeviceService implements OnvifService {
       case 'GetStorageConfigurations':
         return _getStorageConfigurations();
       case 'GetStorageConfiguration':
-        return _getStorageConfiguration();
+        return _getStorageConfiguration(ctx);
       case 'GetGeoLocation':
         return _getGeoLocation();
       case 'CreateUsers':
@@ -538,11 +544,12 @@ class DeviceService implements OnvifService {
     });
   }
 
-  String _getSystemLog() {
-    final lines = BufferedLoggyPrinter.lines;
+  String _getSystemLog(RequestContext ctx) {
+    final logType = ctx.param('LogType') ?? 'System';
+    final lines = logLines();
     final text = lines.isEmpty
-        ? 'No log entries recorded.'
-        : lines.join('\n');
+        ? 'No $logType log entries recorded.'
+        : '=== $logType log ===\n${lines.join('\n')}';
 
     return SoapEnvelopeBuilder.response((b) {
       b.element(
@@ -621,11 +628,14 @@ class DeviceService implements OnvifService {
       settings.recordingDirectory ??
       '${Directory.systemTemp.path}/easy_onvif_recordings';
 
+  /// The token of the single (simulated) storage configuration.
+  static const _storageToken = 'StorageToken_1';
+
   void _writeStorageConfiguration(XmlBuilder b, {required String element}) {
     b.element(
       element,
       namespace: Xmlns.tds,
-      attributes: {'token': 'StorageToken_1'},
+      attributes: {'token': _storageToken},
       nest: () {
         b.element(
           'Data',
@@ -654,7 +664,16 @@ class DeviceService implements OnvifService {
     });
   }
 
-  String _getStorageConfiguration() {
+  String _getStorageConfiguration(RequestContext ctx) {
+    final token = ctx.param('Token');
+
+    if (token != null && token != _storageToken) {
+      return SoapEnvelopeBuilder.fault(
+        subcode: 'NoConfig',
+        reason: 'No storage configuration exists for token "$token".',
+      );
+    }
+
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetStorageConfigurationResponse',

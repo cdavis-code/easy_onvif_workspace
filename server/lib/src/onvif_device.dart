@@ -37,6 +37,10 @@ class OnvifDevice with UiLoggy {
   late final SoapDispatcher dispatcher;
   late final OnvifServer server;
 
+  /// The log ring buffer wrapped around the printer supplied to [start];
+  /// backs the `GetSystemLog` operation.
+  BufferedLoggyPrinter? _logBuffer;
+
   /// The WS-Discovery responder, present when discovery is enabled.
   final WsDiscoveryServer? discovery;
 
@@ -73,6 +77,7 @@ class OnvifDevice with UiLoggy {
         state: this.state,
         hardware: hardware,
         settings: this.settings,
+        logLines: () => _logBuffer?.lines ?? const <String>[],
       ),
       Media1Service(
         config: config,
@@ -111,6 +116,7 @@ class OnvifDevice with UiLoggy {
     // camera startup) has a configured loggy. The printer is wrapped in a
     // ring buffer so `GetSystemLog` can return real device log lines.
     final bufferedPrinter = BufferedLoggyPrinter(printer);
+    _logBuffer = bufferedPrinter;
 
     Loggy.initLoggy(logPrinter: bufferedPrinter, logOptions: logOptions);
 

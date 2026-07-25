@@ -39,8 +39,10 @@ void main() {
     test('getSystemLog returns recent log lines', () async {
       final log = await onvif.deviceManagement.getSystemLog('System');
 
-      expect(log.string, isNotNull);
-      expect(log.string, isNotEmpty);
+      // The startup banner is always logged before the test runs, so the
+      // buffer must contain real content rather than the empty fallback.
+      expect(log.string, contains('ONVIF server listening'));
+      expect(log.string, isNot(contains('No System log entries recorded.')));
     });
 
     test('getSystemSupportInformation returns platform info', () async {
@@ -84,6 +86,11 @@ void main() {
 
       expect(single.data.type, 'Local');
       expect(single.data.localPath, configs.first.data.localPath);
+
+      await expectLater(
+        onvif.deviceManagement.getStorageConfiguration('BogusToken'),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 }
