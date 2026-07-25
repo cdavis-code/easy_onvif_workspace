@@ -153,6 +153,23 @@ void main() {
       expect(presets.first.name, isNotEmpty);
       expect(presets.first.type, isNotEmpty);
 
+      // Unknown video sources are rejected with a NoSource fault (the client
+      // facade swallows faults for getPresets, so assert at the SOAP level).
+      soap.Transport.builder.element('GetPresets', nest: () {
+        soap.Transport.builder.namespace(soap.Xmlns.timg);
+        soap.Transport.builder.element('VideoSourceToken', nest: () {
+          soap.Transport.builder.namespace(soap.Xmlns.timg);
+          soap.Transport.builder.text('BogusSource');
+        });
+      });
+
+      final faulted = await onvif.imaging.transport.securedRequest(
+        onvif.imaging.uri,
+        soap.Body(request: soap.Transport.builder.buildFragment()),
+      );
+
+      expect(faulted.body.hasFault, isTrue);
+
       // The client's `setCurrentPreset` sends the video source token as the
       // preset token (upstream bug), so apply the preset with a low-level
       // request carrying the correct wire shape.

@@ -101,10 +101,13 @@ recording:
   segmentSeconds: 10               # segment rotation length
   maxRetentionMinutes: 60          # default: unlimited
 imaging:
-  presets:
+  presets:            # define at least two (the client parses a preset list)
     - token: ImagingPreset_1
       name: Standard
       type: Auto
+    - token: ImagingPreset_2
+      name: Low Light
+      type: LowLight
 geolocation:       # GetGeoLocation fallback when no platform fix
   lat: 43.65
   lon: -79.38

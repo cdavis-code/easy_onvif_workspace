@@ -246,8 +246,9 @@ class _ServerHomePageState extends State<ServerHomePage> {
         });
 
         // The ffmpeg path (Windows/Linux) has no in-app camera; drive the
-        // preview by grabbing frames from the RTSP stream instead.
-        if (!_useNativeCamera) _startPreviewTimer();
+        // preview by grabbing frames from the RTSP stream instead. The timer
+        // also refreshes the recording status card on all platforms.
+        _startPreviewTimer();
       }
     } catch (error) {
       if (mounted) {

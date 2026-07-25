@@ -30,22 +30,35 @@ class ImagingService implements OnvifService {
       case 'GetServiceCapabilities':
         return _getServiceCapabilities();
       case 'GetPresets':
-        return _getPresets();
+        return _checkSource(ctx) ?? _getPresets();
       case 'GetCurrentPreset':
-        return _getCurrentPreset();
+        return _checkSource(ctx) ?? _getCurrentPreset();
       case 'SetCurrentPreset':
       // The `easy_onvif` client's `setCurrentPreset` builds a `SetPreset`
       // element (upstream bug); accept it as an alias for interop.
       case 'SetPreset':
-        return _setCurrentPreset(ctx);
+        return _checkSource(ctx) ?? _setCurrentPreset(ctx);
       case 'GetStatus':
-        return _getStatus();
+        return _checkSource(ctx) ?? _getStatus();
       default:
         return SoapEnvelopeBuilder.fault(
           subcode: 'ActionNotSupported',
           reason: 'The requested action is not supported by this device.',
         );
     }
+  }
+
+  /// Returns a `NoSource` fault when the request addresses an unknown video
+  /// source, or null when the token matches the device's single source.
+  String? _checkSource(RequestContext ctx) {
+    final token = ctx.param('VideoSourceToken');
+
+    if (token == DeviceState.videoSourceToken) return null;
+
+    return SoapEnvelopeBuilder.fault(
+      subcode: 'NoSource',
+      reason: 'No video source exists for token "$token".',
+    );
   }
 
   String _getServiceCapabilities() {

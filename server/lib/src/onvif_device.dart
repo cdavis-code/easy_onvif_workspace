@@ -81,7 +81,9 @@ class OnvifDevice with UiLoggy {
     );
 
     // Seed the simulated imaging presets from settings; the first preset is
-    // the one initially applied.
+    // the one initially applied. The client's `GetPresetsResponse` parses the
+    // preset list with a `List` cast that only holds for two or more
+    // elements, so pad short overrides with the built-in defaults.
     this.state.imagingPresets.addAll([
       for (final preset in this.settings.imagingPresets)
         ImagingPreset(
@@ -90,6 +92,19 @@ class OnvifDevice with UiLoggy {
           type: preset.type,
         ),
     ]);
+    for (final fallback in ServerSettings.defaultImagingPresets) {
+      if (this.state.imagingPresets.length >= 2) break;
+      if (this.state.imagingPresets.any((p) => p.token == fallback.token)) {
+        continue;
+      }
+      this.state.imagingPresets.add(
+        ImagingPreset(
+          token: fallback.token,
+          name: fallback.name,
+          type: fallback.type,
+        ),
+      );
+    }
     this.state.currentImagingPreset =
         this.state.imagingPresets.firstOrNull?.token;
 
