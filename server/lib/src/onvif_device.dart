@@ -17,8 +17,10 @@ import 'services/media2_service.dart';
 import 'services/onvif_service.dart';
 import 'services/ptz_service.dart';
 import 'services/recording_service.dart';
+import 'services/replay_service.dart';
 import 'settings.dart';
 import 'soap/authenticator.dart';
+import 'streaming/file_h264_source.dart';
 import 'streaming/stream_backend.dart';
 
 /// Assembles and runs a complete simulated ONVIF device.
@@ -95,6 +97,16 @@ class OnvifDevice with UiLoggy {
         backend: streamBackend,
         settings: this.settings,
       );
+
+      // Let the RTSP server resolve `/onvif/replay/<token>` sessions to
+      // file-backed sources reading the recording's segments.
+      streamBackend.replaySourceFor = (recordingToken, startUtc) async {
+        final index = recordingStore!.byToken(recordingToken);
+
+        if (index == null) return null;
+
+        return FileH264Source(index: index, startUtc: startUtc);
+      };
     }
 
     final List<OnvifService> services = [
@@ -119,6 +131,8 @@ class OnvifDevice with UiLoggy {
       PtzService(state: this.state),
       if (recordingManager != null)
         RecordingService(manager: recordingManager!),
+      if (recordingManager != null && this.settings.services.replay)
+        ReplayService(config: config, manager: recordingManager!),
     ];
 
     dispatcher = SoapDispatcher(

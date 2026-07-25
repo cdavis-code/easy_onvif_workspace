@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../config.dart';
 import 'camera_h264_source.dart';
+import 'file_h264_source.dart';
 import 'h264_encoder.dart';
 import 'h264_source.dart';
 import 'rtsp_server.dart';
@@ -35,6 +36,9 @@ class CameraStreamBackend implements StreamBackend {
   @override
   NalStreamSource? get nalSource => _source;
 
+  @override
+  Future<FileH264Source?> Function(String, DateTime?)? replaySourceFor;
+
   /// Channel to the native encoder, used to grab a JPEG still of the latest
   /// camera frame for the snapshot endpoint.
   static const MethodChannel _encoderControl = MethodChannel(
@@ -61,7 +65,11 @@ class CameraStreamBackend implements StreamBackend {
 
     await _source!.start();
 
-    _rtspServer ??= RtspServer(source: _source!, port: config.rtspPort);
+    _rtspServer ??= RtspServer(
+      source: _source!,
+      port: config.rtspPort,
+      replaySourceFor: replaySourceFor,
+    );
 
     await _rtspServer!.start();
 

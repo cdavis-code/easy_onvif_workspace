@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'file_h264_source.dart';
 import 'h264_source.dart';
 
 /// Abstraction over the component that produces the RTSP video stream.
@@ -26,6 +27,15 @@ abstract interface class StreamBackend {
   /// backend is not running or does not expose one. Used by the recording
   /// engine to tap the stream without opening the camera twice.
   NalStreamSource? get nalSource;
+
+  /// Resolver for RTSP replay sessions (`/onvif/replay/<token>` URLs),
+  /// injected by the device when the recording service is enabled. Backends
+  /// that serve RTSP pass it through to their [RtspServer].
+  abstract Future<FileH264Source?> Function(
+    String recordingToken,
+    DateTime? startUtc,
+  )?
+  replaySourceFor;
 }
 
 /// A [StreamBackend] that advertises an RTSP URL derived from [urlFor] without
@@ -57,4 +67,7 @@ class StubStreamBackend implements StreamBackend {
 
   @override
   NalStreamSource? get nalSource => null;
+
+  @override
+  Future<FileH264Source?> Function(String, DateTime?)? replaySourceFor;
 }
