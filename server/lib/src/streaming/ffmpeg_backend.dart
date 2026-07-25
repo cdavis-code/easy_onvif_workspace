@@ -62,7 +62,13 @@ class FfmpegBackend implements StreamBackend {
 
     await _source!.start();
 
-    await audioSource?.start();
+    // Audio is best-effort: a missing device or denied permission must not
+    // take down the video stream.
+    try {
+      await audioSource?.start();
+    } catch (_) {
+      // The RTSP server still serves video; the audio track stays silent.
+    }
 
     _rtspServer ??= RtspServer(
       source: _source!,

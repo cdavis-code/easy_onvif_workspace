@@ -57,6 +57,18 @@ class FfmpegAudioSource implements AudioStreamSource {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) => _log.warning('ffmpeg(audio): $line'));
+
+    // Surface an unexpected exit: frames simply stop otherwise and the SDP
+    // keeps advertising an audio track that never sends data.
+    final process = _process!;
+
+    unawaited(
+      process.exitCode.then((code) {
+        if (_process == process) {
+          _log.warning('ffmpeg(audio) exited unexpectedly (code $code)');
+        }
+      }),
+    );
   }
 
   @override
@@ -67,7 +79,13 @@ class FfmpegAudioSource implements AudioStreamSource {
     await _stderrSubscription?.cancel();
     _stderrSubscription = null;
 
-    _process?.kill(ProcessSignal.sigkill);
+    final process = _process;
+
     _process = null;
+
+    if (process != null) {
+      process.kill(ProcessSignal.sigkill);
+      await process.exitCode; // Reap so no zombie lingers.
+    }
   }
 }

@@ -99,25 +99,15 @@ class FileH264Source implements NalStreamSource {
       }
     }
 
-    // Load the audio sidecars; the first segment honors the seek offset
-    // (A-law is byte-addressable: 8000 bytes per second).
+    // Load the audio sidecars. Playback is segment-aligned: video starts at
+    // the beginning of the first included segment, so audio does too — no
+    // intra-segment byte skip, or audio would lead video after a seek.
     for (final segment in segments) {
       final sidecar = index.audioFile(segment);
 
       if (sidecar == null || !sidecar.existsSync()) continue;
 
-      var bytes = await sidecar.readAsBytes();
-
-      if (seek != null &&
-          segment == segments.first &&
-          seek.isAfter(segment.startUtc)) {
-        final skip =
-            (seek.difference(segment.startUtc).inMilliseconds * 8 ~/ 160) * 160;
-
-        if (skip >= bytes.length) continue;
-
-        bytes = bytes.sublist(skip);
-      }
+      final bytes = await sidecar.readAsBytes();
 
       for (var offset = 0; offset + 160 <= bytes.length; offset += 160) {
         _audioChunks.add(bytes.sublist(offset, offset + 160));
@@ -127,23 +117,23 @@ class FileH264Source implements NalStreamSource {
 
   /// Begins paced emission of the loaded access units.
   void play() {
-    if (_timer != null || _accessUnits.isEmpty) return;
+    if (_timer == null && _accessUnits.isNotEmpty) {
+      final interval = Duration(microseconds: 1000000 ~/ index.frameRate);
 
-    final interval = Duration(microseconds: 1000000 ~/ index.frameRate);
+      _timer = Timer.periodic(interval, (_) {
+        if (_position >= _accessUnits.length) {
+          _timer?.cancel();
 
-    _timer = Timer.periodic(interval, (_) {
-      if (_position >= _accessUnits.length) {
-        _timer?.cancel();
+          return; // End of recording: stop emitting, keep the session open.
+        }
 
-        return; // End of recording: stop emitting, keep the session open.
-      }
+        for (final nal in _accessUnits[_position]) {
+          _controller.add(nal);
+        }
 
-      for (final nal in _accessUnits[_position]) {
-        _controller.add(nal);
-      }
-
-      _position++;
-    });
+        _position++;
+      });
+    }
 
     if (_audioChunks.isNotEmpty && _audioTimer == null) {
       _audioTimer = Timer.periodic(const Duration(milliseconds: 20), (_) {

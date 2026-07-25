@@ -229,6 +229,30 @@ class Media1Service implements OnvifService {
               b.element('Encoding', namespace: Xmlns.tt, nest: 'G711');
               b.element('Bitrate', namespace: Xmlns.tt, nest: '64');
               b.element('SampleRate', namespace: Xmlns.tt, nest: '8');
+              // Multicast and SessionTimeout are required (minOccurs=1) in
+              // the tt:AudioEncoderConfiguration schema.
+              b.element(
+                'Multicast',
+                namespace: Xmlns.tt,
+                nest: () {
+                  b.element(
+                    'Address',
+                    namespace: Xmlns.tt,
+                    nest: () {
+                      b.element('Type', namespace: Xmlns.tt, nest: 'IPv4');
+                      b.element(
+                        'IPv4Address',
+                        namespace: Xmlns.tt,
+                        nest: '0.0.0.0',
+                      );
+                    },
+                  );
+                  b.element('Port', namespace: Xmlns.tt, nest: '0');
+                  b.element('TTL', namespace: Xmlns.tt, nest: '0');
+                  b.element('AutoStart', namespace: Xmlns.tt, nest: 'false');
+                },
+              );
+              b.element('SessionTimeout', namespace: Xmlns.tt, nest: 'PT60S');
             },
           );
         },

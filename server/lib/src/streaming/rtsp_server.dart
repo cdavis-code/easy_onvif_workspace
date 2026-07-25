@@ -366,6 +366,10 @@ class _RtspConnection {
       final replaced = await server.replaySourceFor!(replayToken, seek);
 
       if (replaced != null) {
+        // Stop the current subscriptions so _startStreaming re-subscribes to
+        // the replacement source (it early-returns while already playing).
+        _stopStreaming();
+
         await _fileSource?.stop();
         await replaced.load();
 

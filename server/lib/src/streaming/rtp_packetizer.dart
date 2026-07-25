@@ -32,11 +32,12 @@ class RtpPacketizer {
   }
 
   /// Builds a single RTP packet around an opaque [payload] (e.g. one G.711
-  /// audio frame).
+  /// audio frame). The marker defaults to unset: RFC 3551 reserves it for the
+  /// start of a talkspurt, not every packet of continuous audio.
   Uint8List packetizeRaw(
     Uint8List payload, {
     required int timestamp,
-    bool marker = true,
+    bool marker = false,
   }) => _buildRtp(payload, marker: marker, timestamp: timestamp);
 
   List<Uint8List> _fragment(Uint8List data, H264NalUnit nal) {
