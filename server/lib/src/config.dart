@@ -28,6 +28,10 @@ class ServerConfig {
   /// Hostname reported by `GetHostname`.
   final String hostname;
 
+  /// Stable device endpoint UUID, shared by WS-Discovery and
+  /// `GetEndpointReference`.
+  final String endpointUuid;
+
   const ServerConfig({
     this.httpPort = 8080,
     this.rtspPort = 8554,
@@ -40,6 +44,7 @@ class ServerConfig {
     this.serialNumber = 'EASY-ONVIF-SERVER-0001',
     this.hardwareId = '1',
     this.hostname = 'easy-onvif-server',
+    this.endpointUuid = '3fa1fe68-b915-4053-a3e1-a8294933d5b2',
   });
 
   /// The base URL for this device given the advertised [host] (IP or name).
@@ -57,6 +62,23 @@ class ServerConfig {
 
   /// The PTZ service endpoint for the advertised [host].
   String ptzServiceUrl(String host) => '${baseUrl(host)}/onvif/PTZ';
+
+  /// The Imaging service endpoint for the advertised [host].
+  String imagingServiceUrl(String host) => '${baseUrl(host)}/onvif/Imaging';
+
+  /// The Recording service endpoint for the advertised [host].
+  String recordingServiceUrl(String host) => '${baseUrl(host)}/onvif/Recording';
+
+  /// The Search service endpoint for the advertised [host].
+  String searchServiceUrl(String host) =>
+      '${baseUrl(host)}/onvif/SearchRecording';
+
+  /// The Replay service endpoint for the advertised [host].
+  String replayServiceUrl(String host) => '${baseUrl(host)}/onvif/Replay';
+
+  /// The RTSP replay URL for the advertised [host] and [recordingToken].
+  String replayRtspUrl(String host, String recordingToken) =>
+      'rtsp://$host:$rtspPort/onvif/replay/$recordingToken';
 
   /// The RTSP stream URL for the advertised [host] and [profileToken].
   String rtspUrl(String host, String profileToken) =>

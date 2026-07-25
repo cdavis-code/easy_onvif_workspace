@@ -24,8 +24,6 @@ class WsDiscoveryServer with UiLoggy {
   /// non-loopback IPv4 address is used.
   final String? advertisedHost;
 
-  final String _endpointId = const Uuid().v4();
-
   RawDatagramSocket? _socket;
 
   String? _resolvedHost;
@@ -162,7 +160,7 @@ class WsDiscoveryServer with UiLoggy {
                           'Address',
                           namespace:
                               'http://schemas.xmlsoap.org/ws/2004/08/addressing',
-                          nest: 'urn:uuid:$_endpointId',
+                          nest: 'urn:uuid:${config.endpointUuid}',
                         );
                       },
                     );
