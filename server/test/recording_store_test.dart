@@ -1,9 +1,46 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:easy_onvif_server/src/recording/recording_index.dart';
 import 'package:easy_onvif_server/src/recording/recording_store.dart';
+import 'package:easy_onvif_server/src/recording/segment_recorder.dart';
+import 'package:easy_onvif_server/src/streaming/h264_source.dart';
+
+/// A [NalStreamSource] that emits synthetic access units on demand.
+class FakeNalSource implements NalStreamSource {
+  final _controller = StreamController<H264NalUnit>.broadcast();
+
+  @override
+  Stream<H264NalUnit> get nals => _controller.stream;
+
+  @override
+  Uint8List? get sps => Uint8List.fromList([0x67, 0x42, 0xC0, 0x1E]);
+
+  @override
+  Uint8List? get pps => Uint8List.fromList([0x68, 0xCE, 0x38, 0x80]);
+
+  @override
+  Future<void> get parametersReady => Future.value();
+
+  /// Emits [frames] access units at [interval]; every third frame is an IDR
+  /// (type 5), the rest are non-IDR slices (type 1).
+  Future<void> emitFrames(int frames, Duration interval) async {
+    for (var i = 0; i < frames; i++) {
+      final isIdr = i % 3 == 0;
+      final header = isIdr ? 0x65 : 0x41;
+      final nal = Uint8List.fromList([header, 0x88, ...List.filled(64, i)]);
+
+      _controller.add(H264NalUnit(nal, i * 6000, true));
+
+      await Future<void>.delayed(interval);
+    }
+  }
+
+  Future<void> close() => _controller.close();
+}
 
 void main() {
   late Directory tempDir;
@@ -68,5 +105,48 @@ void main() {
 
     expect(store.recordings, isEmpty);
     expect(Directory('${tempDir.path}/R1').existsSync(), isFalse);
+  });
+
+  group('segment recorder', () {
+    test('writes keyframe-aligned segments and updates the index', () async {
+      final store = RecordingStore(root: tempDir);
+      await store.open();
+
+      final index = await store.create(
+        recordingToken: 'R1',
+        frameRate: 15,
+        sourceToken: 'VideoSource_1',
+        profileToken: 'Profile_1',
+      );
+
+      final source = FakeNalSource();
+      final recorder = SegmentRecorder(
+        index: index,
+        source: source,
+        store: store,
+        segmentSeconds: 1,
+      );
+
+      await recorder.start();
+      // ~30 frames over ~3s => at least 2 rotated segments (1s each).
+      await source.emitFrames(30, const Duration(milliseconds: 100));
+      await recorder.stop();
+      await source.close();
+
+      expect(index.segments.length, greaterThanOrEqualTo(2));
+
+      for (final segment in index.segments) {
+        final bytes = index.segmentFile(segment).readAsBytesSync();
+
+        // Starts with an Annex-B start code followed by SPS (0x67).
+        expect(bytes.sublist(0, 5), [0, 0, 0, 1, 0x67]);
+        expect(segment.frameCount, greaterThan(0));
+      }
+
+      // The reloaded index sees the same segments (save() ran on stop).
+      final reloaded = await RecordingIndex.load(index.directory);
+
+      expect(reloaded!.segments.length, index.segments.length);
+    });
   });
 }
