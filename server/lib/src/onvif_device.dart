@@ -11,6 +11,7 @@ import 'services/media1_service.dart';
 import 'services/media2_service.dart';
 import 'services/onvif_service.dart';
 import 'services/ptz_service.dart';
+import 'settings.dart';
 import 'soap/authenticator.dart';
 import 'streaming/stream_backend.dart';
 
@@ -26,6 +27,9 @@ class OnvifDevice with UiLoggy {
   final StreamBackend streamBackend;
   final DeviceState state;
 
+  /// Simulation settings (service flags, recording options, imaging presets).
+  final ServerSettings settings;
+
   /// The host address advertised to clients (also used to start the stream).
   final String? advertisedHost;
 
@@ -40,9 +44,11 @@ class OnvifDevice with UiLoggy {
     required this.hardware,
     required this.streamBackend,
     DeviceState? state,
+    ServerSettings? settings,
     bool enableDiscovery = false,
     this.advertisedHost,
   }) : state = state ?? DeviceState(),
+       settings = settings ?? const ServerSettings(),
        discovery = enableDiscovery
            ? WsDiscoveryServer(config: config, advertisedHost: advertisedHost)
            : null {
@@ -61,7 +67,12 @@ class OnvifDevice with UiLoggy {
     );
 
     final List<OnvifService> services = [
-      DeviceService(config: config, state: this.state, hardware: hardware),
+      DeviceService(
+        config: config,
+        state: this.state,
+        hardware: hardware,
+        settings: this.settings,
+      ),
       Media1Service(
         config: config,
         state: this.state,

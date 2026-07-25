@@ -4,6 +4,7 @@ import 'package:xml/xml.dart';
 import '../config.dart';
 import '../hardware/device_state.dart';
 import '../hardware/hardware_adapter.dart';
+import '../settings.dart';
 import '../soap/envelope_builder.dart';
 import '../soap/request_context.dart';
 import 'onvif_service.dart';
@@ -17,11 +18,13 @@ class DeviceService implements OnvifService {
   final ServerConfig config;
   final DeviceState state;
   final HardwareAdapter hardware;
+  final ServerSettings settings;
 
   DeviceService({
     required this.config,
     required this.state,
     required this.hardware,
+    this.settings = const ServerSettings(),
   });
 
   @override
@@ -134,6 +137,12 @@ class DeviceService implements OnvifService {
       (Xmlns.trt, config.mediaServiceUrl(host)),
       (Xmlns.tr2, config.media2ServiceUrl(host)),
       (Xmlns.tptz, config.ptzServiceUrl(host)),
+      if (settings.services.imaging)
+        (Xmlns.timg, config.imagingServiceUrl(host)),
+      if (settings.services.recording)
+        (Xmlns.trc, config.recordingServiceUrl(host)),
+      if (settings.services.search) (Xmlns.tse, config.searchServiceUrl(host)),
+      if (settings.services.replay) (Xmlns.trp, config.replayServiceUrl(host)),
     ];
 
     return SoapEnvelopeBuilder.response((b) {
@@ -223,11 +232,83 @@ class DeviceService implements OnvifService {
                   );
                 },
               );
+              if (settings.services.imaging) {
+                b.element(
+                  'Imaging',
+                  namespace: Xmlns.tt,
+                  nest: () {
+                    b.element(
+                      'XAddr',
+                      namespace: Xmlns.tt,
+                      nest: config.imagingServiceUrl(host),
+                    );
+                  },
+                );
+              }
+              if (settings.services.recording ||
+                  settings.services.search ||
+                  settings.services.replay) {
+                b.element(
+                  'Extension',
+                  namespace: Xmlns.tt,
+                  nest: () => _writeCapabilityExtension(b, host),
+                );
+              }
             },
           );
         },
       );
     });
+  }
+
+  /// Writes the Recording/Search/Replay capability entries nested under
+  /// `tt:Extension` (the shape the ENP1A14 fixture uses).
+  void _writeCapabilityExtension(XmlBuilder b, String host) {
+    if (settings.services.recording) {
+      b.element(
+        'Recording',
+        namespace: Xmlns.tt,
+        nest: () {
+          b.element(
+            'XAddr',
+            namespace: Xmlns.tt,
+            nest: config.recordingServiceUrl(host),
+          );
+          b.element('ReceiverSource', namespace: Xmlns.tt, nest: 'false');
+          b.element('MediaProfileSource', namespace: Xmlns.tt, nest: 'true');
+          b.element('DynamicRecordings', namespace: Xmlns.tt, nest: 'true');
+          b.element('DynamicTracks', namespace: Xmlns.tt, nest: 'false');
+          b.element('MaxStringLength', namespace: Xmlns.tt, nest: '256');
+        },
+      );
+    }
+    if (settings.services.search) {
+      b.element(
+        'Search',
+        namespace: Xmlns.tt,
+        nest: () {
+          b.element(
+            'XAddr',
+            namespace: Xmlns.tt,
+            nest: config.searchServiceUrl(host),
+          );
+          b.element('MetadataSearch', namespace: Xmlns.tt, nest: 'false');
+        },
+      );
+    }
+    if (settings.services.replay) {
+      b.element(
+        'Replay',
+        namespace: Xmlns.tt,
+        nest: () {
+          b.element(
+            'XAddr',
+            namespace: Xmlns.tt,
+            nest: config.replayServiceUrl(host),
+          );
+        },
+      );
+    }
   }
 
   String _getDeviceInformation() {

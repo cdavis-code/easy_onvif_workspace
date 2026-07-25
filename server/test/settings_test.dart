@@ -1,6 +1,11 @@
+import 'package:easy_onvif/onvif.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:easy_onvif_server/src/config.dart';
+import 'package:easy_onvif_server/src/hardware/hardware_adapter.dart';
+import 'package:easy_onvif_server/src/onvif_device.dart';
 import 'package:easy_onvif_server/src/settings.dart';
+import 'package:easy_onvif_server/src/streaming/stream_backend.dart';
 
 void main() {
   test('defaults apply when yaml is empty', () {
@@ -110,5 +115,85 @@ geolocation:
       () => ServerSettings.parse(': not yaml : ['),
       throwsA(isA<FormatException>()),
     );
+  });
+
+  group('service flags', () {
+    test('disabled services are not advertised and fault when called', () async {
+      const config = ServerConfig(httpPort: 8095, rtspPort: 8561);
+
+      final device = OnvifDevice(
+        config: config,
+        hardware: StubHardwareAdapter(),
+        streamBackend: StubStreamBackend(urlFor: config.rtspUrl),
+        settings: ServerSettings.parse('''
+services:
+  recording: false
+  replay: false
+  search: false
+  imaging: false
+''', base: config),
+      );
+
+      await device.start();
+      addTearDown(device.stop);
+
+      final onvif = await Onvif.connect(
+        host: 'localhost:8095',
+        username: 'admin',
+        password: 'admin',
+      );
+
+      final services = await onvif.deviceManagement.getServices();
+      final namespaces = services.map((s) => s.nameSpace).toList();
+
+      expect(
+        namespaces,
+        isNot(contains('http://www.onvif.org/ver10/recording/wsdl')),
+      );
+      expect(
+        namespaces,
+        isNot(contains('http://www.onvif.org/ver10/search/wsdl')),
+      );
+      expect(
+        namespaces,
+        isNot(contains('http://www.onvif.org/ver10/replay/wsdl')),
+      );
+      expect(
+        namespaces,
+        isNot(contains('http://www.onvif.org/ver20/imaging/wsdl')),
+      );
+      expect(namespaces, contains('http://www.onvif.org/ver10/device/wsdl'));
+
+      // Client getters throw when the service was not advertised.
+      expect(() => onvif.recordings, throwsException);
+    });
+
+    test('enabled services are advertised by default', () async {
+      const config = ServerConfig(httpPort: 8094, rtspPort: 8559);
+
+      final device = OnvifDevice(
+        config: config,
+        hardware: StubHardwareAdapter(),
+        streamBackend: StubStreamBackend(urlFor: config.rtspUrl),
+        settings: ServerSettings.parse('', base: config),
+      );
+
+      await device.start();
+      addTearDown(device.stop);
+
+      final onvif = await Onvif.connect(
+        host: 'localhost:8094',
+        username: 'admin',
+        password: 'admin',
+      );
+
+      final services = await onvif.deviceManagement.getServices();
+      final namespaces = services.map((s) => s.nameSpace).toList();
+
+      expect(namespaces, contains('http://www.onvif.org/ver10/recording/wsdl'));
+      expect(namespaces, contains('http://www.onvif.org/ver10/search/wsdl'));
+      expect(namespaces, contains('http://www.onvif.org/ver10/replay/wsdl'));
+      expect(namespaces, contains('http://www.onvif.org/ver20/imaging/wsdl'));
+    });
   });
 }
