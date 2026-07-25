@@ -691,7 +691,8 @@ class DeviceService implements OnvifService {
   }
 
   Future<String> _getGeoLocation() async {
-    final location = await hardware.currentLocation();
+    // Prefer a real platform fix; fall back to the configured location.
+    final location = await hardware.currentLocation() ?? settings.geoFallback;
 
     return SoapEnvelopeBuilder.response((b) {
       b.element(

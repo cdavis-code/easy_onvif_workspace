@@ -10,6 +10,7 @@ import 'package:loggy/loggy.dart';
 import 'package:easy_onvif_server/src/config.dart';
 import 'package:easy_onvif_server/src/hardware/flutter_adapter.dart';
 import 'package:easy_onvif_server/src/onvif_device.dart';
+import 'package:easy_onvif_server/src/settings.dart';
 import 'package:easy_onvif_server/src/streaming/camera_stream_backend.dart';
 import 'package:easy_onvif_server/src/streaming/ffmpeg_backend.dart';
 import 'package:easy_onvif_server/src/streaming/stream_backend.dart';
@@ -44,6 +45,10 @@ class ServerHomePage extends StatefulWidget {
 
 class _ServerHomePageState extends State<ServerHomePage> {
   final ServerConfig _config = const ServerConfig();
+
+  /// Settings loaded at start (runtime override file or the bundled asset);
+  /// null until the server has been started at least once.
+  ServerSettings? _settings;
 
   OnvifDevice? _device;
   FlutterAdapter? _adapter;
@@ -180,13 +185,13 @@ class _ServerHomePageState extends State<ServerHomePage> {
   /// and encoded directly via [CameraStreamBackend] (macOS uses `camera_desktop`
   /// for capture and VideoToolbox for H.264). On Windows/Linux, [FfmpegBackend]
   /// shells out to `ffmpeg` (webcam or test pattern).
-  StreamBackend _createStreamBackend() {
+  StreamBackend _createStreamBackend(ServerConfig config) {
     if (Platform.isIOS || Platform.isAndroid || Platform.isMacOS) {
-      return CameraStreamBackend(config: _config, frameRate: 15);
+      return CameraStreamBackend(config: config, frameRate: 15);
     }
 
     return FfmpegBackend(
-      config: _config,
+      config: config,
       ffmpegPath: _resolveFfmpegPath(),
       frameRate: 15,
       inputArgs: _platformVideoInput(),
@@ -207,12 +212,18 @@ class _ServerHomePageState extends State<ServerHomePage> {
       // reuses the backend's controller instead.
       final adapter = FlutterAdapter(enableCamera: !_useNativeCamera);
 
-      final backend = _createStreamBackend();
+      // Runtime settings override the compiled-in defaults; the bundled asset
+      // documents the schema and yields defaults when no override exists.
+      final bundled = await rootBundle.loadString('assets/settings.yaml');
+      final settings = await ServerSettings.load(fallbackYaml: bundled);
+
+      final backend = _createStreamBackend(settings.config);
 
       final device = OnvifDevice(
-        config: _config,
+        config: settings.config,
         hardware: adapter,
         streamBackend: backend,
+        settings: settings,
         enableDiscovery: true,
         advertisedHost: _host,
       );
@@ -226,6 +237,7 @@ class _ServerHomePageState extends State<ServerHomePage> {
         setState(() {
           _device = device;
           _adapter = adapter;
+          _settings = settings;
           _running = true;
           _nativeCameraController =
               _useNativeCamera && backend is CameraStreamBackend
@@ -318,9 +330,12 @@ class _ServerHomePageState extends State<ServerHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceUrl = 'http://$_host:${_config.httpPort}/onvif/device_service';
+    // Before the first start, show the compiled-in defaults; afterwards show
+    // the ports/credentials actually loaded from settings.
+    final config = _settings?.config ?? _config;
+    final deviceUrl = 'http://$_host:${config.httpPort}/onvif/device_service';
     final rtspUrl =
-        'rtsp://$_host:${_config.rtspPort}/onvif/'
+        'rtsp://$_host:${config.rtspPort}/onvif/'
         '${Uri.encodeComponent('Profile_1')}';
 
     return Scaffold(
@@ -336,9 +351,17 @@ class _ServerHomePageState extends State<ServerHomePage> {
                 host: _host,
                 deviceUrl: deviceUrl,
                 rtspUrl: rtspUrl,
-                username: _config.username,
-                password: _config.password,
+                username: config.username,
+                password: config.password,
               ),
+              if (_running && _device?.recordingManager != null) ...[
+                const SizedBox(height: 16),
+                _RecordingStatusCard(
+                  device: _device!,
+                  host: _host,
+                  rtspPort: config.rtspPort,
+                ),
+              ],
               const SizedBox(height: 16),
               _CameraPreviewCard(
                 adapter: _adapter,
@@ -404,6 +427,79 @@ class _StatusCard extends StatelessWidget {
             _row(context, 'RTSP stream', rtspUrl),
             _row(context, 'Username', username),
             _row(context, 'Password', password),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _row(BuildContext context, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(child: SelectableText(value)),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shows the recording subsystem's live state: how many recordings exist on
+/// disk, whether a job is actively capturing, and the replay URL scheme.
+/// Refreshed by the parent's periodic preview/setState cycle.
+class _RecordingStatusCard extends StatelessWidget {
+  final OnvifDevice device;
+  final String host;
+  final int rtspPort;
+
+  const _RecordingStatusCard({
+    required this.device,
+    required this.host,
+    required this.rtspPort,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final manager = device.recordingManager;
+    final recordings = manager?.recordings ?? const [];
+    final active = manager?.jobs.any((job) => job.mode == 'Active') ?? false;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  active ? Icons.fiber_manual_record : Icons.videocam_off,
+                  color: active ? Colors.red : Colors.grey,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Recording',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const Divider(),
+            _row(context, 'Recordings', '${recordings.length}'),
+            _row(context, 'Job state', active ? 'Active' : 'Idle'),
+            _row(
+              context,
+              'Replay URL',
+              'rtsp://$host:$rtspPort/onvif/replay/<recordingToken>',
+            ),
           ],
         ),
       ),

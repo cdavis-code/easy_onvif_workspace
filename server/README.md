@@ -7,16 +7,33 @@ develop and test ONVIF integrations without physical camera hardware.
 
 ## Features
 
-- **ONVIF SOAP services** — Device Management, Media1/Media2, and PTZ, with
-  WS-Security `UsernameToken` authentication.
+- **ONVIF SOAP services** — Device Management, Media1/Media2, PTZ, Imaging,
+  Recording, Search, and Replay, with WS-Security `UsernameToken`
+  authentication.
 - **Live RTSP streaming** — an embedded RTSP server serves H.264 encoded by
   `ffmpeg` (RTP over TCP interleaved).
+- **Real recording pipeline** — recording jobs capture the live H.264 stream
+  to disk as Annex-B segments; Search queries the on-disk indexes and Replay
+  serves the recorded footage back over RTSP.
 - **HTTP snapshots** — JPEG frames from the device camera.
 - **WS-Discovery** — the device announces itself and answers `Probe` messages,
   so discovery-based clients can find it on the local network.
 - **Hardware integration** — camera and geolocation via the `camera` and
   `geolocator` Flutter plugins, with graceful fallback when hardware is
   unavailable.
+
+### Services
+
+| Service           | Namespace | Highlights                                            |
+| ----------------- | --------- | ----------------------------------------------------- |
+| Device Management | `tds`     | Device info, users, capabilities, system log, storage |
+| Media 1           | `trt`     | Profiles, stream/snapshot URIs, metadata configs      |
+| Media 2           | `tr2`     | Profiles, encoder/source options, multicast stubs     |
+| PTZ               | `tptz`    | Continuous/absolute/relative moves, presets, home     |
+| Imaging           | `timg`    | Simulated presets (settings-seeded), focus status     |
+| Recording         | `trc`     | Real capture jobs writing `.h264` segments to disk    |
+| Search            | `tse`     | Finds recordings and time ranges from disk indexes    |
+| Replay            | `trp`     | RTSP replay URIs serving recorded segments            |
 
 ## Requirements
 
@@ -50,13 +67,78 @@ Defaults are defined by `ServerConfig` in [`lib/src/config.dart`](lib/src/config
 | Model               | `Dart ONVIF Server`    |
 | Firmware version    | `0.1.0`                |
 
+### Settings file
+
+At startup the app loads YAML settings, searching in order:
+
+1. `~/.easy_onvif_server/settings.yaml` (runtime override)
+2. the bundled [`assets/settings.yaml`](assets/settings.yaml) (all keys
+   commented — pure defaults)
+
+Every key is optional; missing keys fall back to the defaults above. Schema:
+
+```yaml
+device:
+  manufacturer: easy_onvif
+  model: Dart ONVIF Server
+  firmware: 0.1.0
+  serial: EASY-ONVIF-SERVER-0001
+  hardwareId: "1"
+  hostname: easy-onvif-server
+network:
+  httpPort: 8080
+  rtspPort: 8554
+auth:
+  username: admin
+  password: admin
+services:          # enable/disable optional services
+  recording: true
+  replay: true
+  search: true
+  imaging: true
+recording:
+  directory: /path/to/recordings   # default: system temp
+  segmentSeconds: 10               # segment rotation length
+  maxRetentionMinutes: 60          # default: unlimited
+imaging:
+  presets:
+    - token: ImagingPreset_1
+      name: Standard
+      type: Auto
+geolocation:       # GetGeoLocation fallback when no platform fix
+  lat: 43.65
+  lon: -79.38
+  elevation: 76.0
+```
+
+### Recording storage
+
+Each recording lives in its own directory under the recordings root:
+
+```
+<recording directory>/
+  OnvifRecordingToken_1/
+    index.json          # metadata: source, frame rate, segment time ranges
+    seg_00001.h264      # keyframe-aligned Annex-B segments (SPS/PPS prefixed)
+    seg_00002.h264
+```
+
+Recordings survive restarts — the store reloads `index.json` files at startup.
+When `maxRetentionMinutes` is set, segments older than the window are pruned
+on rotation.
+
 Advertised endpoints (replace `<host>` with the server's IP):
 
-| Endpoint        | URL                                            |
-| --------------- | ---------------------------------------------- |
-| Device service  | `http://<host>:8080/onvif/device_service`      |
-| RTSP stream     | `rtsp://<host>:8554/onvif/Profile_1`           |
-| JPEG snapshot   | `http://<host>:8080/onvif/snapshot/Profile_1`  |
+| Endpoint        | URL                                                 |
+| --------------- | --------------------------------------------------- |
+| Device service  | `http://<host>:8080/onvif/device_service`           |
+| RTSP stream     | `rtsp://<host>:8554/onvif/Profile_1`                |
+| RTSP replay     | `rtsp://<host>:8554/onvif/replay/<recordingToken>`  |
+| JPEG snapshot   | `http://<host>:8080/onvif/snapshot/Profile_1`       |
+
+The replay endpoint serves a recording's segments from disk; `GetReplayUri`
+returns the URL for a given recording token, and `PLAY` accepts a
+`Range: clock=` header to seek within the recording.
 
 ## Using the server with the example project
 
@@ -136,20 +218,27 @@ lib/
   main.dart                     # Flutter app shell + status UI
   src/
     config.dart                 # ServerConfig defaults
+    settings.dart               # YAML settings loader (ServerSettings)
     onvif_device.dart           # Assembles and runs the whole device
     server/                     # HTTP server + SOAP dispatcher
     soap/                       # Envelope builder, request parser, auth
-    services/                   # DeviceManagement, Media1/2, PTZ
-    streaming/                  # ffmpeg H.264 source, RTP packetizer, RTSP server
+    services/                   # DeviceManagement, Media1/2, PTZ, Imaging,
+                                #   Recording, Search, Replay
+    recording/                  # Segment recorder, on-disk store + JSON index
+    streaming/                  # ffmpeg H.264 source, file replay source,
+                                #   RTP packetizer, RTSP server
     discovery/                  # WS-Discovery responder
     hardware/                   # HardwareAdapter interface + Flutter (camera/geo) impl
+assets/
+  settings.yaml                 # Bundled settings template (all keys commented)
 ```
 
 ## Testing
 
 Integration tests drive the **real** `easy_onvif` client against the server
 (connect + device info + auth, media profiles / stream / snapshot, PTZ moves
-and presets, live RTSP recording, and WS-Discovery):
+and presets, imaging presets, live RTSP recording, recording jobs capturing to
+disk, replay over RTSP, search over recorded ranges, and WS-Discovery):
 
 ```sh
 cd server

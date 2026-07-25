@@ -1,0 +1,48 @@
+# easy_onvif_server settings.
+#
+# This bundled file documents every supported key with its default value —
+# all entries are commented out, so the server runs with pure defaults.
+# To customize, copy this file to the runtime override location and edit:
+#
+#   ~/.easy_onvif_server/settings.yaml
+#
+# device:
+#   manufacturer: easy_onvif
+#   model: Dart ONVIF Server
+#   firmware: 0.1.0
+#   serial: EASY-ONVIF-SERVER-0001
+#   hardwareId: "1"
+#   hostname: easy-onvif-server
+#
+# network:
+#   httpPort: 8080
+#   rtspPort: 8554
+#
+# auth:
+#   username: admin
+#   password: admin
+#
+# services:
+#   recording: true
+#   replay: true
+#   search: true
+#   imaging: true
+#
+# recording:
+#   directory: /path/to/recordings   # default: system temp
+#   segmentSeconds: 10
+#   maxRetentionMinutes: 60          # default: unlimited
+#
+# imaging:
+#   presets:
+#     - token: ImagingPreset_1
+#       name: Standard
+#       type: Auto
+#     - token: ImagingPreset_2
+#       name: Low Light
+#       type: LowLight
+#
+# geolocation:
+#   lat: 43.65
+#   lon: -79.38
+#   elevation: 76.0
