@@ -17,6 +17,9 @@ class SoapEnvelopeBuilder {
     Xmlns.tr2: 'tr2',
     Xmlns.tptz: 'tptz',
     Xmlns.timg: 'timg',
+    Xmlns.trc: 'trc',
+    Xmlns.tse: 'tse',
+    Xmlns.trp: 'trp',
     Xmlns.ter: 'ter',
   };
 

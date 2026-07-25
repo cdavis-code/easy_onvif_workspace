@@ -26,12 +26,17 @@ class DeviceService implements OnvifService {
   /// device's `BufferedLoggyPrinter` by `OnvifDevice`).
   final List<String> Function() logLines;
 
+  /// The resolved recordings directory reported by the storage configuration
+  /// operations (supplied by `OnvifDevice` so it matches the recording store).
+  final String? recordingDirectory;
+
   DeviceService({
     required this.config,
     required this.state,
     required this.hardware,
     this.settings = const ServerSettings(),
     this.logLines = _noLogLines,
+    this.recordingDirectory,
   });
 
   static List<String> _noLogLines() => const [];
@@ -625,6 +630,7 @@ class DeviceService implements OnvifService {
   /// The directory recordings are (or would be) written to; reported by the
   /// storage configuration operations.
   String get _recordingDirectory =>
+      recordingDirectory ??
       settings.recordingDirectory ??
       '${Directory.systemTemp.path}/easy_onvif_recordings';
 

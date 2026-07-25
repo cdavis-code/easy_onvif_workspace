@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:loggy/loggy.dart';
 
 import 'config.dart';
@@ -5,6 +7,8 @@ import 'discovery/ws_discovery_server.dart';
 import 'hardware/device_state.dart';
 import 'hardware/hardware_adapter.dart';
 import 'log_buffer.dart';
+import 'recording/recording_manager.dart';
+import 'recording/recording_store.dart';
 import 'server/onvif_server.dart';
 import 'server/soap_dispatcher.dart';
 import 'services/device_service.dart';
@@ -12,6 +16,7 @@ import 'services/media1_service.dart';
 import 'services/media2_service.dart';
 import 'services/onvif_service.dart';
 import 'services/ptz_service.dart';
+import 'services/recording_service.dart';
 import 'settings.dart';
 import 'soap/authenticator.dart';
 import 'streaming/stream_backend.dart';
@@ -40,6 +45,11 @@ class OnvifDevice with UiLoggy {
   /// The log ring buffer wrapped around the printer supplied to [start];
   /// backs the `GetSystemLog` operation.
   BufferedLoggyPrinter? _logBuffer;
+
+  /// The on-disk recording store and its SOAP-facing manager, present when
+  /// the recording service is enabled.
+  RecordingStore? recordingStore;
+  RecordingManager? recordingManager;
 
   /// The WS-Discovery responder, present when discovery is enabled.
   final WsDiscoveryServer? discovery;
@@ -71,6 +81,22 @@ class OnvifDevice with UiLoggy {
       expectedPassword: config.password,
     );
 
+    final recordingsDirectory =
+        this.settings.recordingDirectory ??
+        '${Directory.systemTemp.path}/easy_onvif_recordings';
+
+    if (this.settings.services.recording) {
+      recordingStore = RecordingStore(
+        root: Directory(recordingsDirectory),
+        maxRetentionMinutes: this.settings.maxRetentionMinutes,
+      );
+      recordingManager = RecordingManager(
+        store: recordingStore!,
+        backend: streamBackend,
+        settings: this.settings,
+      );
+    }
+
     final List<OnvifService> services = [
       DeviceService(
         config: config,
@@ -78,6 +104,7 @@ class OnvifDevice with UiLoggy {
         hardware: hardware,
         settings: this.settings,
         logLines: () => _logBuffer?.lines ?? const <String>[],
+        recordingDirectory: recordingsDirectory,
       ),
       Media1Service(
         config: config,
@@ -90,6 +117,8 @@ class OnvifDevice with UiLoggy {
         streamBackend: streamBackend,
       ),
       PtzService(state: this.state),
+      if (recordingManager != null)
+        RecordingService(manager: recordingManager!),
     ];
 
     dispatcher = SoapDispatcher(
@@ -120,6 +149,9 @@ class OnvifDevice with UiLoggy {
 
     Loggy.initLoggy(logPrinter: bufferedPrinter, logOptions: logOptions);
 
+    // Recordings persist across restarts; load the index before serving.
+    await recordingStore?.open();
+
     await hardware.startCamera();
     await server.start(logOptions: logOptions, printer: bufferedPrinter);
     await discovery?.start();
@@ -140,6 +172,7 @@ class OnvifDevice with UiLoggy {
 
   Future<void> stop() async {
     state.dispose();
+    await recordingManager?.dispose();
     await discovery?.stop();
     await streamBackend.stop();
     await hardware.stopCamera();
