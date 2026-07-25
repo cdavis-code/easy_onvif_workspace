@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'audio_source.dart';
 import 'file_h264_source.dart';
 import 'h264_source.dart';
 
@@ -27,6 +28,10 @@ abstract interface class StreamBackend {
   /// backend is not running or does not expose one. Used by the recording
   /// engine to tap the stream without opening the camera twice.
   NalStreamSource? get nalSource;
+
+  /// The live G.711 audio source served as the RTSP audio track, or `null`
+  /// when audio streaming is disabled.
+  AudioStreamSource? get audioSource;
 
   /// Resolver for RTSP replay sessions (`/onvif/replay/<token>` URLs),
   /// injected by the device when the recording service is enabled. Backends
@@ -67,6 +72,9 @@ class StubStreamBackend implements StreamBackend {
 
   @override
   NalStreamSource? get nalSource => null;
+
+  @override
+  final AudioStreamSource? audioSource = null;
 
   @override
   Future<FileH264Source?> Function(String, DateTime?)? replaySourceFor;

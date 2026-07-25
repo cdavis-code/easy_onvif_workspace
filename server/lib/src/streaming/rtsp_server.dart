@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:loggy/loggy.dart';
 
+import 'audio_source.dart';
 import 'file_h264_source.dart';
 import 'h264_source.dart';
 import 'rtp_packetizer.dart';
@@ -19,6 +20,10 @@ class RtspServer with UiLoggy {
   final NalStreamSource source;
   final int port;
 
+  /// The live audio source served as a second RTP track, or `null` when
+  /// audio streaming is disabled.
+  final AudioStreamSource? audioSource;
+
   /// Creates a per-session replay source for `/onvif/replay/<token>` URLs, or
   /// `null` if the token is unknown. When absent, replay paths 404.
   final Future<FileH264Source?> Function(
@@ -30,7 +35,12 @@ class RtspServer with UiLoggy {
   ServerSocket? _serverSocket;
   final Set<_RtspConnection> _connections = {};
 
-  RtspServer({required this.source, required this.port, this.replaySourceFor});
+  RtspServer({
+    required this.source,
+    required this.port,
+    this.replaySourceFor,
+    this.audioSource,
+  });
 
   bool get isRunning => _serverSocket != null;
 
@@ -70,7 +80,7 @@ class RtspServer with UiLoggy {
 
   void _remove(_RtspConnection connection) => _connections.remove(connection);
 
-  String _buildSdp(NalStreamSource source) {
+  String buildSdp(NalStreamSource source, {required bool hasAudio}) {
     final sps = source.sps;
     final pps = source.pps;
 
@@ -98,6 +108,11 @@ class RtspServer with UiLoggy {
       'a=fmtp:96 packetization-mode=1;profile-level-id=$profileLevelId;'
           'sprop-parameter-sets=$sprop',
       'a=control:trackID=0',
+      if (hasAudio) ...[
+        'm=audio 0 RTP/AVP 8',
+        'a=rtpmap:8 PCMA/8000',
+        'a=control:trackID=1',
+      ],
       '',
     ].join('\r\n');
   }
@@ -115,11 +130,18 @@ class _RtspConnection {
 
   int _rtpChannel = 0;
 
+  int _audioChannel = 2;
+
   bool _playing = false;
 
   bool _closed = false;
 
   StreamSubscription<H264NalUnit>? _nalSubscription;
+
+  StreamSubscription<AudioFrame>? _audioSubscription;
+
+  /// Audio frames for this session: the live source's, or the replay file's.
+  Stream<AudioFrame>? _sessionAudioFrames;
 
   /// The source serving this session: the live default, or a per-session
   /// replay file source for `/onvif/replay/<token>` URLs.
@@ -133,6 +155,8 @@ class _RtspConnection {
   String? _replayToken;
 
   late final RtpPacketizer _packetizer = RtpPacketizer();
+
+  late final RtpPacketizer _audioPacketizer = RtpPacketizer(payloadType: 8);
 
   _RtspConnection(this.server, this.socket);
 
@@ -236,7 +260,7 @@ class _RtspConnection {
         _handleDescribe(cseq, url);
 
       case 'SETUP':
-        _handleSetup(cseq, headers);
+        _handleSetup(cseq, url, headers);
 
       case 'PLAY':
         _handlePlay(cseq, url, headers);
@@ -270,8 +294,10 @@ class _RtspConnection {
       _replayToken = replayToken;
       _fileSource = fileSource;
       _sessionSource = fileSource;
+      _sessionAudioFrames = null; // Replay audio arrives in a later task.
     } else {
       _sessionSource = server.source;
+      _sessionAudioFrames = server.audioSource?.frames;
     }
 
     // Ensure SPS/PPS are available so the SDP is valid.
@@ -281,7 +307,10 @@ class _RtspConnection {
     );
 
     final base = url.endsWith('/') ? url : '$url/';
-    final sdp = server._buildSdp(_sessionSource!);
+    final sdp = server.buildSdp(
+      _sessionSource!,
+      hasAudio: _sessionAudioFrames != null,
+    );
 
     _respond(
       cseq,
@@ -290,22 +319,29 @@ class _RtspConnection {
     );
   }
 
-  void _handleSetup(int cseq, Map<String, String> headers) {
+  void _handleSetup(int cseq, String url, Map<String, String> headers) {
     final transport = headers['transport'] ?? '';
 
     final interleaved = RegExp(
       r'interleaved=(\d+)-(\d+)',
     ).firstMatch(transport);
 
-    if (interleaved != null) {
-      _rtpChannel = int.parse(interleaved.group(1)!);
+    final isAudio = url.contains('trackID=1');
+
+    var channel = isAudio ? _audioChannel : _rtpChannel;
+
+    if (interleaved != null) channel = int.parse(interleaved.group(1)!);
+
+    if (isAudio) {
+      _audioChannel = channel;
+    } else {
+      _rtpChannel = channel;
     }
 
     _respond(
       cseq,
       headers: {
-        'Transport':
-            'RTP/AVP/TCP;unicast;interleaved=$_rtpChannel-${_rtpChannel + 1}',
+        'Transport': 'RTP/AVP/TCP;unicast;interleaved=$channel-${channel + 1}',
         'Session': _sessionId,
       },
     );
@@ -343,7 +379,9 @@ class _RtspConnection {
       headers: {
         'Session': _sessionId,
         'Range': 'npt=0.000-',
-        'RTP-Info': 'url=$url/trackID=0;seq=0;rtptime=0',
+        'RTP-Info':
+            'url=$url/trackID=0;seq=0;rtptime=0'
+            '${_sessionAudioFrames != null ? ',url=$url/trackID=1;seq=0;rtptime=0' : ''}',
       },
     );
 
@@ -380,6 +418,26 @@ class _RtspConnection {
       }
     });
 
+    final audioFrames = _sessionAudioFrames;
+
+    if (audioFrames != null) {
+      _audioSubscription = audioFrames.listen((frame) {
+        if (!_playing) return;
+
+        try {
+          _sendInterleaved(
+            _audioPacketizer.packetizeRaw(
+              frame.data,
+              timestamp: frame.timestamp,
+            ),
+            channel: _audioChannel,
+          );
+        } catch (_) {
+          close();
+        }
+      });
+    }
+
     // Replay sessions pace themselves from disk once a listener is attached.
     _fileSource?.play();
   }
@@ -389,12 +447,15 @@ class _RtspConnection {
 
     _nalSubscription?.cancel();
     _nalSubscription = null;
+
+    _audioSubscription?.cancel();
+    _audioSubscription = null;
   }
 
-  void _sendInterleaved(Uint8List rtpPacket) {
+  void _sendInterleaved(Uint8List rtpPacket, {int? channel}) {
     final frame = BytesBuilder()
       ..addByte(0x24)
-      ..addByte(_rtpChannel)
+      ..addByte(channel ?? _rtpChannel)
       ..addByte((rtpPacket.length >> 8) & 0xff)
       ..addByte(rtpPacket.length & 0xff)
       ..add(rtpPacket);

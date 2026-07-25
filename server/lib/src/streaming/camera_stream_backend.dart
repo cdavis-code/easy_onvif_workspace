@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 
 import '../config.dart';
+import 'audio_source.dart';
 import 'camera_h264_source.dart';
 import 'file_h264_source.dart';
 import 'h264_encoder.dart';
@@ -30,6 +31,9 @@ class CameraStreamBackend implements StreamBackend {
   final H264Encoder? encoder;
   final int frameRate;
 
+  @override
+  final AudioStreamSource? audioSource;
+
   CameraH264Source? _source;
   RtspServer? _rtspServer;
 
@@ -49,6 +53,7 @@ class CameraStreamBackend implements StreamBackend {
     required this.config,
     this.encoder,
     this.frameRate = 15,
+    this.audioSource,
   });
 
   @override
@@ -65,10 +70,13 @@ class CameraStreamBackend implements StreamBackend {
 
     await _source!.start();
 
+    await audioSource?.start();
+
     _rtspServer ??= RtspServer(
       source: _source!,
       port: config.rtspPort,
       replaySourceFor: replaySourceFor,
+      audioSource: audioSource,
     );
 
     await _rtspServer!.start();
@@ -99,5 +107,7 @@ class CameraStreamBackend implements StreamBackend {
 
     await _source?.stop();
     _source = null;
+
+    await audioSource?.stop();
   }
 }

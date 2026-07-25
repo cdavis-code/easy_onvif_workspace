@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import '../config.dart';
+import 'audio_source.dart';
 import 'file_h264_source.dart';
 import 'h264_source.dart';
 import 'rtsp_server.dart';
@@ -25,6 +26,9 @@ class FfmpegBackend implements StreamBackend {
   final List<String>? inputArgs;
   final int frameRate;
 
+  @override
+  final AudioStreamSource? audioSource;
+
   H264Source? _source;
   RtspServer? _rtspServer;
   String? _profileToken;
@@ -40,6 +44,7 @@ class FfmpegBackend implements StreamBackend {
     this.ffmpegPath = 'ffmpeg',
     this.inputArgs,
     this.frameRate = 15,
+    this.audioSource,
   });
 
   @override
@@ -57,10 +62,13 @@ class FfmpegBackend implements StreamBackend {
 
     await _source!.start();
 
+    await audioSource?.start();
+
     _rtspServer ??= RtspServer(
       source: _source!,
       port: config.rtspPort,
       replaySourceFor: replaySourceFor,
+      audioSource: audioSource,
     );
 
     await _rtspServer!.start();
@@ -124,5 +132,7 @@ class FfmpegBackend implements StreamBackend {
 
     await _source?.stop();
     _source = null;
+
+    await audioSource?.stop();
   }
 }

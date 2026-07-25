@@ -31,6 +31,14 @@ class RtpPacketizer {
     return _fragment(data, nal);
   }
 
+  /// Builds a single RTP packet around an opaque [payload] (e.g. one G.711
+  /// audio frame).
+  Uint8List packetizeRaw(
+    Uint8List payload, {
+    required int timestamp,
+    bool marker = true,
+  }) => _buildRtp(payload, marker: marker, timestamp: timestamp);
+
   List<Uint8List> _fragment(Uint8List data, H264NalUnit nal) {
     final packets = <Uint8List>[];
 
