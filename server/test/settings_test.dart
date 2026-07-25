@@ -80,6 +80,31 @@ geolocation:
     expect(settings.geoFallback!.elevation, 76.0);
   });
 
+  test('quoted scalars coerce instead of crashing', () {
+    const yaml = '''
+network:
+  httpPort: "9080"
+services:
+  recording: "false"
+geolocation:
+  lat: "43.65"
+  lon: "-79.38"
+''';
+
+    final settings = ServerSettings.parse(yaml);
+
+    expect(settings.config.httpPort, 9080);
+    expect(settings.services.recording, isFalse);
+    expect(settings.geoFallback!.latitude, 43.65);
+  });
+
+  test('non-numeric port throws FormatException', () {
+    expect(
+      () => ServerSettings.parse('network:\n  httpPort: not-a-port\n'),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('malformed yaml throws FormatException', () {
     expect(
       () => ServerSettings.parse(': not yaml : ['),

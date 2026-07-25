@@ -113,11 +113,46 @@ class ServerSettings {
     final geo = section('geolocation');
 
     // A bare scalar like `firmware: 1` parses as int; coerce to String where
-    // the target field is a String.
+    // the target field is a String. Conversely `httpPort: "9080"` parses as
+    // String; coerce numerics/bools too so quoting never crashes with a
+    // TypeError — a bad value is a FormatException like any other parse error.
     String? text(Map<Object?, Object?> node, String key) {
       final value = node[key];
 
       return value == null ? null : '$value';
+    }
+
+    int? integer(Map<Object?, Object?> node, String key) {
+      final value = node[key];
+
+      if (value == null) return null;
+      if (value is int) return value;
+
+      return int.tryParse('$value') ??
+          (throw FormatException('Settings key "$key" is not an integer: $value'));
+    }
+
+    double? decimal(Map<Object?, Object?> node, String key) {
+      final value = node[key];
+
+      if (value == null) return null;
+      if (value is num) return value.toDouble();
+
+      return double.tryParse('$value') ??
+          (throw FormatException('Settings key "$key" is not a number: $value'));
+    }
+
+    bool flag(Map<Object?, Object?> node, String key, {required bool orElse}) {
+      final value = node[key];
+
+      if (value == null) return orElse;
+      if (value is bool) return value;
+
+      return switch ('$value'.toLowerCase()) {
+        'true' => true,
+        'false' => false,
+        _ => throw FormatException('Settings key "$key" is not a boolean: $value'),
+      };
     }
 
     final presets = <ImagingPresetSetting>[];
@@ -141,16 +176,16 @@ class ServerSettings {
 
     if (geo['lat'] != null && geo['lon'] != null) {
       geoFallback = GeoLocation(
-        latitude: (geo['lat'] as num).toDouble(),
-        longitude: (geo['lon'] as num).toDouble(),
-        elevation: (geo['elevation'] as num?)?.toDouble(),
+        latitude: decimal(geo, 'lat')!,
+        longitude: decimal(geo, 'lon')!,
+        elevation: decimal(geo, 'elevation'),
       );
     }
 
     return ServerSettings(
       config: ServerConfig(
-        httpPort: (network['httpPort'] as int?) ?? base.httpPort,
-        rtspPort: (network['rtspPort'] as int?) ?? base.rtspPort,
+        httpPort: integer(network, 'httpPort') ?? base.httpPort,
+        rtspPort: integer(network, 'rtspPort') ?? base.rtspPort,
         username: text(auth, 'username') ?? base.username,
         password: text(auth, 'password') ?? base.password,
         manufacturer: text(device, 'manufacturer') ?? base.manufacturer,
@@ -161,14 +196,14 @@ class ServerSettings {
         hostname: text(device, 'hostname') ?? base.hostname,
       ),
       services: ServiceFlags(
-        recording: (servicesMap['recording'] as bool?) ?? true,
-        replay: (servicesMap['replay'] as bool?) ?? true,
-        search: (servicesMap['search'] as bool?) ?? true,
-        imaging: (servicesMap['imaging'] as bool?) ?? true,
+        recording: flag(servicesMap, 'recording', orElse: true),
+        replay: flag(servicesMap, 'replay', orElse: true),
+        search: flag(servicesMap, 'search', orElse: true),
+        imaging: flag(servicesMap, 'imaging', orElse: true),
       ),
       recordingDirectory: text(recording, 'directory'),
-      segmentSeconds: (recording['segmentSeconds'] as int?) ?? 10,
-      maxRetentionMinutes: recording['maxRetentionMinutes'] as int?,
+      segmentSeconds: integer(recording, 'segmentSeconds') ?? 10,
+      maxRetentionMinutes: integer(recording, 'maxRetentionMinutes'),
       imagingPresets: presets.isEmpty ? defaultImagingPresets : presets,
       geoFallback: geoFallback,
     );
