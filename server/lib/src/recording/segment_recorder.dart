@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import '../streaming/audio_source.dart';
 import '../streaming/h264_source.dart';
 import 'recording_index.dart';
 import 'recording_store.dart';
@@ -19,8 +20,14 @@ class SegmentRecorder {
   final RecordingStore store;
   final int segmentSeconds;
 
+  /// When set, each segment gets a byte-addressable `.alaw` sidecar carrying
+  /// the G.711 frames captured while the segment was open.
+  final AudioStreamSource? audioSource;
+
   StreamSubscription<H264NalUnit>? _subscription;
+  StreamSubscription<AudioFrame>? _audioSubscription;
   IOSink? _sink;
+  IOSink? _audioSink;
   RecordingSegment? _segment;
   int _segmentNumber = 0;
   DateTime? _segmentStartedAt;
@@ -34,6 +41,7 @@ class SegmentRecorder {
     required this.source,
     required this.store,
     this.segmentSeconds = 10,
+    this.audioSource,
   });
 
   bool get isRecording => _subscription != null;
@@ -51,7 +59,11 @@ class SegmentRecorder {
     });
 
     _subscription = source.nals.listen(_onNal);
+
+    _audioSubscription = audioSource?.frames.listen(_onAudioFrame);
   }
+
+  void _onAudioFrame(AudioFrame frame) => _audioSink?.add(frame.data);
 
   void _onNal(H264NalUnit nal) {
     final now = DateTime.now().toUtc();
@@ -92,6 +104,13 @@ class SegmentRecorder {
 
     index.segments.add(_segment!);
 
+    if (audioSource != null) {
+      final audioName = name.replaceAll('.h264', '.alaw');
+
+      _segment!.audioFile = audioName;
+      _audioSink = File('${index.directory.path}/$audioName').openWrite();
+    }
+
     // Every segment starts with SPS/PPS so it decodes standalone.
     final sps = source.sps;
     final pps = source.pps;
@@ -111,15 +130,22 @@ class SegmentRecorder {
 
   void _rotate(DateTime now) {
     final closing = _sink;
+    final closingAudio = _audioSink;
 
     _sink = null;
+    _audioSink = null;
 
     _openSegment(now);
 
     // Flush the closed segment, then persist the index and apply retention —
     // all serialized on one queue so saves never interleave. IO errors are
     // logged into the queue's catch rather than crashing the isolate.
-    _enqueueSave(before: closing?.close());
+    _enqueueSave(
+      before: Future.wait([
+        if (closing != null) closing.close(),
+        if (closingAudio != null) closingAudio.close(),
+      ]),
+    );
   }
 
   /// Appends a save (and prune) to the serialized queue, optionally awaiting
@@ -142,9 +168,15 @@ class SegmentRecorder {
     await _subscription?.cancel();
     _subscription = null;
 
+    await _audioSubscription?.cancel();
+    _audioSubscription = null;
+
     await _sink?.close();
     _sink = null;
     _segment = null;
+
+    await _audioSink?.close();
+    _audioSink = null;
 
     await _pendingSave;
     await index.save();

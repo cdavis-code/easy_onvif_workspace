@@ -11,11 +11,15 @@ class RecordingSegment {
   DateTime endUtc;
   int frameCount;
 
+  /// The `.alaw` audio sidecar file name, or `null` for video-only segments.
+  String? audioFile;
+
   RecordingSegment({
     required this.file,
     required this.startUtc,
     required this.endUtc,
     this.frameCount = 0,
+    this.audioFile,
   });
 
   Map<String, dynamic> toJson() => {
@@ -23,6 +27,7 @@ class RecordingSegment {
     'startUtc': startUtc.toIso8601String(),
     'endUtc': endUtc.toIso8601String(),
     'frameCount': frameCount,
+    if (audioFile != null) 'audioFile': audioFile,
   };
 
   factory RecordingSegment.fromJson(Map<String, dynamic> json) =>
@@ -31,6 +36,7 @@ class RecordingSegment {
         startUtc: DateTime.parse(json['startUtc'] as String),
         endUtc: DateTime.parse(json['endUtc'] as String),
         frameCount: json['frameCount'] as int? ?? 0,
+        audioFile: json['audioFile'] as String?,
       );
 }
 
@@ -65,6 +71,11 @@ class RecordingIndex {
 
   File segmentFile(RecordingSegment segment) =>
       File('${directory.path}/${segment.file}');
+
+  /// The segment's audio sidecar, or null for video-only segments.
+  File? audioFile(RecordingSegment segment) => segment.audioFile == null
+      ? null
+      : File('${directory.path}/${segment.audioFile}');
 
   Future<void> save() async {
     // Write-then-rename so a crash mid-write cannot leave a torn index that

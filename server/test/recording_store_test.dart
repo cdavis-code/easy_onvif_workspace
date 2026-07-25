@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:easy_onvif_server/src/recording/recording_index.dart';
 import 'package:easy_onvif_server/src/recording/recording_store.dart';
 import 'package:easy_onvif_server/src/recording/segment_recorder.dart';
+import 'package:easy_onvif_server/src/streaming/audio_source.dart';
 import 'package:easy_onvif_server/src/streaming/h264_source.dart';
 
 /// A [NalStreamSource] that emits synthetic access units on demand.
@@ -40,6 +41,32 @@ class FakeNalSource implements NalStreamSource {
   }
 
   Future<void> close() => _controller.close();
+}
+
+/// An [AudioStreamSource] that emits one silent A-law frame every 20 ms.
+class FakeAudioSource implements AudioStreamSource {
+  final _controller = StreamController<AudioFrame>.broadcast();
+  Timer? _timer;
+  int _timestamp = 0;
+
+  @override
+  Stream<AudioFrame> get frames => _controller.stream;
+
+  @override
+  Future<void> start() async {
+    _timer = Timer.periodic(const Duration(milliseconds: 20), (_) {
+      _controller.add(
+        AudioFrame(Uint8List.fromList(List.filled(160, 0xD5)), _timestamp),
+      );
+      _timestamp += 160;
+    });
+  }
+
+  @override
+  Future<void> stop() async {
+    _timer?.cancel();
+    await _controller.close();
+  }
 }
 
 void main() {
@@ -147,6 +174,54 @@ void main() {
       final reloaded = await RecordingIndex.load(index.directory);
 
       expect(reloaded!.segments.length, index.segments.length);
+    });
+
+    test('writes an .alaw sidecar per segment when audio is present', () async {
+      final store = RecordingStore(root: tempDir);
+      await store.open();
+
+      final index = await store.create(
+        recordingToken: 'RA1',
+        frameRate: 15,
+        sourceToken: 'VideoSource_1',
+        profileToken: 'Profile_1',
+      );
+
+      final video = FakeNalSource();
+      final audio = FakeAudioSource();
+      final recorder = SegmentRecorder(
+        index: index,
+        source: video,
+        store: store,
+        segmentSeconds: 1,
+        audioSource: audio,
+      );
+
+      await recorder.start();
+      await audio.start();
+      await video.emitFrames(30, const Duration(milliseconds: 100));
+      await recorder.stop();
+      await audio.stop();
+      await video.close();
+
+      expect(index.segments.length, greaterThanOrEqualTo(2));
+
+      for (final segment in index.segments) {
+        expect(segment.audioFile, isNotNull);
+
+        final sidecar = index.audioFile(segment)!;
+        expect(sidecar.existsSync(), isTrue);
+        expect(sidecar.lengthSync(), greaterThan(0));
+        expect(sidecar.lengthSync() % 160, 0);
+      }
+
+      // The sidecar reference survives an index reload.
+      final store2 = RecordingStore(root: tempDir);
+      await store2.open();
+      expect(
+        store2.byToken('RA1')!.segments.first.audioFile,
+        index.segments.first.audioFile,
+      );
     });
   });
 }

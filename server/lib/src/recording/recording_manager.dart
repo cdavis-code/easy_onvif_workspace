@@ -142,6 +142,7 @@ class RecordingManager {
         source: source,
         store: store,
         segmentSeconds: settings.segmentSeconds,
+        audioSource: backend.audioSource,
       );
 
       await recorder.start();

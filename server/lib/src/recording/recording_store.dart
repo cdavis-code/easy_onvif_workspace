@@ -79,6 +79,10 @@ class RecordingStore {
       final file = index.segmentFile(segment);
 
       if (file.existsSync()) await file.delete();
+
+      final audio = index.audioFile(segment);
+
+      if (audio != null && audio.existsSync()) await audio.delete();
     }
 
     await index.save();
