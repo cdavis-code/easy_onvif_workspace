@@ -152,6 +152,7 @@ class OnvifDevice with UiLoggy {
         config: config,
         state: this.state,
         streamBackend: streamBackend,
+        audioEnabled: this.settings.media.audioEnabled,
       ),
       Media2Service(
         config: config,

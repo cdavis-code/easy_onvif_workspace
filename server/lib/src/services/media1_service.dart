@@ -18,10 +18,15 @@ class Media1Service implements OnvifService {
   final DeviceState state;
   final StreamBackend streamBackend;
 
+  /// Whether audio streaming is enabled; when false the audio configuration
+  /// operations return empty lists.
+  final bool audioEnabled;
+
   Media1Service({
     required this.config,
     required this.state,
     required this.streamBackend,
+    this.audioEnabled = false,
   });
 
   @override
@@ -45,6 +50,10 @@ class Media1Service implements OnvifService {
         return _getVideoSources();
       case 'GetAudioSources':
         return _getAudioSources();
+      case 'GetAudioSourceConfigurations':
+        return _getAudioSourceConfigurations();
+      case 'GetAudioEncoderConfigurations':
+        return _getAudioEncoderConfigurations();
       case 'GetServiceCapabilities':
         return _getServiceCapabilities();
       case 'GetMetadataConfigurations':
@@ -164,6 +173,62 @@ class Media1Service implements OnvifService {
             attributes: {'token': 'AudioSource_1'},
             nest: () {
               b.element('Channels', namespace: Xmlns.tt, nest: '1');
+            },
+          );
+        },
+      );
+    });
+  }
+
+  String _getAudioSourceConfigurations() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetAudioSourceConfigurationsResponse',
+        namespace: Xmlns.trt,
+        nest: () {
+          if (!audioEnabled) return;
+
+          b.element(
+            'Configurations',
+            namespace: Xmlns.trt,
+            attributes: {'token': 'AudioSourceConfig_1'},
+            nest: () {
+              b.element(
+                'Name',
+                namespace: Xmlns.tt,
+                nest: 'Audio Source Config',
+              );
+              b.element('UseCount', namespace: Xmlns.tt, nest: '1');
+              b.element(
+                'SourceToken',
+                namespace: Xmlns.tt,
+                nest: 'AudioSource_1',
+              );
+            },
+          );
+        },
+      );
+    });
+  }
+
+  String _getAudioEncoderConfigurations() {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetAudioEncoderConfigurationsResponse',
+        namespace: Xmlns.trt,
+        nest: () {
+          if (!audioEnabled) return;
+
+          b.element(
+            'Configurations',
+            namespace: Xmlns.trt,
+            attributes: {'token': 'AudioEncoderConfig_1'},
+            nest: () {
+              b.element('Name', namespace: Xmlns.tt, nest: 'G711 Encoder');
+              b.element('UseCount', namespace: Xmlns.tt, nest: '1');
+              b.element('Encoding', namespace: Xmlns.tt, nest: 'G711');
+              b.element('Bitrate', namespace: Xmlns.tt, nest: '64');
+              b.element('SampleRate', namespace: Xmlns.tt, nest: '8');
             },
           );
         },

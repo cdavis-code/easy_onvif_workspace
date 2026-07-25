@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:easy_onvif_server/src/config.dart';
 import 'package:easy_onvif_server/src/hardware/hardware_adapter.dart';
 import 'package:easy_onvif_server/src/onvif_device.dart';
+import 'package:easy_onvif_server/src/settings.dart';
 import 'package:easy_onvif_server/src/streaming/stream_backend.dart';
 
 /// Coverage tests for the operations that fill the remaining gaps against the
@@ -22,6 +23,7 @@ void main() {
       config: config,
       hardware: StubHardwareAdapter(),
       streamBackend: StubStreamBackend(urlFor: config.rtspUrl),
+      settings: ServerSettings.parse('media:\n  audio:\n    enabled: true'),
     );
 
     await device.start();
@@ -53,9 +55,12 @@ void main() {
 
     test('getEndpointReference returns the device uuid', () async {
       // The client helper is commented out upstream; use a low-level request.
-      soap.Transport.builder.element('GetEndpointReference', nest: () {
-        soap.Transport.builder.namespace(soap.Xmlns.tds);
-      });
+      soap.Transport.builder.element(
+        'GetEndpointReference',
+        nest: () {
+          soap.Transport.builder.namespace(soap.Xmlns.tds);
+        },
+      );
 
       final envelope = await onvif.deviceManagement.transport.securedRequest(
         onvif.deviceManagement.uri,
@@ -155,13 +160,19 @@ void main() {
 
       // Unknown video sources are rejected with a NoSource fault (the client
       // facade swallows faults for getPresets, so assert at the SOAP level).
-      soap.Transport.builder.element('GetPresets', nest: () {
-        soap.Transport.builder.namespace(soap.Xmlns.timg);
-        soap.Transport.builder.element('VideoSourceToken', nest: () {
+      soap.Transport.builder.element(
+        'GetPresets',
+        nest: () {
           soap.Transport.builder.namespace(soap.Xmlns.timg);
-          soap.Transport.builder.text('BogusSource');
-        });
-      });
+          soap.Transport.builder.element(
+            'VideoSourceToken',
+            nest: () {
+              soap.Transport.builder.namespace(soap.Xmlns.timg);
+              soap.Transport.builder.text('BogusSource');
+            },
+          );
+        },
+      );
 
       final faulted = await onvif.imaging.transport.securedRequest(
         onvif.imaging.uri,
@@ -173,17 +184,26 @@ void main() {
       // The client's `setCurrentPreset` sends the video source token as the
       // preset token (upstream bug), so apply the preset with a low-level
       // request carrying the correct wire shape.
-      soap.Transport.builder.element('SetCurrentPreset', nest: () {
-        soap.Transport.builder.namespace(soap.Xmlns.timg);
-        soap.Transport.builder.element('VideoSourceToken', nest: () {
+      soap.Transport.builder.element(
+        'SetCurrentPreset',
+        nest: () {
           soap.Transport.builder.namespace(soap.Xmlns.timg);
-          soap.Transport.builder.text('VideoSource_1');
-        });
-        soap.Transport.builder.element('PresetToken', nest: () {
-          soap.Transport.builder.namespace(soap.Xmlns.timg);
-          soap.Transport.builder.text(presets.last.token);
-        });
-      });
+          soap.Transport.builder.element(
+            'VideoSourceToken',
+            nest: () {
+              soap.Transport.builder.namespace(soap.Xmlns.timg);
+              soap.Transport.builder.text('VideoSource_1');
+            },
+          );
+          soap.Transport.builder.element(
+            'PresetToken',
+            nest: () {
+              soap.Transport.builder.namespace(soap.Xmlns.timg);
+              soap.Transport.builder.text(presets.last.token);
+            },
+          );
+        },
+      );
 
       final envelope = await onvif.imaging.transport.securedRequest(
         onvif.imaging.uri,
@@ -216,6 +236,34 @@ void main() {
       final capabilities = await onvif.imaging.getServiceCapabilities();
 
       expect(capabilities.presets, isTrue);
+    });
+  });
+
+  group('audio configuration', () {
+    test('advertises one G711 encoder configuration', () async {
+      soap.Transport.builder.element('GetAudioEncoderConfigurations', nest: () {
+        soap.Transport.builder.namespace(soap.Xmlns.trt);
+      });
+
+      final envelope = await onvif.media.media1.transport.securedRequest(
+        onvif.media.media1.uri,
+        soap.Body(request: soap.Transport.builder.buildFragment()),
+      );
+
+      expect(envelope.body.response.toString(), contains('G711'));
+    });
+
+    test('advertises one audio source configuration', () async {
+      soap.Transport.builder.element('GetAudioSourceConfigurations', nest: () {
+        soap.Transport.builder.namespace(soap.Xmlns.trt);
+      });
+
+      final envelope = await onvif.media.media1.transport.securedRequest(
+        onvif.media.media1.uri,
+        soap.Body(request: soap.Transport.builder.buildFragment()),
+      );
+
+      expect(envelope.body.response.toString(), contains('AudioSource_1'));
     });
   });
 }
