@@ -33,6 +33,32 @@ class ImagingPresetSetting {
   });
 }
 
+/// What the video track streams: a camera, a display, or a test pattern.
+enum VideoSourceKind { camera, display, test }
+
+/// Which capture devices feed the stream, using raw platform identifiers
+/// (camera name, CGDirectDisplayID, /dev/video0, dshow name, hw:1, …) passed
+/// unmodified to the capture layer.
+class MediaSettings {
+  final VideoSourceKind videoSource;
+
+  /// Raw platform identifier of the video device; empty = platform default.
+  final String videoDevice;
+
+  /// Audio streaming is opt-in.
+  final bool audioEnabled;
+
+  /// Raw platform identifier of the audio input; empty = default input.
+  final String audioDevice;
+
+  const MediaSettings({
+    this.videoSource = VideoSourceKind.camera,
+    this.videoDevice = '',
+    this.audioEnabled = false,
+    this.audioDevice = '',
+  });
+}
+
 /// Runtime settings for the ONVIF server, loaded from YAML.
 ///
 /// Search order for [load]: explicit `path` argument, then
@@ -59,6 +85,9 @@ class ServerSettings {
   /// Fallback location for `GetGeoLocation` when the platform has no fix.
   final GeoLocation? geoFallback;
 
+  /// Which video/audio devices feed the live stream.
+  final MediaSettings media;
+
   static const defaultImagingPresets = [
     ImagingPresetSetting(
       token: 'ImagingPreset_1',
@@ -80,6 +109,7 @@ class ServerSettings {
     this.maxRetentionMinutes,
     this.imagingPresets = defaultImagingPresets,
     this.geoFallback,
+    this.media = const MediaSettings(),
   });
 
   /// Parses [yamlText]; empty/blank text yields all defaults. Throws
@@ -111,6 +141,13 @@ class ServerSettings {
     final recording = section('recording');
     final imaging = section('imaging');
     final geo = section('geolocation');
+    final mediaMap = section('media');
+    final videoMap = mediaMap['video'] is YamlMap
+        ? mediaMap['video'] as YamlMap
+        : const <Object?, Object?>{};
+    final audioMap = mediaMap['audio'] is YamlMap
+        ? mediaMap['audio'] as YamlMap
+        : const <Object?, Object?>{};
 
     // A bare scalar like `firmware: 1` parses as int; coerce to String where
     // the target field is a String. Conversely `httpPort: "9080"` parses as
@@ -182,6 +219,16 @@ class ServerSettings {
       );
     }
 
+    final sourceText = text(videoMap, 'source') ?? 'camera';
+    final videoSource = switch (sourceText) {
+      'camera' => VideoSourceKind.camera,
+      'display' => VideoSourceKind.display,
+      'test' => VideoSourceKind.test,
+      _ => throw FormatException(
+        'Settings key "source" is not one of camera|display|test: $sourceText',
+      ),
+    };
+
     return ServerSettings(
       config: ServerConfig(
         httpPort: integer(network, 'httpPort') ?? base.httpPort,
@@ -206,6 +253,12 @@ class ServerSettings {
       maxRetentionMinutes: integer(recording, 'maxRetentionMinutes'),
       imagingPresets: presets.isEmpty ? defaultImagingPresets : presets,
       geoFallback: geoFallback,
+      media: MediaSettings(
+        videoSource: videoSource,
+        videoDevice: text(videoMap, 'device') ?? '',
+        audioEnabled: flag(audioMap, 'enabled', orElse: false),
+        audioDevice: text(audioMap, 'device') ?? '',
+      ),
     );
   }
 

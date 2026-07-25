@@ -196,4 +196,39 @@ services:
       expect(namespaces, contains('http://www.onvif.org/ver20/imaging/wsdl'));
     });
   });
+
+  group('media settings', () {
+    test('defaults to camera video and disabled audio', () {
+      final settings = ServerSettings.parse('');
+
+      expect(settings.media.videoSource, VideoSourceKind.camera);
+      expect(settings.media.videoDevice, isEmpty);
+      expect(settings.media.audioEnabled, isFalse);
+      expect(settings.media.audioDevice, isEmpty);
+    });
+
+    test('parses the media section', () {
+      final settings = ServerSettings.parse('''
+media:
+  video:
+    source: display
+    device: "1"
+  audio:
+    enabled: true
+    device: BuiltInMicrophoneDevice
+''');
+
+      expect(settings.media.videoSource, VideoSourceKind.display);
+      expect(settings.media.videoDevice, '1');
+      expect(settings.media.audioEnabled, isTrue);
+      expect(settings.media.audioDevice, 'BuiltInMicrophoneDevice');
+    });
+
+    test('rejects an unknown video source', () {
+      expect(
+        () => ServerSettings.parse('media:\n  video:\n    source: hologram'),
+        throwsFormatException,
+      );
+    });
+  });
 }
