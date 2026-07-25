@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import '../recording/recording_index.dart';
+import 'audio_source.dart';
 import 'h264_source.dart';
 
 /// Plays a recorded segment sequence back as a live-like NAL stream, paced at
@@ -23,10 +24,21 @@ class FileH264Source implements NalStreamSource {
   int _position = 0;
   bool _loaded = false;
 
+  final _audioController = StreamController<AudioFrame>.broadcast();
+  final List<Uint8List> _audioChunks = [];
+  int _audioPosition = 0;
+  Timer? _audioTimer;
+
   FileH264Source({required this.index, this.startUtc});
 
   @override
   Stream<H264NalUnit> get nals => _controller.stream;
+
+  /// Whether the loaded segments carried audio sidecars.
+  bool get hasAudio => _audioChunks.isNotEmpty;
+
+  /// Paced 20 ms replay audio frames (empty for video-only recordings).
+  Stream<AudioFrame> get audioFrames => _audioController.stream;
 
   @override
   Uint8List? get sps => _framer.sps;
@@ -86,6 +98,31 @@ class FileH264Source implements NalStreamSource {
         _accessUnits.last.add(nal);
       }
     }
+
+    // Load the audio sidecars; the first segment honors the seek offset
+    // (A-law is byte-addressable: 8000 bytes per second).
+    for (final segment in segments) {
+      final sidecar = index.audioFile(segment);
+
+      if (sidecar == null || !sidecar.existsSync()) continue;
+
+      var bytes = await sidecar.readAsBytes();
+
+      if (seek != null &&
+          segment == segments.first &&
+          seek.isAfter(segment.startUtc)) {
+        final skip =
+            (seek.difference(segment.startUtc).inMilliseconds * 8 ~/ 160) * 160;
+
+        if (skip >= bytes.length) continue;
+
+        bytes = bytes.sublist(skip);
+      }
+
+      for (var offset = 0; offset + 160 <= bytes.length; offset += 160) {
+        _audioChunks.add(bytes.sublist(offset, offset + 160));
+      }
+    }
   }
 
   /// Begins paced emission of the loaded access units.
@@ -107,6 +144,22 @@ class FileH264Source implements NalStreamSource {
 
       _position++;
     });
+
+    if (_audioChunks.isNotEmpty && _audioTimer == null) {
+      _audioTimer = Timer.periodic(const Duration(milliseconds: 20), (_) {
+        if (_audioPosition >= _audioChunks.length) {
+          _audioTimer?.cancel();
+
+          return;
+        }
+
+        _audioController.add(
+          AudioFrame(_audioChunks[_audioPosition], _audioPosition * 160),
+        );
+
+        _audioPosition++;
+      });
+    }
   }
 
   /// Loads and starts playback in one step.
@@ -120,6 +173,10 @@ class FileH264Source implements NalStreamSource {
     _timer?.cancel();
     _timer = null;
 
+    _audioTimer?.cancel();
+    _audioTimer = null;
+
     await _controller.close();
+    await _audioController.close();
   }
 }

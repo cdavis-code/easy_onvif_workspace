@@ -294,7 +294,7 @@ class _RtspConnection {
       _replayToken = replayToken;
       _fileSource = fileSource;
       _sessionSource = fileSource;
-      _sessionAudioFrames = null; // Replay audio arrives in a later task.
+      _sessionAudioFrames = fileSource.hasAudio ? fileSource.audioFrames : null;
     } else {
       _sessionSource = server.source;
       _sessionAudioFrames = server.audioSource?.frames;
@@ -371,6 +371,7 @@ class _RtspConnection {
 
         _fileSource = replaced;
         _sessionSource = replaced;
+        _sessionAudioFrames = replaced.hasAudio ? replaced.audioFrames : null;
       }
     }
 
