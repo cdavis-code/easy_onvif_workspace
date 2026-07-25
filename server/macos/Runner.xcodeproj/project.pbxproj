@@ -30,6 +30,7 @@
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		AA000102000000000000A002 /* VideoToolboxEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000101000000000000A001 /* VideoToolboxEncoder.swift */; };
 		AA000104000000000000A004 /* AudioCaptureSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000103000000000000A003 /* AudioCaptureSource.swift */; };
+		AA000108000000000000A008 /* ScreenCaptureSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000107000000000000A007 /* ScreenCaptureSource.swift */; };
 		6EF64BA6E3142E9C7956ED60 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92F0DD9FBDE38863189BF95D /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
 
@@ -76,6 +77,7 @@
 		33CC11122044BFA00003C045 /* MainFlutterWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainFlutterWindow.swift; sourceTree = "<group>"; };
 		AA000101000000000000A001 /* VideoToolboxEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoToolboxEncoder.swift; sourceTree = "<group>"; };
 		AA000103000000000000A003 /* AudioCaptureSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCaptureSource.swift; sourceTree = "<group>"; };
+		AA000107000000000000A007 /* ScreenCaptureSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenCaptureSource.swift; sourceTree = "<group>"; };
 		33CEB47222A05771004F2AC0 /* Flutter-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Debug.xcconfig"; sourceTree = "<group>"; };
 		33CEB47422A05771004F2AC0 /* Flutter-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Flutter-Release.xcconfig"; sourceTree = "<group>"; };
 		33CEB47722A0578A004F2AC0 /* Flutter-Generated.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Flutter-Generated.xcconfig"; path = "ephemeral/Flutter-Generated.xcconfig"; sourceTree = "<group>"; };
@@ -183,6 +185,7 @@
 				33CC11122044BFA00003C045 /* MainFlutterWindow.swift */,
 				AA000101000000000000A001 /* VideoToolboxEncoder.swift */,
 				AA000103000000000000A003 /* AudioCaptureSource.swift */,
+				AA000107000000000000A007 /* ScreenCaptureSource.swift */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
 				33E51914231749380026EE4D /* Release.entitlements */,
 				33CC11242044D66E0003C045 /* Resources */,
@@ -447,6 +450,7 @@
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				AA000102000000000000A002 /* VideoToolboxEncoder.swift in Sources */,
 				AA000104000000000000A004 /* AudioCaptureSource.swift in Sources */,
+				AA000108000000000000A008 /* ScreenCaptureSource.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

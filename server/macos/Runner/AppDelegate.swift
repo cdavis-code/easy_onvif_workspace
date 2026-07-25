@@ -12,6 +12,9 @@ class AppDelegate: FlutterAppDelegate {
   private let audioCapture = AudioCaptureSource()
   private var audioEventSink: FlutterEventSink?
 
+  /// ScreenCaptureKit capture (macOS 12.3+), feeding the shared encoder.
+  private var screenCapture: Any?
+
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
   }
@@ -32,6 +35,7 @@ class AppDelegate: FlutterAppDelegate {
       registerPermissionChannel(messenger: messenger)
       registerEncoderChannels(messenger: messenger)
       registerAudioChannels(messenger: messenger)
+      registerScreenCaptureChannel(messenger: messenger)
     }
 
     super.applicationDidFinishLaunching(notification)
@@ -50,6 +54,12 @@ class AppDelegate: FlutterAppDelegate {
         AppDelegate.requestAccess(for: .video, result: result)
       case "requestMicrophone":
         AppDelegate.requestAccess(for: .audio, result: result)
+      case "requestScreenCapture":
+        if CGPreflightScreenCaptureAccess() {
+          result(true)
+        } else {
+          result(CGRequestScreenCaptureAccess())
+        }
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -151,6 +161,52 @@ class AppDelegate: FlutterAppDelegate {
     events.setStreamHandler(AudioStreamHandler(capture: audioCapture) { [weak self] sink in
       self?.audioEventSink = sink
     })
+  }
+
+  /// Channel backing `ScreenH264Source`: starts/stops display capture. The
+  /// encoded H.264 flows through the existing encoder event channel.
+  private func registerScreenCaptureChannel(messenger: FlutterBinaryMessenger) {
+    let channel = FlutterMethodChannel(
+      name: "easy_onvif_server/screen_capture",
+      binaryMessenger: messenger
+    )
+
+    channel.setMethodCallHandler { [weak self] call, result in
+      guard let self = self else { return }
+      guard #available(macOS 12.3, *) else {
+        result(FlutterError(
+          code: "unavailable", message: "ScreenCaptureKit requires macOS 12.3+", details: nil))
+        return
+      }
+
+      switch call.method {
+      case "start":
+        let args = call.arguments as? [String: Any] ?? [:]
+        let displayId = UInt32(args["displayId"] as? Int ?? 0)
+        let width = args["width"] as? Int ?? 1280
+        let height = args["height"] as? Int ?? 720
+        let frameRate = args["frameRate"] as? Int ?? 15
+        let capture = ScreenCaptureSource(encoder: self.encoder)
+        self.screenCapture = capture
+        capture.start(displayId: displayId, width: width, height: height, frameRate: frameRate) { error in
+          DispatchQueue.main.async {
+            if let error = error {
+              result(FlutterError(code: "screen_start", message: error.localizedDescription, details: nil))
+            } else {
+              result(nil)
+            }
+          }
+        }
+
+      case "stop":
+        if let capture = self.screenCapture as? ScreenCaptureSource { capture.stop() }
+        self.screenCapture = nil
+        result(nil)
+
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
   }
 
   /// Requests access to [mediaType], showing the system prompt the first time,
