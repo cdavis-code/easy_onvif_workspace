@@ -138,7 +138,7 @@ services:
       addTearDown(device.stop);
 
       final onvif = await Onvif.connect(
-        host: 'localhost:8095',
+        host: 'localhost:8100',
         username: 'admin',
         password: 'admin',
       );
@@ -182,7 +182,7 @@ services:
       addTearDown(device.stop);
 
       final onvif = await Onvif.connect(
-        host: 'localhost:8094',
+        host: 'localhost:8101',
         username: 'admin',
         password: 'admin',
       );
