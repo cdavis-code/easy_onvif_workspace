@@ -144,4 +144,61 @@ void main() {
       expect(options.ptzStatusFilterOptions, isNotNull);
     });
   });
+
+  group('imaging', () {
+    test('presets round-trip', () async {
+      final presets = await onvif.imaging.getPresets('VideoSource_1');
+
+      expect(presets.length, greaterThanOrEqualTo(2));
+      expect(presets.first.name, isNotEmpty);
+      expect(presets.first.type, isNotEmpty);
+
+      // The client's `setCurrentPreset` sends the video source token as the
+      // preset token (upstream bug), so apply the preset with a low-level
+      // request carrying the correct wire shape.
+      soap.Transport.builder.element('SetCurrentPreset', nest: () {
+        soap.Transport.builder.namespace(soap.Xmlns.timg);
+        soap.Transport.builder.element('VideoSourceToken', nest: () {
+          soap.Transport.builder.namespace(soap.Xmlns.timg);
+          soap.Transport.builder.text('VideoSource_1');
+        });
+        soap.Transport.builder.element('PresetToken', nest: () {
+          soap.Transport.builder.namespace(soap.Xmlns.timg);
+          soap.Transport.builder.text(presets.last.token);
+        });
+      });
+
+      final envelope = await onvif.imaging.transport.securedRequest(
+        onvif.imaging.uri,
+        soap.Body(request: soap.Transport.builder.buildFragment()),
+      );
+
+      expect(envelope.body.hasFault, isFalse);
+
+      final current = await onvif.imaging.getCurrentPreset('VideoSource_1');
+
+      expect(current.token, presets.last.token);
+
+      // The client call reaches the server as `SetPreset` with the video
+      // source token in the `PresetToken` field, which is not a preset token,
+      // so it is rejected with a fault.
+      await expectLater(
+        onvif.imaging.setCurrentPreset(
+          videoSourceToken: 'VideoSource_1',
+          presetToken: presets.last.token,
+        ),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('status and capabilities', () async {
+      final status = await onvif.imaging.getStatus('VideoSource_1');
+
+      expect(status.focusStatus20?.moveStatus, 'IDLE');
+
+      final capabilities = await onvif.imaging.getServiceCapabilities();
+
+      expect(capabilities.presets, isTrue);
+    });
+  });
 }

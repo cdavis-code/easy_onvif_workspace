@@ -12,6 +12,7 @@ import 'recording/recording_store.dart';
 import 'server/onvif_server.dart';
 import 'server/soap_dispatcher.dart';
 import 'services/device_service.dart';
+import 'services/imaging_service.dart';
 import 'services/media1_service.dart';
 import 'services/media2_service.dart';
 import 'services/onvif_service.dart';
@@ -79,6 +80,19 @@ class OnvifDevice with UiLoggy {
       ),
     );
 
+    // Seed the simulated imaging presets from settings; the first preset is
+    // the one initially applied.
+    this.state.imagingPresets.addAll([
+      for (final preset in this.settings.imagingPresets)
+        ImagingPreset(
+          token: preset.token,
+          name: preset.name,
+          type: preset.type,
+        ),
+    ]);
+    this.state.currentImagingPreset =
+        this.state.imagingPresets.firstOrNull?.token;
+
     final authenticator = Authenticator(
       expectedUsername: config.username,
       expectedPassword: config.password,
@@ -130,6 +144,7 @@ class OnvifDevice with UiLoggy {
         streamBackend: streamBackend,
       ),
       PtzService(state: this.state),
+      if (this.settings.services.imaging) ImagingService(state: this.state),
       if (recordingManager != null)
         RecordingService(manager: recordingManager!),
       if (recordingManager != null && this.settings.services.replay)

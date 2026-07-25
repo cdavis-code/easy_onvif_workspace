@@ -34,6 +34,19 @@ class MediaProfile {
   const MediaProfile({required this.token, required this.name});
 }
 
+/// A simulated imaging preset (seeded from settings).
+class ImagingPreset {
+  final String token;
+  final String name;
+  final String type;
+
+  const ImagingPreset({
+    required this.token,
+    required this.name,
+    required this.type,
+  });
+}
+
 /// An ONVIF device user.
 class OnvifUser {
   final String username;
@@ -64,6 +77,12 @@ class DeviceState {
   ];
 
   final Map<String, PtzPreset> presets = {};
+
+  /// Imaging presets served by the Imaging service (seeded from settings).
+  final List<ImagingPreset> imagingPresets = [];
+
+  /// Token of the imaging preset currently applied, if any.
+  String? currentImagingPreset;
 
   final List<OnvifUser> users = [];
 
