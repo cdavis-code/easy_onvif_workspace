@@ -47,6 +47,14 @@ class PtzService implements OnvifService {
         return _getServiceCapabilities();
       case 'GetPresets':
         return _getPresets();
+      case 'GetPresetTours':
+        // Preset tours are supported as a call but no tours exist.
+        return _empty('GetPresetToursResponse');
+      case 'GetPresetTour':
+        return SoapEnvelopeBuilder.fault(
+          subcode: 'NoToken',
+          reason: 'No preset tour exists for the requested token.',
+        );
       case 'SetPreset':
         return _setPreset(ctx);
       case 'RemovePreset':

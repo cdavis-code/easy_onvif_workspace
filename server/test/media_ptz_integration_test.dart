@@ -170,4 +170,24 @@ void main() {
     expect(status.position.panTilt!.y, closeTo(0.2, 0.001));
     expect(status.position.zoom!.x, closeTo(0.3, 0.001));
   });
+
+  test('preset tours are supported but empty', () async {
+    final onvif = await connect();
+
+    final profiles = await onvif.media.getProfiles();
+    final profileToken = profiles.first.token;
+
+    // The device supports the call but has no tours configured.
+    final tours = await onvif.ptz.getPresetTours(profileToken);
+
+    expect(tours, isEmpty);
+
+    // Requesting a specific tour faults with NoToken. The client's
+    // `getPresetTour` does not inspect the fault and fails while parsing the
+    // envelope, so any thrown error is the observable behavior here.
+    await expectLater(
+      onvif.ptz.getPresetTour(profileToken, presetTourToken: 'Tour_1'),
+      throwsA(anything),
+    );
+  });
 }
