@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:loggy/loggy.dart';
 
+import 'file_h264_source.dart';
 import 'h264_source.dart';
 import 'rtp_packetizer.dart';
 
@@ -18,10 +19,18 @@ class RtspServer with UiLoggy {
   final NalStreamSource source;
   final int port;
 
+  /// Creates a per-session replay source for `/onvif/replay/<token>` URLs, or
+  /// `null` if the token is unknown. When absent, replay paths 404.
+  final Future<FileH264Source?> Function(
+    String recordingToken,
+    DateTime? startUtc,
+  )?
+  replaySourceFor;
+
   ServerSocket? _serverSocket;
   final Set<_RtspConnection> _connections = {};
 
-  RtspServer({required this.source, required this.port});
+  RtspServer({required this.source, required this.port, this.replaySourceFor});
 
   bool get isRunning => _serverSocket != null;
 
@@ -61,7 +70,7 @@ class RtspServer with UiLoggy {
 
   void _remove(_RtspConnection connection) => _connections.remove(connection);
 
-  String _buildSdp(String baseUrl) {
+  String _buildSdp(NalStreamSource source) {
     final sps = source.sps;
     final pps = source.pps;
 
@@ -111,6 +120,17 @@ class _RtspConnection {
   bool _closed = false;
 
   StreamSubscription<H264NalUnit>? _nalSubscription;
+
+  /// The source serving this session: the live default, or a per-session
+  /// replay file source for `/onvif/replay/<token>` URLs.
+  NalStreamSource? _sessionSource;
+
+  /// The replay source owned by this session (disposed on close).
+  FileH264Source? _fileSource;
+
+  /// The replay token for this session, kept so a PLAY with a `Range:
+  /// clock=` seek can re-resolve the file source at the right position.
+  String? _replayToken;
 
   late final RtpPacketizer _packetizer = RtpPacketizer();
 
@@ -219,7 +239,7 @@ class _RtspConnection {
         _handleSetup(cseq, headers);
 
       case 'PLAY':
-        _handlePlay(cseq, url);
+        _handlePlay(cseq, url, headers);
 
       case 'TEARDOWN':
         _respond(cseq, headers: {'Session': _sessionId});
@@ -230,15 +250,38 @@ class _RtspConnection {
     }
   }
 
+  /// Matches replay URLs of the form `/onvif/replay/<recordingToken>`.
+  static final _replayPath = RegExp(r'/onvif/replay/([^/?]+)');
+
   Future<void> _handleDescribe(int cseq, String url) async {
+    final replayToken = _replayPath.firstMatch(url)?.group(1);
+
+    if (replayToken != null && server.replaySourceFor != null) {
+      final fileSource = await server.replaySourceFor!(replayToken, null);
+
+      if (fileSource == null) {
+        _respond(cseq, status: 404, reason: 'Not Found');
+
+        return;
+      }
+
+      await fileSource.load();
+
+      _replayToken = replayToken;
+      _fileSource = fileSource;
+      _sessionSource = fileSource;
+    } else {
+      _sessionSource = server.source;
+    }
+
     // Ensure SPS/PPS are available so the SDP is valid.
-    await server.source.parametersReady.timeout(
+    await _sessionSource!.parametersReady.timeout(
       const Duration(seconds: 5),
       onTimeout: () {},
     );
 
     final base = url.endsWith('/') ? url : '$url/';
-    final sdp = server._buildSdp(base);
+    final sdp = server._buildSdp(_sessionSource!);
 
     _respond(
       cseq,
@@ -268,7 +311,33 @@ class _RtspConnection {
     );
   }
 
-  void _handlePlay(int cseq, String url) {
+  /// Matches an absolute-clock seek in a PLAY `Range` header, e.g.
+  /// `clock=20260723T120005Z-`.
+  static final _clockRange = RegExp(r'clock=(\d{8}T\d{6}(?:\.\d+)?Z)');
+
+  Future<void> _handlePlay(
+    int cseq,
+    String url,
+    Map<String, String> headers,
+  ) async {
+    // A replay session may seek with `Range: clock=<start>-`; re-resolve the
+    // file source so playback begins at the nearest keyframe segment.
+    final clock = _clockRange.firstMatch(headers['range'] ?? '')?.group(1);
+    final replayToken = _replayToken;
+
+    if (clock != null && replayToken != null) {
+      final seek = _parseClock(clock);
+      final replaced = await server.replaySourceFor!(replayToken, seek);
+
+      if (replaced != null) {
+        await _fileSource?.stop();
+        await replaced.load();
+
+        _fileSource = replaced;
+        _sessionSource = replaced;
+      }
+    }
+
     _respond(
       cseq,
       headers: {
@@ -281,12 +350,24 @@ class _RtspConnection {
     _startStreaming();
   }
 
+  /// Parses `20260723T120005Z` (with optional fraction) into a UTC instant.
+  static DateTime _parseClock(String clock) => DateTime.utc(
+    int.parse(clock.substring(0, 4)),
+    int.parse(clock.substring(4, 6)),
+    int.parse(clock.substring(6, 8)),
+    int.parse(clock.substring(9, 11)),
+    int.parse(clock.substring(11, 13)),
+    int.parse(clock.substring(13, 15)),
+  );
+
   void _startStreaming() {
     if (_playing) return;
 
     _playing = true;
 
-    _nalSubscription = server.source.nals.listen((nal) {
+    final source = _sessionSource ?? server.source;
+
+    _nalSubscription = source.nals.listen((nal) {
       if (!_playing) return;
 
       try {
@@ -298,6 +379,9 @@ class _RtspConnection {
         close();
       }
     });
+
+    // Replay sessions pace themselves from disk once a listener is attached.
+    _fileSource?.play();
   }
 
   void _stopStreaming() {
@@ -364,6 +448,10 @@ class _RtspConnection {
     _closed = true;
 
     _stopStreaming();
+
+    await _fileSource?.stop();
+    _fileSource = null;
+    _sessionSource = null;
 
     server._remove(this);
 
