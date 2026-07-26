@@ -21,6 +21,9 @@ dependencies:
   getwidget: ^7.0.0
   http: ^1.2.1
   loggy: ^2.0.3
+  media_kit: ^1.1.10
+  media_kit_libs_video: ^1.0.4
+  media_kit_video: ^1.2.4
   path: ^1.9.0
   shared_preferences: ^2.2.2
   universal_io: ^2.2.2
@@ -28,6 +31,8 @@ dependencies:
 
   flutter:
     sdk: flutter
+  flutter_webrtc: ^1.5.2
+  web_socket_channel: ^3.0.3
 
 dev_dependencies:
   custom_lint: ^0.8.1
