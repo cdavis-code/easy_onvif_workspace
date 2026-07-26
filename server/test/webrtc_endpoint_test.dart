@@ -57,7 +57,9 @@ void main() {
     await server.start();
     addTearDown(server.stop);
 
-    final client = await WebSocket.connect('ws://localhost:8106/onvif/webrtc');
+    final client = await WebSocket.connect(
+      'ws://localhost:8106/onvif/webrtc?username=admin&password=admin',
+    );
     final responses = <Map<String, dynamic>>[];
     client.listen(
       (data) => responses.add(jsonDecode(data as String) as Map<String, dynamic>),
@@ -72,5 +74,37 @@ void main() {
     );
 
     await client.close();
+  });
+
+  test('rejects an unauthenticated /onvif/webrtc upgrade', () async {
+    const config = ServerConfig(httpPort: 8107);
+
+    final service = WebrtcService(
+      media: const MediaSettings(),
+      sessionFactory: (send) => FakeWebrtcSession(send),
+    );
+
+    final server = OnvifServer(
+      config: config,
+      dispatcher: SoapDispatcher(
+        services: const [],
+        authenticator: Authenticator(
+          expectedUsername: 'admin',
+          expectedPassword: 'admin',
+        ),
+      ),
+      hardware: StubHardwareAdapter(),
+      webrtcService: service,
+    );
+
+    await server.start();
+    addTearDown(server.stop);
+
+    // No credentials: the upgrade is refused with 401 (WebSocket.connect
+    // surfaces the failed handshake as an exception).
+    expect(
+      () => WebSocket.connect('ws://localhost:8107/onvif/webrtc'),
+      throwsA(anything),
+    );
   });
 }

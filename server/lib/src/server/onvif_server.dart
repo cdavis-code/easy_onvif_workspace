@@ -169,11 +169,24 @@ class OnvifServer with UiLoggy {
 
   /// Upgrades the `/onvif/webrtc` request to a WebSocket and hands it to the
   /// WebRTC signaling service (browser live-video preview).
+  ///
+  /// The WebSocket handshake cannot carry SOAP WS-Security credentials, so the
+  /// browser passes them as `username`/`password` query parameters. The upgrade
+  /// is rejected without valid credentials: an open endpoint would let any page
+  /// on the network start camera/screen/microphone capture.
   Future<void> _handleWebRtc(HttpRequest request) async {
     final service = webrtcService;
 
     if (service == null) {
       request.response.statusCode = HttpStatus.notImplemented;
+      await request.response.close();
+      return;
+    }
+
+    final query = request.uri.queryParameters;
+    if (query['username'] != config.username ||
+        query['password'] != config.password) {
+      request.response.statusCode = HttpStatus.unauthorized;
       await request.response.close();
       return;
     }
