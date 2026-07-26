@@ -24,12 +24,12 @@ LocationEntity _$LocationEntityFromJson(
           json['LocalOrientation'] as Map<String, dynamic>,
         ),
   entity: OnvifUtil.nullableStringMappedFromXml(
-    json['Entity'] as Map<String, dynamic>?,
+    json['@Entity'] as Map<String, dynamic>?,
   ),
-  token: json['Token'] as String?,
+  token: json['@Token'] as String?,
   fixed: OnvifUtil.nullableStringToBool(json['@Fixed'] as String?),
   geoSource: OnvifUtil.nullableStringMappedFromXml(
-    json['GeoSource'] as Map<String, dynamic>?,
+    json['@GeoSource'] as Map<String, dynamic>?,
   ),
   autoGeo: OnvifUtil.nullableStringToBool(json['@AutoGeo'] as String?),
 );
@@ -40,10 +40,10 @@ Map<String, dynamic> _$LocationEntityToJson(LocationEntity instance) =>
       'GeoOrientation': instance.geoOrientation,
       'LocalLocation': instance.localLocation,
       'LocalOrientation': instance.localOrientation,
-      'Entity': instance.entity,
-      'Token': instance.token,
+      '@Entity': instance.entity,
+      '@Token': instance.token,
       '@Fixed': instance.fixed,
-      'GeoSource': instance.geoSource,
+      '@GeoSource': instance.geoSource,
       '@AutoGeo': instance.autoGeo,
     };
 

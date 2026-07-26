@@ -39,9 +39,13 @@ class DynamicDnsInformation {
 
 enum DynamicDnsType {
   @JsonValue('NoUpdate')
-  noUpdate,
+  noUpdate('NoUpdate'),
   @JsonValue('ClientUpdates')
-  clientUpdates,
+  clientUpdates('ClientUpdates'),
   @JsonValue('ServerUpdates')
-  serverUpdates,
+  serverUpdates('ServerUpdates');
+
+  /// The ONVIF wire value (e.g. `NoUpdate`).
+  final String value;
+  const DynamicDnsType(this.value);
 }

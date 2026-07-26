@@ -28,11 +28,11 @@ class LocationEntity implements XmlSerializable {
   final LocalOrientation? localOrientation;
 
   /// Entity type the entry refers to, use a value from the tt:Entity enumeration.
-  @JsonKey(name: 'Entity', fromJson: OnvifUtil.nullableStringMappedFromXml)
+  @JsonKey(name: '@Entity', fromJson: OnvifUtil.nullableStringMappedFromXml)
   final String? entity;
 
   /// Optional entity token.
-  @JsonKey(name: 'Token')
+  @JsonKey(name: '@Token')
   final String? token;
 
   /// If this value is true the entity cannot be deleted.
@@ -40,7 +40,7 @@ class LocationEntity implements XmlSerializable {
   final bool? fixed;
 
   /// Optional reference to the XAddr of another devices DeviceManagement service.
-  @JsonKey(name: 'GeoSource', fromJson: OnvifUtil.nullableStringMappedFromXml)
+  @JsonKey(name: '@GeoSource', fromJson: OnvifUtil.nullableStringMappedFromXml)
   final String? geoSource;
 
   /// If set the geo location is obtained internally.
@@ -77,9 +77,12 @@ class LocationEntity implements XmlSerializable {
     nest: () {
       if (namespace != null) builder.namespace(namespace);
 
+      // Entity, Token, Fixed, GeoSource and AutoGeo are attributes of
+      // tt:LocationEntity.
       if (entity != null) builder.attribute('Entity', entity!);
       if (token != null) builder.attribute('Token', token!);
       if (fixed != null) builder.attribute('Fixed', fixed.toString());
+      if (geoSource != null) builder.attribute('GeoSource', geoSource!);
       if (autoGeo != null) builder.attribute('AutoGeo', autoGeo.toString());
 
       final geo = geoLocation;
@@ -108,7 +111,29 @@ class LocationEntity implements XmlSerializable {
         });
       }
 
-      if (geoSource != null) geoSource!.buildXml(builder, tag: 'GeoSource');
+      final local = localLocation;
+      if (local != null) {
+        builder.element('LocalLocation', nest: () {
+          if (local.x != null) builder.attribute('x', local.x.toString());
+          if (local.y != null) builder.attribute('y', local.y.toString());
+          if (local.z != null) builder.attribute('z', local.z.toString());
+        });
+      }
+
+      final localOrientation = this.localOrientation;
+      if (localOrientation != null) {
+        builder.element('LocalOrientation', nest: () {
+          if (localOrientation.pan != null) {
+            builder.attribute('pan', localOrientation.pan.toString());
+          }
+          if (localOrientation.tilt != null) {
+            builder.attribute('tilt', localOrientation.tilt.toString());
+          }
+          if (localOrientation.roll != null) {
+            builder.attribute('roll', localOrientation.roll.toString());
+          }
+        });
+      }
     },
   );
 }

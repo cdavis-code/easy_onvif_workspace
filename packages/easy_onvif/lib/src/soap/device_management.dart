@@ -383,22 +383,12 @@ class DeviceManagementRequest {
   static XmlDocumentFragment setDynamicDns(
     DynamicDnsInformation dynamicDnsInformation,
   ) {
-    // ONVIF wire values for the tt:DynamicDNSType enumeration.
-    const typeValues = {
-      DynamicDnsType.noUpdate: 'NoUpdate',
-      DynamicDnsType.clientUpdates: 'ClientUpdates',
-      DynamicDnsType.serverUpdates: 'ServerUpdates',
-    };
-
     builder.element(
       'SetDynamicDNS',
       nest: () {
         builder.namespace(Xmlns.tds);
 
-        (typeValues[dynamicDnsInformation.type] ?? 'NoUpdate').buildXml(
-          builder,
-          tag: 'Type',
-        );
+        dynamicDnsInformation.type.value.buildXml(builder, tag: 'Type');
 
         if (dynamicDnsInformation.name != null) {
           dynamicDnsInformation.name!.buildXml(builder, tag: 'Name');
