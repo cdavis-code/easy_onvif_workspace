@@ -151,8 +151,9 @@ layer. To discover them:
 - **Cameras:** `ffmpeg -f avfoundation -list_devices true -i ""` (macOS),
   `ffmpeg -list_devices true -f dshow -i dummy` (Windows),
   `v4l2-ctl --list-devices` (Linux).
-- **Displays:** `system_profiler SPDisplaysDataType` or the Displays settings
-  pane for the CGDirectDisplayID (macOS); gdigrab accepts `desktop` or
+- **Displays:** the macOS `CGDirectDisplayID` of the screen to capture — see
+  [Selecting a display on macOS](#selecting-a-display-on-macos) below (leave
+  `device` empty to use the main display); gdigrab accepts `desktop` or
   `title=<window>` (Windows); X11 display names like `:0.0` (Linux).
 - **Audio inputs:** `SwitchAudioSource -a` or Audio MIDI Setup for CoreAudio
   UIDs (macOS); `ffmpeg -list_devices true -f dshow -i dummy` (Windows);
@@ -161,6 +162,53 @@ layer. To discover them:
 On macOS, `source: display` needs the **Screen Recording** permission — the
 app requests it on first start, and macOS requires an app restart after the
 grant.
+
+### Selecting a display on macOS
+
+With `source: display`, `media.video.device` is the **CGDirectDisplayID** (a
+number) of the screen to capture. Leave it empty (or omit it) to capture the
+main display. If the id doesn't match a connected display, the server falls
+back to the main display.
+
+macOS doesn't show the CGDirectDisplayID in System Settings, so list them with
+this one-off Swift script (uses the Xcode command-line tools you already have
+for Flutter):
+
+```sh
+cat > /tmp/list_displays.swift <<'EOF'
+import CoreGraphics
+import AppKit
+var count: UInt32 = 0
+CGGetActiveDisplayList(0, nil, &count)
+var ids = [CGDirectDisplayID](repeating: 0, count: Int(count))
+CGGetActiveDisplayList(count, &ids, &count)
+let main = CGMainDisplayID()
+for id in ids {
+    let b = CGDisplayBounds(id)
+    let name = NSScreen.screens.first(where: {
+        $0.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? UInt32 == id
+    })?.localizedName ?? "?"
+    print("id \(id)\(id == main ? " (main)" : "")  \(Int(b.width))x\(Int(b.height))  \(name)")
+}
+EOF
+swift /tmp/list_displays.swift
+```
+
+Example output for a laptop with one external monitor:
+
+```
+id 1 (main)  1728x1117  Built-in Retina Display
+id 2  3840x2160  ASUS PB287Q
+```
+
+To stream the external monitor, put its id in `device`:
+
+```yaml
+media:
+  video:
+    source: display
+    device: "2"        # CGDirectDisplayID of the display to capture
+```
 
 ### Browser preview (WebRTC)
 
