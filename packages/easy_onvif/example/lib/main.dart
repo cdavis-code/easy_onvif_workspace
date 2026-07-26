@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_onvif/device_management.dart' as device;
 import 'package:easy_onvif/onvif.dart' hide Media;
@@ -68,6 +70,11 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
   String firmwareVersion = '';
 
   String url = '';
+
+  /// HTTP Basic `Authorization` header for the snapshot endpoint (the server
+  /// requires authentication; `CachedNetworkImage` does not derive it from the
+  /// URL's embedded credentials).
+  Map<String, String> _snapshotHeaders = const {};
 
   String videoUrl = '';
 
@@ -152,6 +159,11 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
           config['username']!,
           config['password']!,
         );
+
+        final credentials = base64.encode(
+          utf8.encode('${config['username']}:${config['password']}'),
+        );
+        _snapshotHeaders = {'Authorization': 'Basic $credentials'};
       }
 
       if (streamUri != null) {
@@ -258,6 +270,7 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
         url != ''
             ? CachedNetworkImage(
               imageUrl: url,
+              httpHeaders: _snapshotHeaders,
               progressIndicatorBuilder:
                   (context, url, downloadProgress) => CircularProgressIndicator(
                     value: downloadProgress.progress,
