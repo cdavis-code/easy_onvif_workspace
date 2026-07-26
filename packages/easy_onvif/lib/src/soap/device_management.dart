@@ -197,4 +197,44 @@ class DeviceManagementRequest {
 
     return builder.buildFragment();
   }
+
+  /// XML for the [getRelayOutputs]
+  static XmlDocumentFragment getRelayOutputs() =>
+      Transport.quickTag('GetRelayOutputs', Xmlns.tds);
+
+  /// XML for the [setRelayOutputState]
+  static XmlDocumentFragment setRelayOutputState({
+    required String relayOutputToken,
+    required RelayLogicalState logicalState,
+  }) {
+    builder.element(
+      'SetRelayOutputState',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        relayOutputToken.buildXml(builder, tag: 'RelayOutputToken');
+        logicalState.value.buildXml(builder, tag: 'LogicalState');
+      },
+    );
+
+    return builder.buildFragment();
+  }
+
+  /// XML for the [setRelayOutputSettings]
+  static XmlDocumentFragment setRelayOutputSettings({
+    required String relayOutputToken,
+    required RelayOutputSettings properties,
+  }) {
+    builder.element(
+      'SetRelayOutputSettings',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        relayOutputToken.buildXml(builder, tag: 'RelayOutputToken');
+        properties.buildXml(builder, tag: 'Properties');
+      },
+    );
+
+    return builder.buildFragment();
+  }
 }

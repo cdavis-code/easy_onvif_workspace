@@ -627,6 +627,79 @@ class DeviceManagement extends Operation with UiLoggy {
     return responseEnvelope.body.response!;
   }
 
+  /// This operation gets a list of all available relay outputs and their
+  /// settings.
+  ///
+  /// Access Class: READ_SYSTEM
+  Future<List<RelayOutput>> getRelayOutputs() async {
+    loggy.debug('getRelayOutputs');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: DeviceManagementRequest.getRelayOutputs()),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return GetRelayOutputsResponse.fromJson(
+      responseEnvelope.body.response!,
+    ).relayOutputs;
+  }
+
+  /// This operation sets the state of a relay output.
+  ///
+  /// Access Class: ACTUATE
+  Future<bool> setRelayOutputState({
+    required String relayOutputToken,
+    required RelayLogicalState logicalState,
+  }) async {
+    loggy.debug('setRelayOutputState');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: DeviceManagementRequest.setRelayOutputState(
+          relayOutputToken: relayOutputToken,
+          logicalState: logicalState,
+        ),
+      ),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
+  /// This operation sets the settings of a relay output.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setRelayOutputSettings({
+    required String relayOutputToken,
+    required RelayOutputSettings properties,
+  }) async {
+    loggy.debug('setRelayOutputSettings');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: DeviceManagementRequest.setRelayOutputSettings(
+          relayOutputToken: relayOutputToken,
+          properties: properties,
+        ),
+      ),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
   // Future<bool> setIpAddressFilter({
   //   required IpAddressFilter ipAddressFilter,
   // }) async {

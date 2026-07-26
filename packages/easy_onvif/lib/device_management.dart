@@ -44,6 +44,8 @@ export 'src/model/device_management/prefixed_ipv4_ipaddress.dart';
 export 'src/model/device_management/prefixed_ipv6_ipaddress.dart';
 export 'src/model/device_management/ptz_capabilities.dart';
 export 'src/model/device_management/real_time_streaming_capabilities.dart';
+export 'src/model/device_management/relay_output.dart';
+export 'src/model/device_management/relay_output_settings.dart';
 export 'src/model/device_management/security_capabilities.dart';
 export 'src/model/device_management/service.dart';
 export 'src/model/device_management/system.dart';
