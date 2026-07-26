@@ -6,6 +6,7 @@ import 'package:loggy/loggy.dart';
 import '../config.dart';
 import '../hardware/hardware_adapter.dart';
 import '../streaming/stream_backend.dart';
+import '../webrtc/webrtc_service.dart';
 import 'soap_dispatcher.dart';
 
 /// The HTTP front-end for the ONVIF device.
@@ -26,6 +27,10 @@ class OnvifServer with UiLoggy {
   /// camera device again, which would contend with the RTSP encoder).
   final StreamBackend? streamBackend;
 
+  /// Handles browser WebRTC signaling (`/onvif/webrtc`). Null disables the
+  /// endpoint (it answers 501).
+  final WebrtcService? webrtcService;
+
   HttpServer? _server;
 
   OnvifServer({
@@ -33,6 +38,7 @@ class OnvifServer with UiLoggy {
     required this.dispatcher,
     required this.hardware,
     this.streamBackend,
+    this.webrtcService,
   });
 
   /// The port the server is bound to (once started).
@@ -65,6 +71,9 @@ class OnvifServer with UiLoggy {
       } else if (request.method == 'GET' &&
           request.uri.path.startsWith('/onvif/snapshot')) {
         await _handleSnapshot(request);
+      } else if (request.uri.path == '/onvif/webrtc' &&
+          WebSocketTransformer.isUpgradeRequest(request)) {
+        await _handleWebRtc(request);
       } else {
         request.response.statusCode = HttpStatus.notFound;
         await request.response.close();
@@ -158,6 +167,21 @@ class OnvifServer with UiLoggy {
     await request.response.close();
   }
 
+  /// Upgrades the `/onvif/webrtc` request to a WebSocket and hands it to the
+  /// WebRTC signaling service (browser live-video preview).
+  Future<void> _handleWebRtc(HttpRequest request) async {
+    final service = webrtcService;
+
+    if (service == null) {
+      request.response.statusCode = HttpStatus.notImplemented;
+      await request.response.close();
+      return;
+    }
+
+    final socket = await WebSocketTransformer.upgrade(request);
+    await service.handleConnection(socket);
+  }
+
   /// Derives the advertised host from the request's `Host` header so that
   /// self-referential service URLs point back to the address the client used.
   String _hostOf(HttpRequest request) {
@@ -171,6 +195,7 @@ class OnvifServer with UiLoggy {
   }
 
   Future<void> stop() async {
+    await webrtcService?.dispose();
     await _server?.close(force: true);
     _server = null;
   }

@@ -24,6 +24,8 @@ import 'settings.dart';
 import 'soap/authenticator.dart';
 import 'streaming/file_h264_source.dart';
 import 'streaming/stream_backend.dart';
+import 'webrtc/native_webrtc_session.dart';
+import 'webrtc/webrtc_service.dart';
 
 /// Assembles and runs a complete simulated ONVIF device.
 ///
@@ -174,11 +176,20 @@ class OnvifDevice with UiLoggy {
       authenticator: authenticator,
     );
 
+    final webrtcService = WebrtcService(
+      media: this.settings.media,
+      sessionFactory: (send) => NativeWebrtcSession(
+        media: this.settings.media,
+        send: send,
+      ),
+    );
+
     server = OnvifServer(
       config: config,
       dispatcher: dispatcher,
       hardware: hardware,
       streamBackend: streamBackend,
+      webrtcService: webrtcService,
     );
   }
 
