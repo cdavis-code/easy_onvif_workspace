@@ -269,4 +269,155 @@ class DeviceManagementRequest {
 
     return builder.buildFragment();
   }
+
+  /// XML for the [setHostname]
+  static XmlDocumentFragment setHostname(String name) {
+    builder.element(
+      'SetHostname',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        name.buildXml(builder, tag: 'Name');
+      },
+    );
+
+    return builder.buildFragment();
+  }
+
+  /// XML for the [setHostnameFromDhcp]
+  static XmlDocumentFragment setHostnameFromDhcp(bool fromDhcp) {
+    builder.element(
+      'SetHostnameFromDHCP',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        fromDhcp.toString().buildXml(builder, tag: 'FromDHCP');
+      },
+    );
+
+    return builder.buildFragment();
+  }
+
+  /// XML for the [setDns]
+  static XmlDocumentFragment setDns(DnsInformation dnsInformation) {
+    builder.element(
+      'SetDNS',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        (dnsInformation.fromDhcp ?? false).toString().buildXml(
+          builder,
+          tag: 'FromDHCP',
+        );
+
+        for (var domain in dnsInformation.searchDomain ?? <String>[]) {
+          domain.buildXml(builder, tag: 'SearchDomain');
+        }
+
+        for (var entry in dnsInformation.dnsManual ?? <DnsEntry>[]) {
+          builder.element('DNSManual', nest: () {
+            entry.type.buildXml(builder, tag: 'Type');
+
+            if (entry.ipv4Address != null) {
+              entry.ipv4Address!.buildXml(builder, tag: 'IPv4Address');
+            }
+
+            if (entry.ipv6Address != null) {
+              entry.ipv6Address!.buildXml(builder, tag: 'IPv6Address');
+            }
+          });
+        }
+      },
+    );
+
+    return builder.buildFragment();
+  }
+
+  /// XML for the [setNtp]
+  static XmlDocumentFragment setNtp(NtpInformation ntpInformation) {
+    builder.element(
+      'SetNTP',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        ntpInformation.fromDhcp.toString().buildXml(builder, tag: 'FromDHCP');
+
+        for (var ntp in ntpInformation.ntpManual ?? <Ntp>[]) {
+          builder.element('NTPManual', nest: () {
+            ntp.type.buildXml(builder, tag: 'Type');
+
+            if (ntp.iPv4Address != null) {
+              ntp.iPv4Address!.buildXml(builder, tag: 'IPv4Address');
+            }
+
+            if (ntp.iPv6Address != null) {
+              ntp.iPv6Address!.buildXml(builder, tag: 'IPv6Address');
+            }
+
+            if (ntp.dnsName != null) {
+              ntp.dnsName!.buildXml(builder, tag: 'DNSname');
+            }
+          });
+        }
+      },
+    );
+
+    return builder.buildFragment();
+  }
+
+  /// XML for the [setDynamicDns]
+  static XmlDocumentFragment setDynamicDns(
+    DynamicDnsInformation dynamicDnsInformation,
+  ) {
+    // ONVIF wire values for the tt:DynamicDNSType enumeration.
+    const typeValues = {
+      DynamicDnsType.noUpdate: 'NoUpdate',
+      DynamicDnsType.clientUpdates: 'ClientUpdates',
+      DynamicDnsType.serverUpdates: 'ServerUpdates',
+    };
+
+    builder.element(
+      'SetDynamicDNS',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        (typeValues[dynamicDnsInformation.type] ?? 'NoUpdate').buildXml(
+          builder,
+          tag: 'Type',
+        );
+
+        if (dynamicDnsInformation.name != null) {
+          dynamicDnsInformation.name!.buildXml(builder, tag: 'Name');
+        }
+
+        if (dynamicDnsInformation.ttl != null) {
+          dynamicDnsInformation.ttl!.buildXml(builder, tag: 'TTL');
+        }
+      },
+    );
+
+    return builder.buildFragment();
+  }
+
+  /// XML for the [setNetworkProtocols]
+  static XmlDocumentFragment setNetworkProtocols(
+    List<NetworkProtocol> networkProtocols,
+  ) {
+    builder.element(
+      'SetNetworkProtocols',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        for (var protocol in networkProtocols) {
+          builder.element('NetworkProtocols', nest: () {
+            protocol.name.buildXml(builder, tag: 'Name');
+            protocol.enabled.toString().buildXml(builder, tag: 'Enabled');
+            protocol.port.toString().buildXml(builder, tag: 'Port');
+          });
+        }
+      },
+    );
+
+    return builder.buildFragment();
+  }
 }

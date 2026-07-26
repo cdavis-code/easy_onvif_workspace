@@ -287,6 +287,99 @@ void main() {
         '<Test><DeleteGeoLocation xmlns="http://www.onvif.org/ver10/device/wsdl"><Location><GeoLocation lon="12.0" lat="34.0"/></Location></DeleteGeoLocation></Test>',
       );
     });
+
+    test('setHostname', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setHostname('camera1'),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetHostname xmlns="http://www.onvif.org/ver10/device/wsdl"><Name>camera1</Name></SetHostname></Test>',
+      );
+    });
+
+    test('setHostnameFromDhcp', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setHostnameFromDhcp(true),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetHostnameFromDHCP xmlns="http://www.onvif.org/ver10/device/wsdl"><FromDHCP>true</FromDHCP></SetHostnameFromDHCP></Test>',
+      );
+    });
+
+    test('setDns', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setDns(
+          DnsInformation(
+            fromDhcp: false,
+            searchDomain: ['example.com'],
+            dnsManual: [
+              DnsEntry(type: 'IPv4', ipv4Address: '8.8.8.8', ipv6Address: null),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetDNS xmlns="http://www.onvif.org/ver10/device/wsdl"><FromDHCP>false</FromDHCP><SearchDomain>example.com</SearchDomain><DNSManual><Type>IPv4</Type><IPv4Address>8.8.8.8</IPv4Address></DNSManual></SetDNS></Test>',
+      );
+    });
+
+    test('setNtp', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setNtp(
+          NtpInformation(
+            fromDhcp: false,
+            ntpManual: [Ntp(type: 'IPv4', iPv4Address: '129.6.15.28')],
+          ),
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetNTP xmlns="http://www.onvif.org/ver10/device/wsdl"><FromDHCP>false</FromDHCP><NTPManual><Type>IPv4</Type><IPv4Address>129.6.15.28</IPv4Address></NTPManual></SetNTP></Test>',
+      );
+    });
+
+    test('setDynamicDns', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setDynamicDns(
+          DynamicDnsInformation(
+            type: DynamicDnsType.clientUpdates,
+            name: 'host.example.com',
+            ttl: 'PT1H',
+          ),
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetDynamicDNS xmlns="http://www.onvif.org/ver10/device/wsdl"><Type>ClientUpdates</Type><Name>host.example.com</Name><TTL>PT1H</TTL></SetDynamicDNS></Test>',
+      );
+    });
+
+    test('setNetworkProtocols', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setNetworkProtocols([
+          NetworkProtocol(name: 'HTTP', enabled: true, port: 80),
+        ]),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetNetworkProtocols xmlns="http://www.onvif.org/ver10/device/wsdl"><NetworkProtocols><Name>HTTP</Name><Enabled>true</Enabled><Port>80</Port></NetworkProtocols></SetNetworkProtocols></Test>',
+      );
+    });
   });
 
   group('Imaging SOAP Requests', () {

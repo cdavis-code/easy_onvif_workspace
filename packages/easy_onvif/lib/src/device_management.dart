@@ -736,6 +736,121 @@ class DeviceManagement extends Operation with UiLoggy {
     return true;
   }
 
+  /// This operation sets the hostname on a device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setHostname(String name) async {
+    loggy.debug('setHostname');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: DeviceManagementRequest.setHostname(name)),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
+  /// This operation controls whether the hostname shall be obtained via DHCP.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setHostnameFromDhcp(bool fromDhcp) async {
+    loggy.debug('setHostnameFromDhcp');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: DeviceManagementRequest.setHostnameFromDhcp(fromDhcp)),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
+  /// This operation sets the DNS settings on a device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setDns(DnsInformation dnsInformation) async {
+    loggy.debug('setDns');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: DeviceManagementRequest.setDns(dnsInformation)),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
+  /// This operation sets the NTP settings on a device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setNtp(NtpInformation ntpInformation) async {
+    loggy.debug('setNtp');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: DeviceManagementRequest.setNtp(ntpInformation)),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
+  /// This operation sets the dynamic DNS settings on a device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setDynamicDns(DynamicDnsInformation dynamicDnsInformation) async {
+    loggy.debug('setDynamicDns');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: DeviceManagementRequest.setDynamicDns(dynamicDnsInformation),
+      ),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
+  /// This operation configures one or more defined network protocols supported
+  /// by the device (HTTP, HTTPS, RTSP).
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setNetworkProtocols(
+    List<NetworkProtocol> networkProtocols,
+  ) async {
+    loggy.debug('setNetworkProtocols');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: DeviceManagementRequest.setNetworkProtocols(networkProtocols),
+      ),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
   // Future<bool> setIpAddressFilter({
   //   required IpAddressFilter ipAddressFilter,
   // }) async {
