@@ -133,4 +133,34 @@ void main() {
     },
     timeout: const Timeout(Duration(seconds: 60)),
   );
+
+  test(
+    'snapshot endpoint requires HTTP Basic authentication',
+    () async {
+      // Give the stream a moment to produce its first keyframe.
+      await Future<void>.delayed(const Duration(seconds: 2));
+
+      final client = HttpClient();
+
+      // No credentials → 401 with a Basic challenge.
+      final unauthenticated = await client.getUrl(
+        Uri.parse('http://localhost:$httpPort/onvif/snapshot/Profile_1'),
+      );
+      final unauthenticatedResponse = await unauthenticated.close();
+      expect(unauthenticatedResponse.statusCode, HttpStatus.unauthorized);
+
+      // Credentials embedded in the URL → 200 with a JPEG (the Dart HTTP
+      // client sends URL userinfo as a Basic Authorization header).
+      final authenticated = await client.getUrl(
+        Uri.parse(
+          'http://admin:admin@localhost:$httpPort/onvif/snapshot/Profile_1',
+        ),
+      );
+      final authenticatedResponse = await authenticated.close();
+      expect(authenticatedResponse.statusCode, HttpStatus.ok);
+
+      client.close(force: true);
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
 }

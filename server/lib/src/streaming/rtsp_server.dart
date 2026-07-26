@@ -9,6 +9,7 @@ import 'audio_source.dart';
 import 'file_h264_source.dart';
 import 'h264_source.dart';
 import 'rtp_packetizer.dart';
+import '../server/basic_auth.dart';
 
 /// A minimal RTSP server that serves a single H.264 stream (from a
 /// [NalStreamSource]) over RTP/AVP/TCP (RTP interleaved on the RTSP TCP
@@ -23,6 +24,12 @@ class RtspServer with UiLoggy {
   /// The live audio source served as a second RTP track, or `null` when
   /// audio streaming is disabled.
   final AudioStreamSource? audioSource;
+
+  /// Device credentials for HTTP Basic authentication of RTSP requests. When
+  /// both are non-null, every request must present a matching `Authorization`
+  /// header or it is rejected with `401 Unauthorized`.
+  final String? username;
+  final String? password;
 
   /// Creates a per-session replay source for `/onvif/replay/<token>` URLs, or
   /// `null` if the token is unknown. When absent, replay paths 404.
@@ -40,6 +47,8 @@ class RtspServer with UiLoggy {
     required this.port,
     this.replaySourceFor,
     this.audioSource,
+    this.username,
+    this.password,
   });
 
   bool get isRunning => _serverSocket != null;
@@ -249,6 +258,16 @@ class _RtspConnection {
 
     server.loggy.debug('RTSP $method $url');
 
+    if (!_isAuthorized(headers)) {
+      _respond(
+        cseq,
+        status: 401,
+        reason: 'Unauthorized',
+        headers: {'WWW-Authenticate': 'Basic realm="easy_onvif_server"'},
+      );
+      return;
+    }
+
     switch (method) {
       case 'OPTIONS':
         _respond(
@@ -276,6 +295,17 @@ class _RtspConnection {
 
   /// Matches replay URLs of the form `/onvif/replay/<recordingToken>`.
   static final _replayPath = RegExp(r'/onvif/replay/([^/?]+)');
+
+  /// Checks the request's Basic credentials against the server's. When the
+  /// server has no credentials configured, authentication is disabled.
+  bool _isAuthorized(Map<String, String> headers) {
+    final username = server.username;
+    final password = server.password;
+
+    if (username == null || password == null) return true;
+
+    return basicAuthMatches(headers['authorization'], username, password);
+  }
 
   Future<void> _handleDescribe(int cseq, String url) async {
     final replayToken = _replayPath.firstMatch(url)?.group(1);

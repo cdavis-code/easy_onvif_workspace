@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -37,33 +38,75 @@ void main() {
     expect(withAudio, contains('a=control:trackID=1'));
   });
 
-  test('RTSP stream carries both h264 and pcm_alaw', () async {
-    const config = ServerConfig(httpPort: 8104, rtspPort: 8566);
+  test(
+    'RTSP stream carries both h264 and pcm_alaw',
+    () async {
+      const config = ServerConfig(httpPort: 8104, rtspPort: 8566);
+
+      final backend = FfmpegBackend(
+        config: config,
+        frameRate: 15,
+        inputArgs: ['-f', 'lavfi', '-i', 'testsrc=size=640x480:rate=15'],
+        audioSource: FfmpegAudioSource(),
+      );
+
+      await backend.start('Profile_1', host: 'localhost');
+
+      try {
+        final result = await Process.run('ffprobe', [
+          '-v',
+          'error',
+          '-rtsp_transport',
+          'tcp',
+          '-show_entries',
+          'stream=codec_name',
+          '-of',
+          'csv=p=0',
+          'rtsp://admin:admin@127.0.0.1:8566/onvif/Profile_1',
+        ]);
+
+        expect(result.stdout.toString(), contains('h264'));
+        expect(result.stdout.toString(), contains('pcm_alaw'));
+      } finally {
+        await backend.stop();
+      }
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
+
+  test('rejects an unauthenticated RTSP request with 401', () async {
+    const config = ServerConfig(httpPort: 8108, rtspPort: 8568);
 
     final backend = FfmpegBackend(
       config: config,
       frameRate: 15,
       inputArgs: ['-f', 'lavfi', '-i', 'testsrc=size=640x480:rate=15'],
-      audioSource: FfmpegAudioSource(),
     );
 
     await backend.start('Profile_1', host: 'localhost');
 
     try {
-      final result = await Process.run('ffprobe', [
-        '-v',
-        'error',
-        '-rtsp_transport',
-        'tcp',
-        '-show_entries',
-        'stream=codec_name',
-        '-of',
-        'csv=p=0',
-        'rtsp://127.0.0.1:8566/onvif/Profile_1',
-      ]);
+      final socket = await Socket.connect('127.0.0.1', 8568);
+      socket.write(
+        'OPTIONS rtsp://127.0.0.1:8568/onvif/Profile_1 RTSP/1.0\r\n'
+        'CSeq: 1\r\n\r\n',
+      );
+      await socket.flush();
 
-      expect(result.stdout.toString(), contains('h264'));
-      expect(result.stdout.toString(), contains('pcm_alaw'));
+      final response = StringBuffer();
+      final stream = utf8.decoder
+          .bind(socket)
+          .timeout(const Duration(seconds: 3), onTimeout: (sink) => sink.close());
+
+      await for (final chunk in stream) {
+        response.write(chunk);
+        if (response.toString().contains('\r\n\r\n')) break;
+      }
+
+      socket.destroy();
+
+      expect(response.toString(), contains('401'));
+      expect(response.toString(), contains('WWW-Authenticate'));
     } finally {
       await backend.stop();
     }

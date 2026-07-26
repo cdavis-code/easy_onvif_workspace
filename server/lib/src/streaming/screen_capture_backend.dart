@@ -63,6 +63,8 @@ class ScreenCaptureStreamBackend implements StreamBackend {
       port: config.rtspPort,
       replaySourceFor: replaySourceFor,
       audioSource: audioSource,
+      username: config.username,
+      password: config.password,
     );
 
     await _rtspServer!.start();

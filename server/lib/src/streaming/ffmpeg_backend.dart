@@ -75,6 +75,8 @@ class FfmpegBackend implements StreamBackend {
       port: config.rtspPort,
       replaySourceFor: replaySourceFor,
       audioSource: audioSource,
+      username: config.username,
+      password: config.password,
     );
 
     await _rtspServer!.start();
@@ -92,7 +94,9 @@ class FfmpegBackend implements StreamBackend {
 
     if (profileToken == null || _rtspServer == null) return null;
 
-    final url = 'rtsp://127.0.0.1:${config.rtspPort}/onvif/$profileToken';
+    // The advertised URL embeds the device credentials, which ffmpeg presents
+    // to the RTSP server's Basic auth challenge.
+    final url = config.rtspUrl('127.0.0.1', profileToken);
 
     try {
       final result = await Process.run(

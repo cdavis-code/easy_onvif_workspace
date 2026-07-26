@@ -7,6 +7,7 @@ import '../config.dart';
 import '../hardware/hardware_adapter.dart';
 import '../streaming/stream_backend.dart';
 import '../webrtc/webrtc_service.dart';
+import 'basic_auth.dart';
 import 'soap_dispatcher.dart';
 
 /// The HTTP front-end for the ONVIF device.
@@ -152,6 +153,23 @@ class OnvifServer with UiLoggy {
   }
 
   Future<void> _handleSnapshot(HttpRequest request) async {
+    // The snapshot exposes live camera frames, so gate it behind the device
+    // credentials (HTTP Basic). Clients embed them in the snapshot URL, which
+    // the HTTP client sends as an Authorization header.
+    if (!basicAuthMatches(
+      request.headers.value(HttpHeaders.authorizationHeader),
+      config.username,
+      config.password,
+    )) {
+      request.response.statusCode = HttpStatus.unauthorized;
+      request.response.headers.set(
+        HttpHeaders.wwwAuthenticateHeader,
+        'Basic realm="easy_onvif_server"',
+      );
+      await request.response.close();
+      return;
+    }
+
     // Prefer a frame grabbed from the live stream (avoids contending for the
     // camera device); fall back to the hardware adapter's camera.
     final bytes =

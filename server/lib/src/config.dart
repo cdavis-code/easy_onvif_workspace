@@ -77,12 +77,22 @@ class ServerConfig {
   String replayServiceUrl(String host) => '${baseUrl(host)}/onvif/Replay';
 
   /// The RTSP replay URL for the advertised [host] and [recordingToken].
+  ///
+  /// The device credentials are embedded in the URL (as real ONVIF devices do)
+  /// so players such as VLC and ffprobe authenticate automatically against the
+  /// RTSP server's HTTP Basic challenge.
   String replayRtspUrl(String host, String recordingToken) =>
-      'rtsp://$host:$rtspPort/onvif/replay/$recordingToken';
+      'rtsp://${_rtspUserInfo()}$host:$rtspPort/onvif/replay/$recordingToken';
 
   /// The RTSP stream URL for the advertised [host] and [profileToken].
+  ///
+  /// Credentials are embedded (see [replayRtspUrl]).
   String rtspUrl(String host, String profileToken) =>
-      'rtsp://$host:$rtspPort/onvif/$profileToken';
+      'rtsp://${_rtspUserInfo()}$host:$rtspPort/onvif/$profileToken';
+
+  /// URL-encoded `user:password@` for embedding in RTSP URLs.
+  String _rtspUserInfo() =>
+      '${Uri.encodeComponent(username)}:${Uri.encodeComponent(password)}@';
 
   /// The HTTP snapshot URL for the advertised [host] and [profileToken].
   String snapshotUrl(String host, String profileToken) =>
