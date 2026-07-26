@@ -221,26 +221,46 @@ Please see the cli documentation [README.md](https://github.com/faithoflifedev/e
 
 | Onvif Operation             | Dart Method                 | Dart Return Type                       | Test |
 | --------------------------- | --------------------------- | -------------------------------------- | ---- |
+| AddIPAddressFilter          | addIpAddressFilter          | `Future<bool>`                         | [x\] |
 | CreateUsers                 | createUsers                 | `Future<bool>`                         | [x\] |
+| DeleteGeoLocation           | deleteGeoLocation           | `Future<bool>`                         | [x\] |
 | DeleteUsers                 | deleteUsers                 | `Future<bool>`                         | [x\] |
 | GetCapabilities             | getCapabilities             | `Future<Capabilities>`                 | [x\] |
 | GetDeviceInformation        | getDeviceInformation        | `Future<GetDeviceInformationResponse>` | [x\] |
 | GetDiscoveryMode            | getDiscoveryMode            | `Future<String>`                       | [x\] |
 | GetDNS                      | getDNS                      | `Future<DnsInformation>`               | [x\] |
+| GetDynamicDNS               | getDynamicDns               | `Future<DynamicDnsInformation>`        | [ \] |
 | GetEndpointReference        | getEndpointReference        | `Future<Map<String, dynamic>>`         | [ \] |
+| GetGeoLocation              | getGeoLocation              | `Future<dynamic>`                      | [ \] |
 | GetHostname                 | getHostname                 | `Future<HostnameInformation>`          | [x\] |
 | GetIPAddressFilter          | getIPAddressFilter          | `Future<IpAddressFilter>`              | [ \] |
+| GetNetworkDefaultGateway    | getNetworkDefaultGateway    | `Future<NetworkGateway>`               | [x\] |
 | GetNetworkProtocols         | getNetworkProtocols         | `Future<List<NetworkProtocol>>`        | [x\] |
 | GetNTP                      | getNtp                      | `Future<NtpInformation>`               | [x\] |
+| GetRelayOutputs             | getRelayOutputs             | `Future<List<RelayOutput>>`            | [x\] |
 | GetServiceCapabilities      | getServiceCapabilities      | `Future<DeviceServiceCapabilities>`    | [x\] |
 | GetServices                 | getServices                 | `Future<List<Service>>`                | [x\] |
 | GetStorageConfiguration     | getStorageConfiguration     | `Future<StorageConfiguration>`         | [ \] |
 | GetStorageConfigurations    | getStorageConfigurations    | `Future<List<StorageConfiguration>>`   | [ \] |
 | GetSystemDateAndTime        | getSystemDateAndTime        | `Future<SystemDateAndTime>`            | [x\] |
-| GetSystemUris               | getSystemUris               | `Future<GetSystemUrisResponse>`        | [x\] |
 | GetSystemLog                | getSystemLog                | `Future<SystemInformation>`            | [ \] |
 | GetSystemSupportInformation | getSystemSupportInformation | `Future<SystemInformation>`            | [ \] |
+| GetSystemUris               | getSystemUris               | `Future<GetSystemUrisResponse>`        | [x\] |
 | GetUsers                    | getUsers                    | `Future<List<User>>`                   | [x\] |
+| GetZeroConfiguration        | getZeroConfiguration        | `Future<NetworkZeroConfiguration>`     | [x\] |
+| RemoveIPAddressFilter       | removeIpAddressFilter       | `Future<bool>`                         | [x\] |
+| SetDNS                      | setDns                      | `Future<bool>`                         | [x\] |
+| SetDynamicDNS               | setDynamicDns               | `Future<bool>`                         | [x\] |
+| SetGeoLocation              | setGeoLocation              | `Future<bool>`                         | [x\] |
+| SetHostname                 | setHostname                 | `Future<bool>`                         | [x\] |
+| SetHostnameFromDHCP         | setHostnameFromDhcp         | `Future<bool>`                         | [x\] |
+| SetIPAddressFilter          | setIpAddressFilter          | `Future<bool>`                         | [x\] |
+| SetNetworkDefaultGateway    | setNetworkDefaultGateway    | `Future<bool>`                         | [x\] |
+| SetNetworkProtocols         | setNetworkProtocols         | `Future<bool>`                         | [x\] |
+| SetNTP                      | setNtp                      | `Future<bool>`                         | [x\] |
+| SetRelayOutputSettings      | setRelayOutputSettings      | `Future<bool>`                         | [x\] |
+| SetRelayOutputState         | setRelayOutputState         | `Future<bool>`                         | [x\] |
+| SetZeroConfiguration        | setZeroConfiguration        | `Future<bool>`                         | [x\] |
 | SystemReboot                | systemReboot                | `Future<String>`                       | [ \] |
 
 ### Imaging
