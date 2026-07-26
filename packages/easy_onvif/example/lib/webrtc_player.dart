@@ -14,7 +14,17 @@ class WebrtcPlayer extends StatefulWidget {
   /// The server's `host:port` (e.g. `192.168.1.50:8080`).
   final String host;
 
-  const WebrtcPlayer({super.key, required this.host});
+  /// ONVIF credentials, sent as query parameters on the signaling WebSocket
+  /// (the upgrade is rejected without them).
+  final String username;
+  final String password;
+
+  const WebrtcPlayer({
+    super.key,
+    required this.host,
+    required this.username,
+    required this.password,
+  });
 
   @override
   State<WebrtcPlayer> createState() => _WebrtcPlayerState();
@@ -71,9 +81,7 @@ class _WebrtcPlayerState extends State<WebrtcPlayer> {
         init: RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly),
       );
 
-      final channel = WebSocketChannel.connect(
-        Uri.parse('ws://${widget.host}/onvif/webrtc'),
-      );
+      final channel = WebSocketChannel.connect(_signalingUri());
       _channel = channel;
 
       channel.stream.listen(
@@ -93,12 +101,19 @@ class _WebrtcPlayerState extends State<WebrtcPlayer> {
               ));
             case 'error':
               if (!_disposed) {
-                setState(() => _error = message['message'] as String?);
+                setState(() => _error ??= message['message'] as String?);
               }
           }
         },
+        onDone: () {
+          // The server closed the signaling socket (session replaced by a
+          // newer viewer, or the server stopped).
+          if (!_disposed) {
+            setState(() => _error ??= 'Connection closed by the server');
+          }
+        },
         onError: (Object error) {
-          if (!_disposed) setState(() => _error = '$error');
+          if (!_disposed) setState(() => _error ??= '$error');
         },
       );
 
@@ -106,8 +121,29 @@ class _WebrtcPlayerState extends State<WebrtcPlayer> {
       await pc.setLocalDescription(offer);
       channel.sink.add(jsonEncode({'type': 'offer', 'sdp': offer.sdp}));
     } catch (error) {
-      if (!_disposed) setState(() => _error = '$error');
+      if (!_disposed) setState(() => _error ??= '$error');
+      // Tear down anything created before the failure so the peer connection
+      // and socket don't leak while the error is on screen.
+      await _channel?.sink.close();
+      _channel = null;
+      await _pc?.close();
+      _pc = null;
     }
+  }
+
+  /// Builds the authenticated signaling URL from [widget.host] (`host:port`).
+  Uri _signalingUri() {
+    final parts = widget.host.split(':');
+    return Uri(
+      scheme: 'ws',
+      host: parts.first,
+      port: parts.length > 1 ? int.tryParse(parts[1]) : null,
+      path: '/onvif/webrtc',
+      queryParameters: {
+        'username': widget.username,
+        'password': widget.password,
+      },
+    );
   }
 
   @override

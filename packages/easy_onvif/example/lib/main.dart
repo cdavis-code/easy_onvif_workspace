@@ -267,7 +267,11 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
             : const Text('Snapshot not available'),
       ViewMode.video =>
         kIsWeb
-            ? WebrtcPlayer(host: '${config['host']}')
+            ? WebrtcPlayer(
+              host: '${config['host']}',
+              username: '${config['username']}',
+              password: '${config['password']}',
+            )
             : (_videoController != null
                 ? Video(controller: _videoController!, controls: NoVideoControls())
                 : const Text('Live video not available')),
