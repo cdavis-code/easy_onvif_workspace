@@ -10,26 +10,31 @@ develop and test ONVIF integrations without physical camera hardware.
 - **ONVIF SOAP services** — Device Management, Media1/Media2, PTZ, Imaging,
   Recording, Search, and Replay, with WS-Security `UsernameToken`
   authentication.
-- **Live RTSP streaming** — an embedded RTSP server serves H.264 encoded by
-  `ffmpeg` (RTP over TCP interleaved).
+- **Live RTSP streaming** — an embedded RTSP server serves H.264 (RTP over TCP
+  interleaved) from multiple backends: native camera + VideoToolbox (macOS),
+  ScreenCaptureKit (macOS display), or `ffmpeg` (Windows/Linux/test pattern).
 - **Audio streaming** — the selected input device is served as a G.711 (PCMA)
   track in the same RTSP stream, recorded to `.alaw` sidecars, and replayed.
+- **Browser live preview** — a WebRTC endpoint (`/onvif/webrtc`) lets a browser
+  view the live camera/display with microphone audio; the example app uses it
+  automatically on Flutter web, where RTSP cannot play.
 - **Real recording pipeline** — recording jobs capture the live H.264 stream
   to disk as Annex-B segments; Search queries the on-disk indexes and Replay
   serves the recorded footage back over RTSP.
 - **HTTP snapshots** — JPEG frames from the device camera.
 - **WS-Discovery** — the device announces itself and answers `Probe` messages,
   so discovery-based clients can find it on the local network.
-- **Hardware integration** — camera and geolocation via the `camera` and
-  `geolocator` Flutter plugins, with graceful fallback when hardware is
-  unavailable.
+- **Hardware integration** — camera, microphone, screen capture, and
+  geolocation via platform channels and Flutter plugins (`camera`,
+  `geolocator`, AVAudioEngine/ScreenCaptureKit on macOS, AudioRecord on
+  Android), with graceful fallback when hardware is unavailable.
 
 ### Services
 
 | Service           | Namespace | Highlights                                            |
 | ----------------- | --------- | ----------------------------------------------------- |
 | Device Management | `tds`     | Device info, users, capabilities, system log, storage |
-| Media 1           | `trt`     | Profiles, stream/snapshot URIs, metadata configs      |
+| Media 1           | `trt`     | Profiles, stream/snapshot URIs, audio/metadata configs |
 | Media 2           | `tr2`     | Profiles, encoder/source options, multicast stubs     |
 | PTZ               | `tptz`    | Continuous/absolute/relative moves, presets, home     |
 | Imaging           | `timg`    | Simulated presets (settings-seeded), focus status     |
@@ -40,8 +45,9 @@ develop and test ONVIF integrations without physical camera hardware.
 ## Requirements
 
 - Flutter SDK (see the workspace root for the pinned Dart/Flutter versions).
-- `ffmpeg` available on `PATH` for RTSP streaming on desktop
-  (`brew install ffmpeg` on macOS).
+- `ffmpeg` on `PATH` for the `test` video source and for all capture on
+  Windows/Linux (`brew install ffmpeg` on macOS). Not needed on macOS when
+  using the native camera or display backends.
 
 ## Running the server
 
@@ -155,6 +161,27 @@ layer. To discover them:
 On macOS, `source: display` needs the **Screen Recording** permission — the
 app requests it on first start, and macOS requires an app restart after the
 grant.
+
+### Browser preview (WebRTC)
+
+The server exposes a WebRTC signaling endpoint at
+`ws://<host>:<httpPort>/onvif/webrtc`. A browser client negotiates a
+receive-only peer connection and the server streams the configured source
+(camera or display, plus the microphone when `media.audio.enabled` is true),
+encoded by libwebrtc (H.264 video / Opus audio).
+
+The example app uses this automatically when run on Flutter web
+(`flutter run -d chrome`): its **Live Video** mode connects over WebRTC, while
+native platforms keep using RTSP.
+
+Notes:
+
+- One active WebRTC session at a time (camera capture is single-consumer); a new
+  viewer replaces the previous one.
+- On macOS, `source: display` (ScreenCaptureKit) coexists with RTSP; `source:
+  camera` may contend with the RTSP camera capture — stop RTSP or use `display`
+  if you need both at once.
+- LAN only (host ICE candidates); no TURN/STUN relay.
 
 ### Recording storage
 
@@ -271,8 +298,9 @@ lib/
     services/                   # DeviceManagement, Media1/2, PTZ, Imaging,
                                 #   Recording, Search, Replay
     recording/                  # Segment recorder, on-disk store + JSON index
-    streaming/                  # ffmpeg H.264 source, file replay source,
-                                #   RTP packetizer, RTSP server
+    streaming/                  # Video sources (ffmpeg, camera, screen capture),
+                                #   audio sources (ffmpeg, native mic), A-law
+                                #   encoder, RTP packetizer, RTSP server, backends
     discovery/                  # WS-Discovery responder
     hardware/                   # HardwareAdapter interface + Flutter (camera/geo) impl
 assets/
@@ -284,7 +312,8 @@ assets/
 Integration tests drive the **real** `easy_onvif` client against the server
 (connect + device info + auth, media profiles / stream / snapshot, PTZ moves
 and presets, imaging presets, live RTSP recording, recording jobs capturing to
-disk, replay over RTSP, search over recorded ranges, and WS-Discovery):
+disk, replay over RTSP, search over recorded ranges, WS-Discovery, G.711 audio
+track in live/replay RTSP, and `.alaw` recording sidecars):
 
 ```sh
 cd server
