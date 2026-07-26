@@ -273,8 +273,13 @@ The example shows device information and snapshots over HTTP. To watch the live
 RTSP video, open the stream URL in a player such as VLC:
 
 ```sh
-vlc rtsp://192.168.1.50:8554/onvif/Profile_1
+vlc rtsp://admin:admin@192.168.1.50:8554/onvif/Profile_1
 ```
+
+The RTSP stream and the HTTP snapshot endpoint both require the device
+credentials (HTTP Basic). `GetStreamUri` returns the URL with the credentials
+embedded (`rtsp://user:password@host:port/...`), so players such as VLC and
+`ffprobe` authenticate automatically.
 
 ### Notes
 
