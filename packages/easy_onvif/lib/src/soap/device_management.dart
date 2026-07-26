@@ -420,4 +420,52 @@ class DeviceManagementRequest {
 
     return builder.buildFragment();
   }
+
+  /// XML for the [getNetworkDefaultGateway]
+  static XmlDocumentFragment getNetworkDefaultGateway() =>
+      Transport.quickTag('GetNetworkDefaultGateway', Xmlns.tds);
+
+  /// XML for the [setNetworkDefaultGateway]
+  static XmlDocumentFragment setNetworkDefaultGateway(
+    NetworkGateway networkGateway,
+  ) {
+    builder.element(
+      'SetNetworkDefaultGateway',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        for (var address in networkGateway.ipv4Addresses) {
+          address.buildXml(builder, tag: 'IPv4Address');
+        }
+
+        for (var address in networkGateway.ipv6Addresses) {
+          address.buildXml(builder, tag: 'IPv6Address');
+        }
+      },
+    );
+
+    return builder.buildFragment();
+  }
+
+  /// XML for the [getZeroConfiguration]
+  static XmlDocumentFragment getZeroConfiguration() =>
+      Transport.quickTag('GetZeroConfiguration', Xmlns.tds);
+
+  /// XML for the [setZeroConfiguration]
+  static XmlDocumentFragment setZeroConfiguration({
+    required String interfaceToken,
+    required bool enabled,
+  }) {
+    builder.element(
+      'SetZeroConfiguration',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        interfaceToken.buildXml(builder, tag: 'InterfaceToken');
+        enabled.toString().buildXml(builder, tag: 'Enabled');
+      },
+    );
+
+    return builder.buildFragment();
+  }
 }

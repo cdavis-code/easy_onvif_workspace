@@ -851,6 +851,94 @@ class DeviceManagement extends Operation with UiLoggy {
     return true;
   }
 
+  /// This operation gets the default gateway settings from a device.
+  ///
+  /// Access Class: READ_SYSTEM
+  Future<NetworkGateway> getNetworkDefaultGateway() async {
+    loggy.debug('getNetworkDefaultGateway');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: DeviceManagementRequest.getNetworkDefaultGateway()),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return GetNetworkDefaultGatewayResponse.fromJson(
+      responseEnvelope.body.response!,
+    ).networkGateway;
+  }
+
+  /// This operation sets the default gateway settings on a device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setNetworkDefaultGateway(NetworkGateway networkGateway) async {
+    loggy.debug('setNetworkDefaultGateway');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: DeviceManagementRequest.setNetworkDefaultGateway(
+          networkGateway,
+        ),
+      ),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
+  /// This operation gets the zero-configuration settings from a device.
+  ///
+  /// Access Class: READ_SYSTEM
+  Future<NetworkZeroConfiguration> getZeroConfiguration() async {
+    loggy.debug('getZeroConfiguration');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: DeviceManagementRequest.getZeroConfiguration()),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return GetZeroConfigurationResponse.fromJson(
+      responseEnvelope.body.response!,
+    ).zeroConfiguration;
+  }
+
+  /// This operation sets the zero-configuration settings on a device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setZeroConfiguration({
+    required String interfaceToken,
+    required bool enabled,
+  }) async {
+    loggy.debug('setZeroConfiguration');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: DeviceManagementRequest.setZeroConfiguration(
+          interfaceToken: interfaceToken,
+          enabled: enabled,
+        ),
+      ),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
   // Future<bool> setIpAddressFilter({
   //   required IpAddressFilter ipAddressFilter,
   // }) async {

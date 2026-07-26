@@ -380,6 +380,59 @@ void main() {
         '<Test><SetNetworkProtocols xmlns="http://www.onvif.org/ver10/device/wsdl"><NetworkProtocols><Name>HTTP</Name><Enabled>true</Enabled><Port>80</Port></NetworkProtocols></SetNetworkProtocols></Test>',
       );
     });
+
+    test('getNetworkDefaultGateway', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.getNetworkDefaultGateway(),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><GetNetworkDefaultGateway xmlns="http://www.onvif.org/ver10/device/wsdl"/></Test>',
+      );
+    });
+
+    test('setNetworkDefaultGateway', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setNetworkDefaultGateway(
+          NetworkGateway(ipv4Addresses: ['192.168.0.1']),
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetNetworkDefaultGateway xmlns="http://www.onvif.org/ver10/device/wsdl"><IPv4Address>192.168.0.1</IPv4Address></SetNetworkDefaultGateway></Test>',
+      );
+    });
+
+    test('getZeroConfiguration', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.getZeroConfiguration(),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><GetZeroConfiguration xmlns="http://www.onvif.org/ver10/device/wsdl"/></Test>',
+      );
+    });
+
+    test('setZeroConfiguration', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setZeroConfiguration(
+          interfaceToken: 'eth0',
+          enabled: true,
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetZeroConfiguration xmlns="http://www.onvif.org/ver10/device/wsdl"><InterfaceToken>eth0</InterfaceToken><Enabled>true</Enabled></SetZeroConfiguration></Test>',
+      );
+    });
   });
 
   group('Imaging SOAP Requests', () {
