@@ -237,4 +237,36 @@ class DeviceManagementRequest {
 
     return builder.buildFragment();
   }
+
+  /// XML for the [setGeoLocation]
+  static XmlDocumentFragment setGeoLocation(List<LocationEntity> locations) {
+    builder.element(
+      'SetGeoLocation',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        for (var location in locations) {
+          location.buildXml(builder);
+        }
+      },
+    );
+
+    return builder.buildFragment();
+  }
+
+  /// XML for the [deleteGeoLocation]
+  static XmlDocumentFragment deleteGeoLocation(List<LocationEntity> locations) {
+    builder.element(
+      'DeleteGeoLocation',
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        for (var location in locations) {
+          location.buildXml(builder);
+        }
+      },
+    );
+
+    return builder.buildFragment();
+  }
 }

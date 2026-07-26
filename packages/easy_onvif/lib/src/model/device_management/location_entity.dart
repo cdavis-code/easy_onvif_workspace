@@ -1,14 +1,16 @@
 import 'dart:convert';
 
+import 'package:easy_onvif/src/model/common/xml_serializable.dart';
 import 'package:easy_onvif/util.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:xml/xml.dart';
 
 part 'location_entity.g.dart';
 
 /// Represents a geographic location with latitude, longitude, and optional elevation.
 /// This is used by ONVIF GetGeoLocation response.
 @JsonSerializable()
-class LocationEntity {
+class LocationEntity implements XmlSerializable {
   /// Location on earth.
   @JsonKey(name: 'GeoLocation')
   final GeoLocation? geoLocation;
@@ -64,6 +66,51 @@ class LocationEntity {
 
   @override
   String toString() => json.encode(toJson());
+
+  @override
+  void buildXml(
+    XmlBuilder builder, {
+    String tag = 'Location',
+    String? namespace,
+  }) => builder.element(
+    tag,
+    nest: () {
+      if (namespace != null) builder.namespace(namespace);
+
+      if (entity != null) builder.attribute('Entity', entity!);
+      if (token != null) builder.attribute('Token', token!);
+      if (fixed != null) builder.attribute('Fixed', fixed.toString());
+      if (autoGeo != null) builder.attribute('AutoGeo', autoGeo.toString());
+
+      final geo = geoLocation;
+      if (geo != null) {
+        builder.element('GeoLocation', nest: () {
+          if (geo.lon != null) builder.attribute('lon', geo.lon.toString());
+          if (geo.lat != null) builder.attribute('lat', geo.lat.toString());
+          if (geo.elevation != null) {
+            builder.attribute('elevation', geo.elevation.toString());
+          }
+        });
+      }
+
+      final orientation = geoOrientation;
+      if (orientation != null) {
+        builder.element('GeoOrientation', nest: () {
+          if (orientation.roll != null) {
+            builder.attribute('roll', orientation.roll.toString());
+          }
+          if (orientation.pitch != null) {
+            builder.attribute('pitch', orientation.pitch.toString());
+          }
+          if (orientation.yaw != null) {
+            builder.attribute('yaw', orientation.yaw.toString());
+          }
+        });
+      }
+
+      if (geoSource != null) geoSource!.buildXml(builder, tag: 'GeoSource');
+    },
+  );
 }
 
 @JsonSerializable()

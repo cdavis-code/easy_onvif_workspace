@@ -34,6 +34,7 @@ export 'src/model/device_management/get_users_response.dart';
 export 'src/model/device_management/hostname_information.dart';
 export 'src/model/device_management/io_capabilities.dart';
 export 'src/model/device_management/ipaddress_filter.dart';
+export 'src/model/device_management/location_entity.dart';
 export 'src/model/device_management/media_capabilities.dart';
 export 'src/model/device_management/network_capabilities.dart';
 export 'src/model/device_management/network_protocol.dart';

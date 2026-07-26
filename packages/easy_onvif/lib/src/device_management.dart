@@ -700,6 +700,42 @@ class DeviceManagement extends Operation with UiLoggy {
     return true;
   }
 
+  /// This operation sets the geo location on the device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setGeoLocation(List<LocationEntity> locations) async {
+    loggy.debug('setGeoLocation');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: DeviceManagementRequest.setGeoLocation(locations)),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
+  /// This operation deletes the geo location on the device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> deleteGeoLocation(List<LocationEntity> locations) async {
+    loggy.debug('deleteGeoLocation');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: DeviceManagementRequest.deleteGeoLocation(locations)),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
   // Future<bool> setIpAddressFilter({
   //   required IpAddressFilter ipAddressFilter,
   // }) async {

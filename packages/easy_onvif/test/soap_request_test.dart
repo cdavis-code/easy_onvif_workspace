@@ -259,6 +259,34 @@ void main() {
         '<Test><SetRelayOutputSettings xmlns="http://www.onvif.org/ver10/device/wsdl"><RelayOutputToken>relay1</RelayOutputToken><Properties><Mode>Monostable</Mode><DelayTime>PT1S</DelayTime><IdleState>open</IdleState></Properties></SetRelayOutputSettings></Test>',
       );
     });
+
+    test('setGeoLocation', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setGeoLocation([
+          LocationEntity(geoLocation: GeoLocation(lat: 34.0, lon: 12.0)),
+        ]),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetGeoLocation xmlns="http://www.onvif.org/ver10/device/wsdl"><Location><GeoLocation lon="12.0" lat="34.0"/></Location></SetGeoLocation></Test>',
+      );
+    });
+
+    test('deleteGeoLocation', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.deleteGeoLocation([
+          LocationEntity(geoLocation: GeoLocation(lat: 34.0, lon: 12.0)),
+        ]),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><DeleteGeoLocation xmlns="http://www.onvif.org/ver10/device/wsdl"><Location><GeoLocation lon="12.0" lat="34.0"/></Location></DeleteGeoLocation></Test>',
+      );
+    });
   });
 
   group('Imaging SOAP Requests', () {
