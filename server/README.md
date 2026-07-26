@@ -176,6 +176,8 @@ native platforms keep using RTSP.
 
 Notes:
 
+- The signaling WebSocket is authenticated with the ONVIF credentials (sent as
+  query parameters); the example app supplies them from its `config.yaml`.
 - One active WebRTC session at a time (camera capture is single-consumer); a new
   viewer replaces the previous one.
 - On macOS, `source: display` (ScreenCaptureKit) coexists with RTSP; `source:
