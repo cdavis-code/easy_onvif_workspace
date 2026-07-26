@@ -12,10 +12,14 @@ import 'prefixed_ipv6_ipaddress.dart';
 part 'ipaddress_filter.g.dart';
 
 enum Type {
-  @JsonValue("Allow")
-  allow,
-  @JsonValue("Deny")
-  deny,
+  @JsonValue('Allow')
+  allow('Allow'),
+  @JsonValue('Deny')
+  deny('Deny');
+
+  /// The ONVIF wire value (e.g. `Allow`).
+  final String value;
+  const Type(this.value);
 }
 
 @JsonSerializable()
@@ -57,7 +61,7 @@ class IpAddressFilter implements XmlSerializable {
     nest: () {
       builder.namespace(namespace!);
 
-      type.name.buildXml(builder, tag: 'Type');
+      type.value.buildXml(builder, tag: 'Type');
 
       if (prefixedIpv4Addresses.isNotEmpty) {
         for (var address in prefixedIpv4Addresses) {

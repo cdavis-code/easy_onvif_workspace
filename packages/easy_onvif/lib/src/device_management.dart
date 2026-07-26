@@ -939,25 +939,77 @@ class DeviceManagement extends Operation with UiLoggy {
     return true;
   }
 
-  // Future<bool> setIpAddressFilter({
-  //   required IpAddressFilter ipAddressFilter,
-  // }) async {
-  //       loggy.debug('setIpAddressFilter');
+  /// This operation sets the IP address filter on a device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> setIpAddressFilter({
+    required IpAddressFilter ipAddressFilter,
+  }) async {
+    loggy.debug('setIpAddressFilter');
 
-  //   final responseEnvelope = await transport.request(
-  //     uri,
-  //     soap.Body(
-  //       request: ipAddressFilter
-  //       ),
-  //     ),
-  //   );
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: DeviceManagementRequest.setIpAddressFilter(
+          ipAddressFilter: ipAddressFilter,
+        ),
+      ),
+    );
 
-  //   if (responseEnvelope.body.hasFault) {
-  //     throw Exception(responseEnvelope.body.fault.toString());
-  //   }
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
 
-  //   return true;
-  // }
+    return true;
+  }
+
+  /// This operation adds an IP address filter entry on a device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> addIpAddressFilter({
+    required IpAddressFilter ipAddressFilter,
+  }) async {
+    loggy.debug('addIpAddressFilter');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: DeviceManagementRequest.addIpAddressFilter(
+          ipAddressFilter: ipAddressFilter,
+        ),
+      ),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
+
+  /// This operation removes an IP address filter entry on a device.
+  ///
+  /// Access Class: WRITE_SYSTEM
+  Future<bool> removeIpAddressFilter({
+    required IpAddressFilter ipAddressFilter,
+  }) async {
+    loggy.debug('removeIpAddressFilter');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: DeviceManagementRequest.removeIpAddressFilter(
+          ipAddressFilter: ipAddressFilter,
+        ),
+      ),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
 
   // Future<void> getLogOutput() async {
   //  Future<GetEndpointReferenceResponse> getEndpointReference() async {

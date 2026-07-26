@@ -184,15 +184,29 @@ class DeviceManagementRequest {
   /// XML for the [setIpAddressFilter]
   static XmlDocumentFragment setIpAddressFilter({
     required IpAddressFilter ipAddressFilter,
-  }) {
+  }) => _ipAddressFilter('SetIPAddressFilter', ipAddressFilter);
+
+  /// XML for the [addIpAddressFilter]
+  static XmlDocumentFragment addIpAddressFilter({
+    required IpAddressFilter ipAddressFilter,
+  }) => _ipAddressFilter('AddIPAddressFilter', ipAddressFilter);
+
+  /// XML for the [removeIpAddressFilter]
+  static XmlDocumentFragment removeIpAddressFilter({
+    required IpAddressFilter ipAddressFilter,
+  }) => _ipAddressFilter('RemoveIPAddressFilter', ipAddressFilter);
+
+  static XmlDocumentFragment _ipAddressFilter(
+    String operation,
+    IpAddressFilter ipAddressFilter,
+  ) {
     builder.element(
-      'SetIPAddressFilter',
-      namespace: Xmlns.trc,
-      nest: () => ipAddressFilter.buildXml(
-        builder,
-        tag: 'IPAddressFilter',
-        namespace: Xmlns.tds,
-      ),
+      operation,
+      nest: () {
+        builder.namespace(Xmlns.tds);
+
+        ipAddressFilter.buildXml(builder, tag: 'IPAddressFilter');
+      },
     );
 
     return builder.buildFragment();

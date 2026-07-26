@@ -433,6 +433,66 @@ void main() {
         '<Test><SetZeroConfiguration xmlns="http://www.onvif.org/ver10/device/wsdl"><InterfaceToken>eth0</InterfaceToken><Enabled>true</Enabled></SetZeroConfiguration></Test>',
       );
     });
+
+    test('setIpAddressFilter', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setIpAddressFilter(
+          ipAddressFilter: IpAddressFilter(
+            type: Type.allow,
+            prefixedIpv4Addresses: [
+              PrefixedIpv4Address(address: '192.168.0.10', prefixLength: 24),
+            ],
+            prefixedIpv6Addresses: [],
+          ),
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetIPAddressFilter xmlns="http://www.onvif.org/ver10/device/wsdl"><IPAddressFilter xmlns="http://www.onvif.org/ver10/device/wsdl"><Type>Allow</Type><IPv4Address xmlns="http://www.onvif.org/ver10/device/wsdl"><Address>192.168.0.10</Address><PrefixLength>24</PrefixLength></IPv4Address></IPAddressFilter></SetIPAddressFilter></Test>',
+      );
+    });
+
+    test('addIpAddressFilter', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.addIpAddressFilter(
+          ipAddressFilter: IpAddressFilter(
+            type: Type.deny,
+            prefixedIpv4Addresses: [
+              PrefixedIpv4Address(address: '10.0.0.5', prefixLength: 32),
+            ],
+            prefixedIpv6Addresses: [],
+          ),
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><AddIPAddressFilter xmlns="http://www.onvif.org/ver10/device/wsdl"><IPAddressFilter xmlns="http://www.onvif.org/ver10/device/wsdl"><Type>Deny</Type><IPv4Address xmlns="http://www.onvif.org/ver10/device/wsdl"><Address>10.0.0.5</Address><PrefixLength>32</PrefixLength></IPv4Address></IPAddressFilter></AddIPAddressFilter></Test>',
+      );
+    });
+
+    test('removeIpAddressFilter', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.removeIpAddressFilter(
+          ipAddressFilter: IpAddressFilter(
+            type: Type.allow,
+            prefixedIpv4Addresses: [
+              PrefixedIpv4Address(address: '192.168.0.10', prefixLength: 24),
+            ],
+            prefixedIpv6Addresses: [],
+          ),
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><RemoveIPAddressFilter xmlns="http://www.onvif.org/ver10/device/wsdl"><IPAddressFilter xmlns="http://www.onvif.org/ver10/device/wsdl"><Type>Allow</Type><IPv4Address xmlns="http://www.onvif.org/ver10/device/wsdl"><Address>192.168.0.10</Address><PrefixLength>24</PrefixLength></IPv4Address></IPAddressFilter></RemoveIPAddressFilter></Test>',
+      );
+    });
   });
 
   group('Imaging SOAP Requests', () {
