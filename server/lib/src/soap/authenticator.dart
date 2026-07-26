@@ -38,7 +38,23 @@ class Authenticator {
       password: expectedPassword,
     );
 
-    return expectedDigest == credentials.passwordDigest;
+    return _constantTimeEquals(expectedDigest, credentials.passwordDigest);
+  }
+
+  /// Compares two digest strings without an early exit, so the comparison time
+  /// does not leak how many leading characters matched (timing side-channel).
+  static bool _constantTimeEquals(String a, String b) {
+    final aBytes = utf8.encode(a);
+    final bBytes = utf8.encode(b);
+
+    if (aBytes.length != bBytes.length) return false;
+
+    var result = 0;
+    for (var i = 0; i < aBytes.length; i++) {
+      result |= aBytes[i] ^ bBytes[i];
+    }
+
+    return result == 0;
   }
 
   static String _digest({
