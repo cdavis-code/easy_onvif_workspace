@@ -216,6 +216,49 @@ void main() {
         '<Test><GetGeoLocation xmlns="http://www.onvif.org/ver10/device/wsdl"/></Test>',
       );
     });
+
+    test('getRelayOutputs', () {
+      builder.element('Test', nest: DeviceManagementRequest.getRelayOutputs());
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><GetRelayOutputs xmlns="http://www.onvif.org/ver10/device/wsdl"/></Test>',
+      );
+    });
+
+    test('setRelayOutputState', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setRelayOutputState(
+          relayOutputToken: 'relay1',
+          logicalState: RelayLogicalState.active,
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetRelayOutputState xmlns="http://www.onvif.org/ver10/device/wsdl"><RelayOutputToken>relay1</RelayOutputToken><LogicalState>active</LogicalState></SetRelayOutputState></Test>',
+      );
+    });
+
+    test('setRelayOutputSettings', () {
+      builder.element(
+        'Test',
+        nest: DeviceManagementRequest.setRelayOutputSettings(
+          relayOutputToken: 'relay1',
+          properties: RelayOutputSettings(
+            mode: RelayMode.monostable,
+            delayTime: 'PT1S',
+            idleState: RelayIdleState.open,
+          ),
+        ),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetRelayOutputSettings xmlns="http://www.onvif.org/ver10/device/wsdl"><RelayOutputToken>relay1</RelayOutputToken><Properties><Mode>Monostable</Mode><DelayTime>PT1S</DelayTime><IdleState>open</IdleState></Properties></SetRelayOutputSettings></Test>',
+      );
+    });
   });
 
   group('Imaging SOAP Requests', () {
@@ -762,9 +805,11 @@ void main() {
         nest: PtzRequest.stop('testToken', panTilt: true, zoom: true),
       );
 
+      // As of v3.1.3 the Stop operation is issued as a zero-velocity
+      // ContinuousMove (broader device compatibility), not a Stop element.
       expect(
         builder.buildDocument().toXmlString(),
-        '<Test><Stop xmlns="http://www.onvif.org/ver20/ptz/wsdl"><ProfileToken>testToken</ProfileToken><PanTilt xmlns="http://www.onvif.org/ver10/schema">true</PanTilt><Zoom xmlns="http://www.onvif.org/ver10/schema">true</Zoom></Stop></Test>',
+        '<Test><ContinuousMove xmlns="http://www.onvif.org/ver20/ptz/wsdl"><ProfileToken>testToken</ProfileToken><Velocity xmlns="http://www.onvif.org/ver20/ptz/wsdl"><PanTilt xmlns="http://www.onvif.org/ver10/schema" x="0.0" y="0.0"/><Zoom xmlns="http://www.onvif.org/ver10/schema" x="0.0"/></Velocity></ContinuousMove></Test>',
       );
     });
   });
