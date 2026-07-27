@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_onvif/device_management.dart' as device;
 import 'package:easy_onvif/onvif.dart' hide Media;
 import 'package:easy_onvif/shared.dart';
@@ -72,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
   String url = '';
 
   /// HTTP Basic `Authorization` header for the snapshot endpoint (the server
-  /// requires authentication; `CachedNetworkImage` does not derive it from the
+  /// requires authentication; `Image.network` does not derive it from the
   /// URL's embedded credentials).
   Map<String, String> _snapshotHeaders = const {};
 
@@ -146,6 +145,12 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
   }
 
   void _update() async {
+    // Evict the previous snapshot from the in-memory image cache so the
+    // Image.network below fetches a fresh frame from the camera.
+    if (url.isNotEmpty) {
+      await NetworkImage(url, headers: _snapshotHeaders).evict();
+    }
+
     setState(() {
       model = deviceInfo.model ?? '';
 
@@ -268,14 +273,29 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
     final Widget media = switch (_viewMode) {
       ViewMode.snapshot =>
         url != ''
-            ? CachedNetworkImage(
-              imageUrl: url,
-              httpHeaders: _snapshotHeaders,
-              progressIndicatorBuilder:
-                  (context, url, downloadProgress) => CircularProgressIndicator(
-                    value: downloadProgress.progress,
-                  ),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
+            // A live camera frame must never be served from cache: a cached
+            // image would keep showing a stale frame forever (the URL never
+            // changes). Image.network + an evict in _update() refetches on
+            // every "Get".
+            ? Image.network(
+              url,
+              headers: _snapshotHeaders,
+              gaplessPlayback: true,
+              loadingBuilder:
+                  (context, child, progress) =>
+                      progress == null
+                          ? child
+                          : Center(
+                            child: CircularProgressIndicator(
+                              value:
+                                  progress.expectedTotalBytes != null
+                                      ? progress.cumulativeBytesLoaded /
+                                          progress.expectedTotalBytes!
+                                      : null,
+                            ),
+                          ),
+              errorBuilder:
+                  (context, error, stackTrace) => const Icon(Icons.error),
             )
             : const Text('Snapshot not available'),
       ViewMode.video =>
@@ -286,7 +306,10 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
               password: '${config['password']}',
             )
             : (_videoController != null
-                ? Video(controller: _videoController!, controls: NoVideoControls())
+                ? Video(
+                  controller: _videoController!,
+                  controls: NoVideoControls,
+                )
                 : const Text('Live video not available')),
     };
 

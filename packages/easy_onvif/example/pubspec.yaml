@@ -10,7 +10,6 @@ environment:
   sdk: ">=3.7.0 <4.0.0"
 
 dependencies:
-  cached_network_image: ^3.3.1
   collection: ^1.19.1
   easy_onvif:
     path: ../
