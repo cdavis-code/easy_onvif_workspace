@@ -75,69 +75,68 @@ Defaults are defined by `ServerConfig` in [`lib/src/config.dart`](lib/src/config
 | Model               | `Dart ONVIF Server`    |
 | Firmware version    | `0.1.0`                |
 
-### Settings file
+### Settings
 
-At startup the app loads YAML settings, searching in order:
+All settings are edited in the app: tap the gear icon in the app bar. Saving
+persists immediately (and restarts the server if it is running, so save always
+means applied). Settings are stored as JSON in the app's own storage
+(`getApplicationSupportDirectory()/settings.json`), which works inside the
+macOS App Sandbox without any entitlement exceptions.
 
-1. `~/.easy_onvif_server/settings.yaml` (runtime override)
-2. the bundled [`assets/settings.yaml`](assets/settings.yaml) (all keys
-   commented — pure defaults)
+Every setting falls back to the defaults above. The stored JSON mirrors the
+settings screen's sections:
 
-Every key is optional; missing keys fall back to the defaults above. Schema:
-
-```yaml
-device:
-  manufacturer: easy_onvif
-  model: Dart ONVIF Server
-  firmware: 0.1.0
-  serial: EASY-ONVIF-SERVER-0001
-  hardwareId: "1"
-  hostname: easy-onvif-server
-network:
-  httpPort: 8080
-  rtspPort: 8554
-auth:
-  username: admin
-  password: admin
-services:          # enable/disable optional services
-  recording: true
-  replay: true
-  search: true
-  imaging: true
-recording:
-  directory: /path/to/recordings   # default: system temp
-  segmentSeconds: 10               # segment rotation length
-  maxRetentionMinutes: 60          # default: unlimited
-imaging:
-  presets:            # define at least two (the client parses a preset list)
-    - token: ImagingPreset_1
-      name: Standard
-      type: Auto
-    - token: ImagingPreset_2
-      name: Low Light
-      type: LowLight
-geolocation:       # GetGeoLocation fallback when no platform fix
-  lat: 43.65
-  lon: -79.38
-  elevation: 76.0
-media:
-  video:
-    source: camera             # camera | display | test
-    device: ""                 # raw platform id, empty = default:
-                               #   camera: plugin device name (macOS/mobile),
-                               #     dshow name (Windows), /dev/video0 (Linux)
-                               #   display: CGDirectDisplayID (macOS),
-                               #     gdigrab target (Windows), :0.0 (Linux)
-  audio:
-    enabled: false             # serve G.711 audio as a second RTSP track
-    device: ""                 # raw platform id, empty = default input:
-                               #   CoreAudio device UID (macOS),
-                               #   dshow name (Windows), hw:1 / pulse (Linux)
+```jsonc
+{
+  "device": {
+    "manufacturer": "easy_onvif",
+    "model": "Dart ONVIF Server",
+    "firmware": "0.1.0",
+    "serial": "EASY-ONVIF-SERVER-0001",
+    "hardwareId": "1",
+    "hostname": "easy-onvif-server"
+  },
+  "network": { "httpPort": 8080, "rtspPort": 8554 },
+  "auth": { "username": "admin", "password": "admin" },
+  "services": {          // enable/disable optional services
+    "recording": true,
+    "replay": true,
+    "search": true,
+    "imaging": true
+  },
+  "recording": {
+    "directory": "/path/to/recordings",  // default: system temp
+    "segmentSeconds": 10,                // segment rotation length
+    "maxRetentionMinutes": 60            // default: unlimited
+  },
+  "imaging": {
+    "presets": [         // define at least two (the client parses a preset list)
+      { "token": "ImagingPreset_1", "name": "Standard", "type": "Auto" },
+      { "token": "ImagingPreset_2", "name": "Low Light", "type": "LowLight" }
+    ]
+  },
+  "geolocation": {       // GetGeoLocation fallback when no platform fix
+    "lat": 43.65,
+    "lon": -79.38,
+    "elevation": 76.0
+  },
+  "media": {
+    "video": {
+      "source": "camera",  // camera | display | test
+      "device": ""         // raw platform id, empty = default
+    },
+    "audio": {
+      "enabled": false,    // serve G.711 audio as a second RTSP track
+      "device": ""         // raw platform id, empty = default input
+    }
+  }
+}
 ```
 
 ### Choosing what to stream
 
-`media.video.source` selects the video source:
+`media.video.source` (the video source picker in settings) selects the video
+source:
 
 | Source    | macOS                        | Windows/Linux            | iOS/Android |
 | --------- | ---------------------------- | ------------------------ | ----------- |
@@ -146,69 +145,22 @@ media:
 | `test`    | ffmpeg lavfi test pattern    | ffmpeg lavfi test pattern | not supported (falls back to camera) |
 
 Device identifiers are raw platform values passed unmodified to the capture
-layer. To discover them:
+layer. On macOS the settings screen discovers them for you: the camera, display
+and audio-input pickers are populated by enumerating the actual hardware
+(`availableCameras()`, CoreAudio, CoreGraphics). On Windows/Linux the device
+fields are free text; to discover values:
 
-- **Cameras:** `ffmpeg -f avfoundation -list_devices true -i ""` (macOS),
-  `ffmpeg -list_devices true -f dshow -i dummy` (Windows),
+- **Cameras:** `ffmpeg -list_devices true -f dshow -i dummy` (Windows),
   `v4l2-ctl --list-devices` (Linux).
-- **Displays:** the macOS `CGDirectDisplayID` of the screen to capture — see
-  [Selecting a display on macOS](#selecting-a-display-on-macos) below (leave
-  `device` empty to use the main display); gdigrab accepts `desktop` or
-  `title=<window>` (Windows); X11 display names like `:0.0` (Linux).
-- **Audio inputs:** `SwitchAudioSource -a` or Audio MIDI Setup for CoreAudio
-  UIDs (macOS); `ffmpeg -list_devices true -f dshow -i dummy` (Windows);
+- **Displays:** gdigrab accepts `desktop` or `title=<window>` (Windows); X11
+  display names like `:0.0` (Linux).
+- **Audio inputs:** `ffmpeg -list_devices true -f dshow -i dummy` (Windows);
   `hw:<n>` ALSA ids or PulseAudio source names (Linux).
 
-On macOS, `source: display` needs the **Screen Recording** permission — the
+On macOS, the Display source needs the **Screen Recording** permission — the
 app requests it on first start, and macOS requires an app restart after the
-grant.
-
-### Selecting a display on macOS
-
-With `source: display`, `media.video.device` is the **CGDirectDisplayID** (a
-number) of the screen to capture. Leave it empty (or omit it) to capture the
-main display. If the id doesn't match a connected display, the server falls
-back to the main display.
-
-macOS doesn't show the CGDirectDisplayID in System Settings, so list them with
-this one-off Swift script (uses the Xcode command-line tools you already have
-for Flutter):
-
-```sh
-cat > /tmp/list_displays.swift <<'EOF'
-import CoreGraphics
-import AppKit
-var count: UInt32 = 0
-CGGetActiveDisplayList(0, nil, &count)
-var ids = [CGDirectDisplayID](repeating: 0, count: Int(count))
-CGGetActiveDisplayList(count, &ids, &count)
-let main = CGMainDisplayID()
-for id in ids {
-    let b = CGDisplayBounds(id)
-    let name = NSScreen.screens.first(where: {
-        $0.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? UInt32 == id
-    })?.localizedName ?? "?"
-    print("id \(id)\(id == main ? " (main)" : "")  \(Int(b.width))x\(Int(b.height))  \(name)")
-}
-EOF
-swift /tmp/list_displays.swift
-```
-
-Example output for a laptop with one external monitor:
-
-```
-id 1 (main)  1728x1117  Built-in Retina Display
-id 2  3840x2160  ASUS PB287Q
-```
-
-To stream the external monitor, put its id in `device`:
-
-```yaml
-media:
-  video:
-    source: display
-    device: "2"        # CGDirectDisplayID of the display to capture
-```
+grant. Enabling audio requests the **Microphone** permission right from the
+settings toggle.
 
 ### Browser preview (WebRTC)
 
@@ -355,7 +307,9 @@ lib/
   main.dart                     # Flutter app shell + status UI
   src/
     config.dart                 # ServerConfig defaults
-    settings.dart               # YAML settings loader (ServerSettings)
+    settings.dart               # ServerSettings model (JSON toJson/fromJson)
+    settings_store.dart         # JSON persistence in app storage
+    ui/                         # Settings screen (gear icon in the app bar)
     onvif_device.dart           # Assembles and runs the whole device
     server/                     # HTTP server + SOAP dispatcher
     soap/                       # Envelope builder, request parser, auth
@@ -367,8 +321,6 @@ lib/
                                 #   encoder, RTP packetizer, RTSP server, backends
     discovery/                  # WS-Discovery responder
     hardware/                   # HardwareAdapter interface + Flutter (camera/geo) impl
-assets/
-  settings.yaml                 # Bundled settings template (all keys commented)
 ```
 
 ## Testing
