@@ -78,7 +78,8 @@ void main() {
     final client = await WebSocket.connect('ws://localhost:${server.port}/');
     final responses = <Map<String, dynamic>>[];
     client.listen(
-      (data) => responses.add(jsonDecode(data as String) as Map<String, dynamic>),
+      (data) =>
+          responses.add(jsonDecode(data as String) as Map<String, dynamic>),
     );
 
     client.add(jsonEncode({'type': 'offer', 'sdp': 'fake-offer'}));
@@ -102,12 +103,14 @@ void main() {
     client.add(jsonEncode({'type': 'offer', 'sdp': 'o'}));
     await Future<void>.delayed(const Duration(milliseconds: 50));
 
-    client.add(jsonEncode({
-      'type': 'candidate',
-      'candidate': 'candidate:1',
-      'sdpMid': '0',
-      'sdpMLineIndex': 0,
-    }));
+    client.add(
+      jsonEncode({
+        'type': 'candidate',
+        'candidate': 'candidate:1',
+        'sdpMid': '0',
+        'sdpMLineIndex': 0,
+      }),
+    );
     await Future<void>.delayed(const Duration(milliseconds: 100));
 
     expect(created.single.candidates, contains('candidate:1'));

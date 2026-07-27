@@ -64,11 +64,11 @@ class RecordingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetServiceCapabilitiesResponse',
-        namespace: Xmlns.trc,
+        namespaceUri: Xmlns.trc,
         nest: () {
           b.element(
             'Capabilities',
-            namespace: Xmlns.trc,
+            namespaceUri: Xmlns.trc,
             attributes: {
               'DynamicRecordings': 'true',
               'DynamicTracks': 'false',
@@ -101,11 +101,11 @@ class RecordingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'CreateRecordingResponse',
-        namespace: Xmlns.trc,
+        namespaceUri: Xmlns.trc,
         nest: () {
           b.element(
             'RecordingToken',
-            namespace: Xmlns.trc,
+            namespaceUri: Xmlns.trc,
             nest: index.recordingToken,
           );
         },
@@ -129,7 +129,7 @@ class RecordingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetRecordingsResponse',
-        namespace: Xmlns.trc,
+        namespaceUri: Xmlns.trc,
         nest: () {
           for (final index in manager.recordings) {
             _writeRecordingItem(b, index);
@@ -144,69 +144,69 @@ class RecordingService implements OnvifService {
   void _writeRecordingItem(XmlBuilder b, RecordingIndex index) {
     b.element(
       'RecordingItem',
-      namespace: Xmlns.trc,
+      namespaceUri: Xmlns.trc,
       nest: () {
         b.element(
           'RecordingToken',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: index.recordingToken,
         );
         b.element(
           'Configuration',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: () {
             b.element(
               'Source',
-              namespace: Xmlns.tt,
+              namespaceUri: Xmlns.tt,
               nest: () {
                 b.element(
                   'SourceId',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: index.sourceToken,
                 );
-                b.element('Name', namespace: Xmlns.tt, nest: index.sourceToken);
-                b.element('Location', namespace: Xmlns.tt, nest: 'Location');
+                b.element('Name', namespaceUri: Xmlns.tt, nest: index.sourceToken);
+                b.element('Location', namespaceUri: Xmlns.tt, nest: 'Location');
                 b.element(
                   'Description',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: 'Live capture',
                 );
                 b.element(
                   'Address',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: 'http://www.onvif.org/ver10/schema/Profile',
                 );
               },
             );
-            b.element('Content', namespace: Xmlns.tt, nest: 'RecordContent');
+            b.element('Content', namespaceUri: Xmlns.tt, nest: 'RecordContent');
             b.element(
               'MaximumRetentionTime',
-              namespace: Xmlns.tt,
+              namespaceUri: Xmlns.tt,
               nest: 'PT0S',
             );
           },
         );
         b.element(
           'Tracks',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: () {
             b.element(
               'Track',
-              namespace: Xmlns.tt,
+              namespaceUri: Xmlns.tt,
               nest: () {
                 b.element(
                   'TrackToken',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: 'videotracktoken_1',
                 );
                 b.element(
                   'Configuration',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: () {
-                    b.element('TrackType', namespace: Xmlns.tt, nest: 'Video');
+                    b.element('TrackType', namespaceUri: Xmlns.tt, nest: 'Video');
                     b.element(
                       'Description',
-                      namespace: Xmlns.tt,
+                      namespaceUri: Xmlns.tt,
                       nest: 'VideoTrack',
                     );
                   },
@@ -257,9 +257,9 @@ class RecordingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'CreateRecordingJobResponse',
-        namespace: Xmlns.trc,
+        namespaceUri: Xmlns.trc,
         nest: () {
-          b.element('JobToken', namespace: Xmlns.trc, nest: job.jobToken);
+          b.element('JobToken', namespaceUri: Xmlns.trc, nest: job.jobToken);
           _writeJobConfiguration(b, job, 'JobConfiguration', Xmlns.trc);
         },
       );
@@ -294,20 +294,15 @@ class RecordingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetRecordingJobsResponse',
-        namespace: Xmlns.trc,
+        namespaceUri: Xmlns.trc,
         nest: () {
           for (final job in manager.jobs) {
             b.element(
               'JobItem',
-              namespace: Xmlns.trc,
+              namespaceUri: Xmlns.trc,
               nest: () {
-                b.element('JobToken', namespace: Xmlns.tt, nest: job.jobToken);
-                _writeJobConfiguration(
-                  b,
-                  job,
-                  'JobConfiguration',
-                  Xmlns.tt,
-                );
+                b.element('JobToken', namespaceUri: Xmlns.tt, nest: job.jobToken);
+                _writeJobConfiguration(b, job, 'JobConfiguration', Xmlns.tt);
               },
             );
           }
@@ -325,18 +320,18 @@ class RecordingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetRecordingJobStateResponse',
-        namespace: Xmlns.trc,
+        namespaceUri: Xmlns.trc,
         nest: () {
           b.element(
             'State',
-            namespace: Xmlns.trc,
+            namespaceUri: Xmlns.trc,
             nest: () {
               b.element(
                 'RecordingToken',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: job.recordingToken,
               );
-              b.element('State', namespace: Xmlns.tt, nest: job.mode);
+              b.element('State', namespaceUri: Xmlns.tt, nest: job.mode);
             },
           );
         },
@@ -378,15 +373,15 @@ class RecordingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetRecordingOptionsResponse',
-        namespace: Xmlns.trc,
+        namespaceUri: Xmlns.trc,
         nest: () {
           b.element(
             'Options',
-            namespace: Xmlns.trc,
+            namespaceUri: Xmlns.trc,
             nest: () {
               b.element(
                 'Job',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 attributes: {
                   'Spare': '4',
                   'CompatibleSources': 'VideoSource_1',
@@ -394,7 +389,7 @@ class RecordingService implements OnvifService {
               );
               b.element(
                 'Track',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 attributes: {'SpareTotal': '0'},
               );
             },
@@ -414,15 +409,15 @@ class RecordingService implements OnvifService {
   ) {
     b.element(
       element,
-      namespace: namespace,
+      namespaceUri: namespace,
       nest: () {
         b.element(
           'RecordingToken',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: job.recordingToken,
         );
-        b.element('Mode', namespace: Xmlns.tt, nest: job.mode);
-        b.element('Priority', namespace: Xmlns.tt, nest: '${job.priority}');
+        b.element('Mode', namespaceUri: Xmlns.tt, nest: job.mode);
+        b.element('Priority', namespaceUri: Xmlns.tt, nest: '${job.priority}');
       },
     );
   }
@@ -460,7 +455,7 @@ class RecordingService implements OnvifService {
 
   String _empty(String responseName) {
     return SoapEnvelopeBuilder.response((b) {
-      b.element(responseName, namespace: Xmlns.trc, nest: () {});
+      b.element(responseName, namespaceUri: Xmlns.trc, nest: () {});
     });
   }
 

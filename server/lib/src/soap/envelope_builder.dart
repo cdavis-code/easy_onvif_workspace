@@ -9,18 +9,20 @@ import 'package:xml/xml.dart';
 /// URIs matter (prefixes are stripped). The namespace map below mirrors the
 /// prefixes used by the reference fixtures in `packages/easy_onvif/test/xml/`.
 class SoapEnvelopeBuilder {
-  static const Map<String, String> _namespaces = {
-    Xmlns.s: 'env',
-    Xmlns.tt: 'tt',
-    Xmlns.tds: 'tds',
-    Xmlns.trt: 'trt',
-    Xmlns.tr2: 'tr2',
-    Xmlns.tptz: 'tptz',
-    Xmlns.timg: 'timg',
-    Xmlns.trc: 'trc',
-    Xmlns.tse: 'tse',
-    Xmlns.trp: 'trp',
-    Xmlns.ter: 'ter',
+  /// Namespace declarations for every envelope, keyed by prefix as required
+  /// by `XmlBuilder.element`'s `namespaceUris` parameter.
+  static const Map<String, String> _namespaceUris = {
+    'env': Xmlns.s,
+    'tt': Xmlns.tt,
+    'tds': Xmlns.tds,
+    'trt': Xmlns.trt,
+    'tr2': Xmlns.tr2,
+    'tptz': Xmlns.tptz,
+    'timg': Xmlns.timg,
+    'trc': Xmlns.trc,
+    'tse': Xmlns.tse,
+    'trp': Xmlns.trp,
+    'ter': Xmlns.ter,
   };
 
   /// Wraps a response body (written by [body] into the shared [XmlBuilder]) in
@@ -32,12 +34,16 @@ class SoapEnvelopeBuilder {
 
     builder.element(
       'Envelope',
-      namespace: Xmlns.s,
-      namespaces: _namespaces,
+      namespaceUri: Xmlns.s,
+      namespaceUris: _namespaceUris,
       nest: () {
-        builder.element('Body', namespace: Xmlns.s, nest: () {
-          body(builder);
-        });
+        builder.element(
+          'Body',
+          namespaceUri: Xmlns.s,
+          nest: () {
+            body(builder);
+          },
+        );
       },
     );
 
@@ -59,35 +65,51 @@ class SoapEnvelopeBuilder {
 
     builder.element(
       'Envelope',
-      namespace: Xmlns.s,
-      namespaces: _namespaces,
+      namespaceUri: Xmlns.s,
+      namespaceUris: _namespaceUris,
       nest: () {
-        builder.element('Body', namespace: Xmlns.s, nest: () {
-          builder.element('Fault', namespace: Xmlns.s, nest: () {
-            builder.element('Code', namespace: Xmlns.s, nest: () {
-              builder.element(
-                'Value',
-                namespace: Xmlns.s,
-                nest: topCode,
-              );
-              builder.element('Subcode', namespace: Xmlns.s, nest: () {
+        builder.element(
+          'Body',
+          namespaceUri: Xmlns.s,
+          nest: () {
+            builder.element(
+              'Fault',
+              namespaceUri: Xmlns.s,
+              nest: () {
                 builder.element(
-                  'Value',
-                  namespace: Xmlns.s,
-                  nest: 'ter:$subcode',
+                  'Code',
+                  namespaceUri: Xmlns.s,
+                  nest: () {
+                    builder.element('Value', namespaceUri: Xmlns.s, nest: topCode);
+                    builder.element(
+                      'Subcode',
+                      namespaceUri: Xmlns.s,
+                      nest: () {
+                        builder.element(
+                          'Value',
+                          namespaceUri: Xmlns.s,
+                          nest: 'ter:$subcode',
+                        );
+                      },
+                    );
+                  },
                 );
-              });
-            });
-            builder.element('Reason', namespace: Xmlns.s, nest: () {
-              builder.element(
-                'Text',
-                namespace: Xmlns.s,
-                attributes: {'xml:lang': 'en'},
-                nest: reason,
-              );
-            });
-          });
-        });
+                builder.element(
+                  'Reason',
+                  namespaceUri: Xmlns.s,
+                  nest: () {
+                    builder.element(
+                      'Text',
+                      namespaceUri: Xmlns.s,
+                      attributes: {'xml:lang': 'en'},
+                      nest: reason,
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
       },
     );
 

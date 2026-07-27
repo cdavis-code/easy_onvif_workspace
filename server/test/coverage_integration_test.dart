@@ -58,7 +58,7 @@ void main() {
       soap.Transport.builder.element(
         'GetEndpointReference',
         nest: () {
-          soap.Transport.builder.namespace(soap.Xmlns.tds);
+          soap.Transport.builder.namespaceUri(null, soap.Xmlns.tds);
         },
       );
 
@@ -114,7 +114,7 @@ void main() {
       soap.Transport.builder.element(
         'GetVideoEncoderConfigurations',
         nest: () {
-          soap.Transport.builder.namespace(soap.Xmlns.tr2);
+          soap.Transport.builder.namespaceUri(null, soap.Xmlns.tr2);
         },
       );
 
@@ -163,11 +163,11 @@ void main() {
       soap.Transport.builder.element(
         'GetPresets',
         nest: () {
-          soap.Transport.builder.namespace(soap.Xmlns.timg);
+          soap.Transport.builder.namespaceUri(null, soap.Xmlns.timg);
           soap.Transport.builder.element(
             'VideoSourceToken',
             nest: () {
-              soap.Transport.builder.namespace(soap.Xmlns.timg);
+              soap.Transport.builder.namespaceUri(null, soap.Xmlns.timg);
               soap.Transport.builder.text('BogusSource');
             },
           );
@@ -187,18 +187,18 @@ void main() {
       soap.Transport.builder.element(
         'SetCurrentPreset',
         nest: () {
-          soap.Transport.builder.namespace(soap.Xmlns.timg);
+          soap.Transport.builder.namespaceUri(null, soap.Xmlns.timg);
           soap.Transport.builder.element(
             'VideoSourceToken',
             nest: () {
-              soap.Transport.builder.namespace(soap.Xmlns.timg);
+              soap.Transport.builder.namespaceUri(null, soap.Xmlns.timg);
               soap.Transport.builder.text('VideoSource_1');
             },
           );
           soap.Transport.builder.element(
             'PresetToken',
             nest: () {
-              soap.Transport.builder.namespace(soap.Xmlns.timg);
+              soap.Transport.builder.namespaceUri(null, soap.Xmlns.timg);
               soap.Transport.builder.text(presets.last.token);
             },
           );
@@ -241,9 +241,12 @@ void main() {
 
   group('audio configuration', () {
     test('advertises one G711 encoder configuration', () async {
-      soap.Transport.builder.element('GetAudioEncoderConfigurations', nest: () {
-        soap.Transport.builder.namespace(soap.Xmlns.trt);
-      });
+      soap.Transport.builder.element(
+        'GetAudioEncoderConfigurations',
+        nest: () {
+          soap.Transport.builder.namespaceUri(null, soap.Xmlns.trt);
+        },
+      );
 
       final envelope = await onvif.media.media1.transport.securedRequest(
         onvif.media.media1.uri,
@@ -254,9 +257,12 @@ void main() {
     });
 
     test('advertises one audio source configuration', () async {
-      soap.Transport.builder.element('GetAudioSourceConfigurations', nest: () {
-        soap.Transport.builder.namespace(soap.Xmlns.trt);
-      });
+      soap.Transport.builder.element(
+        'GetAudioSourceConfigurations',
+        nest: () {
+          soap.Transport.builder.namespaceUri(null, soap.Xmlns.trt);
+        },
+      );
 
       final envelope = await onvif.media.media1.transport.securedRequest(
         onvif.media.media1.uri,

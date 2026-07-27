@@ -76,7 +76,7 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetProfilesResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           for (final profile in state.profiles) {
             _writeProfile(b, profile.token, profile.name);
@@ -96,7 +96,7 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetProfileResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           _writeProfile(b, profile.token, profile.name);
         },
@@ -112,7 +112,7 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetStreamUriResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           _writeMediaUri(b, uri);
         },
@@ -126,7 +126,7 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetSnapshotUriResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           _writeMediaUri(b, config.snapshotUrl(host, profileToken));
         },
@@ -138,20 +138,20 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetVideoSourcesResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           b.element(
             'VideoSources',
-            namespace: Xmlns.trt,
+            namespaceUri: Xmlns.trt,
             attributes: {'token': DeviceState.videoSourceToken},
             nest: () {
-              b.element('Framerate', namespace: Xmlns.tt, nest: '30');
+              b.element('Framerate', namespaceUri: Xmlns.tt, nest: '30');
               b.element(
                 'Resolution',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
-                  b.element('Width', namespace: Xmlns.tt, nest: '1920');
-                  b.element('Height', namespace: Xmlns.tt, nest: '1080');
+                  b.element('Width', namespaceUri: Xmlns.tt, nest: '1920');
+                  b.element('Height', namespaceUri: Xmlns.tt, nest: '1080');
                 },
               );
             },
@@ -165,14 +165,14 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetAudioSourcesResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           b.element(
             'AudioSources',
-            namespace: Xmlns.trt,
+            namespaceUri: Xmlns.trt,
             attributes: {'token': 'AudioSource_1'},
             nest: () {
-              b.element('Channels', namespace: Xmlns.tt, nest: '1');
+              b.element('Channels', namespaceUri: Xmlns.tt, nest: '1');
             },
           );
         },
@@ -184,24 +184,24 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetAudioSourceConfigurationsResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           if (!audioEnabled) return;
 
           b.element(
             'Configurations',
-            namespace: Xmlns.trt,
+            namespaceUri: Xmlns.trt,
             attributes: {'token': 'AudioSourceConfig_1'},
             nest: () {
               b.element(
                 'Name',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: 'Audio Source Config',
               );
-              b.element('UseCount', namespace: Xmlns.tt, nest: '1');
+              b.element('UseCount', namespaceUri: Xmlns.tt, nest: '1');
               b.element(
                 'SourceToken',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: 'AudioSource_1',
               );
             },
@@ -215,44 +215,44 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetAudioEncoderConfigurationsResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           if (!audioEnabled) return;
 
           b.element(
             'Configurations',
-            namespace: Xmlns.trt,
+            namespaceUri: Xmlns.trt,
             attributes: {'token': 'AudioEncoderConfig_1'},
             nest: () {
-              b.element('Name', namespace: Xmlns.tt, nest: 'G711 Encoder');
-              b.element('UseCount', namespace: Xmlns.tt, nest: '1');
-              b.element('Encoding', namespace: Xmlns.tt, nest: 'G711');
-              b.element('Bitrate', namespace: Xmlns.tt, nest: '64');
-              b.element('SampleRate', namespace: Xmlns.tt, nest: '8');
+              b.element('Name', namespaceUri: Xmlns.tt, nest: 'G711 Encoder');
+              b.element('UseCount', namespaceUri: Xmlns.tt, nest: '1');
+              b.element('Encoding', namespaceUri: Xmlns.tt, nest: 'G711');
+              b.element('Bitrate', namespaceUri: Xmlns.tt, nest: '64');
+              b.element('SampleRate', namespaceUri: Xmlns.tt, nest: '8');
               // Multicast and SessionTimeout are required (minOccurs=1) in
               // the tt:AudioEncoderConfiguration schema.
               b.element(
                 'Multicast',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   b.element(
                     'Address',
-                    namespace: Xmlns.tt,
+                    namespaceUri: Xmlns.tt,
                     nest: () {
-                      b.element('Type', namespace: Xmlns.tt, nest: 'IPv4');
+                      b.element('Type', namespaceUri: Xmlns.tt, nest: 'IPv4');
                       b.element(
                         'IPv4Address',
-                        namespace: Xmlns.tt,
+                        namespaceUri: Xmlns.tt,
                         nest: '0.0.0.0',
                       );
                     },
                   );
-                  b.element('Port', namespace: Xmlns.tt, nest: '0');
-                  b.element('TTL', namespace: Xmlns.tt, nest: '0');
-                  b.element('AutoStart', namespace: Xmlns.tt, nest: 'false');
+                  b.element('Port', namespaceUri: Xmlns.tt, nest: '0');
+                  b.element('TTL', namespaceUri: Xmlns.tt, nest: '0');
+                  b.element('AutoStart', namespaceUri: Xmlns.tt, nest: 'false');
                 },
               );
-              b.element('SessionTimeout', namespace: Xmlns.tt, nest: 'PT60S');
+              b.element('SessionTimeout', namespaceUri: Xmlns.tt, nest: 'PT60S');
             },
           );
         },
@@ -276,16 +276,16 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetMetadataConfigurationResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           b.element(
             'Configuration',
-            namespace: Xmlns.trt,
+            namespaceUri: Xmlns.trt,
             attributes: {'token': _metadataConfigToken},
             nest: () {
-              b.element('Name', namespace: Xmlns.tt, nest: 'Metadata 1');
-              b.element('UseCount', namespace: Xmlns.tt, nest: '1');
-              b.element('SessionTimeout', namespace: Xmlns.tt, nest: 'PT60S');
+              b.element('Name', namespaceUri: Xmlns.tt, nest: 'Metadata 1');
+              b.element('UseCount', namespaceUri: Xmlns.tt, nest: '1');
+              b.element('SessionTimeout', namespaceUri: Xmlns.tt, nest: 'PT60S');
             },
           );
         },
@@ -297,11 +297,11 @@ class Media1Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetServiceCapabilitiesResponse',
-        namespace: Xmlns.trt,
+        namespaceUri: Xmlns.trt,
         nest: () {
           b.element(
             'Capabilities',
-            namespace: Xmlns.trt,
+            namespaceUri: Xmlns.trt,
             attributes: {
               'SnapshotUri': 'true',
               'Rotation': 'false',
@@ -311,12 +311,12 @@ class Media1Service implements OnvifService {
             nest: () {
               b.element(
                 'ProfileCapabilities',
-                namespace: Xmlns.trt,
+                namespaceUri: Xmlns.trt,
                 attributes: {'MaximumNumberOfProfiles': '10'},
               );
               b.element(
                 'StreamingCapabilities',
-                namespace: Xmlns.trt,
+                namespaceUri: Xmlns.trt,
                 attributes: {
                   'RTPMulticast': 'true',
                   'RTP_TCP': 'true',
@@ -336,10 +336,10 @@ class Media1Service implements OnvifService {
   void _writeProfile(XmlBuilder b, String token, String name) {
     b.element(
       'Profiles',
-      namespace: Xmlns.trt,
+      namespaceUri: Xmlns.trt,
       attributes: {'token': token, 'fixed': 'true'},
       nest: () {
-        b.element('Name', namespace: Xmlns.tt, nest: name);
+        b.element('Name', namespaceUri: Xmlns.tt, nest: name);
       },
     );
   }
@@ -347,19 +347,19 @@ class Media1Service implements OnvifService {
   void _writeMediaUri(XmlBuilder b, String uri) {
     b.element(
       'MediaUri',
-      namespace: Xmlns.trt,
+      namespaceUri: Xmlns.trt,
       nest: () {
-        b.element('Uri', namespace: Xmlns.tt, nest: uri);
-        b.element('InvalidAfterConnect', namespace: Xmlns.tt, nest: 'false');
-        b.element('InvalidAfterReboot', namespace: Xmlns.tt, nest: 'false');
-        b.element('Timeout', namespace: Xmlns.tt, nest: 'PT60S');
+        b.element('Uri', namespaceUri: Xmlns.tt, nest: uri);
+        b.element('InvalidAfterConnect', namespaceUri: Xmlns.tt, nest: 'false');
+        b.element('InvalidAfterReboot', namespaceUri: Xmlns.tt, nest: 'false');
+        b.element('Timeout', namespaceUri: Xmlns.tt, nest: 'PT60S');
       },
     );
   }
 
   String _empty(String responseName) {
     return SoapEnvelopeBuilder.response((b) {
-      b.element(responseName, namespace: Xmlns.trt, nest: () {});
+      b.element(responseName, namespaceUri: Xmlns.trt, nest: () {});
     });
   }
 }

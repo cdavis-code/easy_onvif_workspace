@@ -65,11 +65,11 @@ class ImagingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetServiceCapabilitiesResponse',
-        namespace: Xmlns.timg,
+        namespaceUri: Xmlns.timg,
         nest: () {
           b.element(
             'Capabilities',
-            namespace: Xmlns.timg,
+            namespaceUri: Xmlns.timg,
             attributes: {
               'ImageStabilization': 'false',
               'Presets': 'true',
@@ -84,12 +84,12 @@ class ImagingService implements OnvifService {
   void _writePreset(XmlBuilder b, ImagingPreset preset) {
     b.element(
       'Preset',
-      namespace: Xmlns.timg,
+      namespaceUri: Xmlns.timg,
       attributes: {'token': preset.token, 'type': preset.type},
       nest: () {
         // The client model expects lowercase `type`/`name` child elements.
-        b.element('type', namespace: Xmlns.timg, nest: preset.type);
-        b.element('name', namespace: Xmlns.timg, nest: preset.name);
+        b.element('type', namespaceUri: Xmlns.timg, nest: preset.type);
+        b.element('name', namespaceUri: Xmlns.timg, nest: preset.name);
       },
     );
   }
@@ -98,7 +98,7 @@ class ImagingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetPresetsResponse',
-        namespace: Xmlns.timg,
+        namespaceUri: Xmlns.timg,
         nest: () {
           for (final preset in state.imagingPresets) {
             _writePreset(b, preset);
@@ -116,7 +116,7 @@ class ImagingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetCurrentPresetResponse',
-        namespace: Xmlns.timg,
+        namespaceUri: Xmlns.timg,
         nest: () {
           if (current != null) _writePreset(b, current);
         },
@@ -140,7 +140,7 @@ class ImagingService implements OnvifService {
     state.currentImagingPreset = presetToken;
 
     return SoapEnvelopeBuilder.response((b) {
-      b.element('SetCurrentPresetResponse', namespace: Xmlns.timg, nest: () {});
+      b.element('SetCurrentPresetResponse', namespaceUri: Xmlns.timg, nest: () {});
     });
   }
 
@@ -148,18 +148,18 @@ class ImagingService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetStatusResponse',
-        namespace: Xmlns.timg,
+        namespaceUri: Xmlns.timg,
         nest: () {
           b.element(
             'Status',
-            namespace: Xmlns.timg,
+            namespaceUri: Xmlns.timg,
             nest: () {
               b.element(
                 'FocusStatus20',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
-                  b.element('Position', namespace: Xmlns.tt, nest: '0.5');
-                  b.element('MoveStatus', namespace: Xmlns.tt, nest: 'IDLE');
+                  b.element('Position', namespaceUri: Xmlns.tt, nest: '0.5');
+                  b.element('MoveStatus', namespaceUri: Xmlns.tt, nest: 'IDLE');
                 },
               );
             },

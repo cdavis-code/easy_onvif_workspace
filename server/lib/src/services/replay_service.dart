@@ -59,11 +59,11 @@ class ReplayService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetReplayUriResponse',
-        namespace: Xmlns.trp,
+        namespaceUri: Xmlns.trp,
         nest: () {
           b.element(
             'Uri',
-            namespace: Xmlns.trp,
+            namespaceUri: Xmlns.trp,
             nest: config.replayRtspUrl(host, token),
           );
         },
@@ -75,15 +75,15 @@ class ReplayService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetReplayConfigurationResponse',
-        namespace: Xmlns.trp,
+        namespaceUri: Xmlns.trp,
         nest: () {
           b.element(
             'Configuration',
-            namespace: Xmlns.trp,
+            namespaceUri: Xmlns.trp,
             nest: () {
               b.element(
                 'SessionTimeout',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: _sessionTimeout,
               );
             },
@@ -106,7 +106,7 @@ class ReplayService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'SetReplayConfigurationResponse',
-        namespace: Xmlns.trp,
+        namespaceUri: Xmlns.trp,
         nest: () {},
       );
     });
@@ -116,11 +116,11 @@ class ReplayService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetServiceCapabilitiesResponse',
-        namespace: Xmlns.trp,
+        namespaceUri: Xmlns.trp,
         nest: () {
           b.element(
             'Capabilities',
-            namespace: Xmlns.trp,
+            namespaceUri: Xmlns.trp,
             attributes: {
               'ReversePlayback': 'false',
               'SessionTimeoutRange': '10 120',

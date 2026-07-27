@@ -89,7 +89,7 @@ class WsDiscoveryServer with UiLoggy {
       final body = document
           .findAllElements(
             'Body',
-            namespace: 'http://www.w3.org/2003/05/soap-envelope',
+            namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
           )
           .firstOrNull;
 
@@ -111,29 +111,29 @@ class WsDiscoveryServer with UiLoggy {
 
     builder.element(
       'Envelope',
-      namespace: 'http://www.w3.org/2003/05/soap-envelope',
-      namespaces: {
-        'http://www.w3.org/2003/05/soap-envelope': 's',
-        'http://schemas.xmlsoap.org/ws/2004/08/addressing': 'a',
-        'http://schemas.xmlsoap.org/ws/2005/04/discovery': 'd',
-        'http://www.onvif.org/ver10/network/wsdl': 'dn',
-        'http://www.onvif.org/ver10/device/wsdl': 'tds',
+      namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
+      namespaceUris: {
+        's': 'http://www.w3.org/2003/05/soap-envelope',
+        'a': 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+        'd': 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+        'dn': 'http://www.onvif.org/ver10/network/wsdl',
+        'tds': 'http://www.onvif.org/ver10/device/wsdl',
       },
       nest: () {
         builder.element(
           'Header',
-          namespace: 'http://www.w3.org/2003/05/soap-envelope',
+          namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
           nest: () {
             builder.element(
               'Action',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest:
                   'http://schemas.xmlsoap.org/ws/2005/04/discovery/'
                   'ProbeMatches',
             );
             builder.element(
               'MessageID',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest: 'uuid:${const Uuid().v4()}',
             );
           },
@@ -141,24 +141,24 @@ class WsDiscoveryServer with UiLoggy {
 
         builder.element(
           'Body',
-          namespace: 'http://www.w3.org/2003/05/soap-envelope',
+          namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
           nest: () {
             builder.element(
               'ProbeMatches',
-              namespace: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
               nest: () {
                 builder.element(
                   'ProbeMatch',
-                  namespace: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+                  namespaceUri: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
                   nest: () {
                     builder.element(
                       'EndpointReference',
-                      namespace:
+                      namespaceUri:
                           'http://schemas.xmlsoap.org/ws/2004/08/addressing',
                       nest: () {
                         builder.element(
                           'Address',
-                          namespace:
+                          namespaceUri:
                               'http://schemas.xmlsoap.org/ws/2004/08/addressing',
                           nest: 'urn:uuid:${config.endpointUuid}',
                         );
@@ -166,13 +166,13 @@ class WsDiscoveryServer with UiLoggy {
                     );
                     builder.element(
                       'Types',
-                      namespace:
+                      namespaceUri:
                           'http://schemas.xmlsoap.org/ws/2005/04/discovery',
                       nest: 'dn:NetworkVideoTransmitter tds:Device',
                     );
                     builder.element(
                       'Scopes',
-                      namespace:
+                      namespaceUri:
                           'http://schemas.xmlsoap.org/ws/2005/04/discovery',
                       nest:
                           'onvif://www.onvif.org/location/country/US '
@@ -181,13 +181,13 @@ class WsDiscoveryServer with UiLoggy {
                     );
                     builder.element(
                       'XAddrs',
-                      namespace:
+                      namespaceUri:
                           'http://schemas.xmlsoap.org/ws/2005/04/discovery',
                       nest: xAddr,
                     );
                     builder.element(
                       'MetadataVersion',
-                      namespace:
+                      namespaceUri:
                           'http://schemas.xmlsoap.org/ws/2005/04/discovery',
                       nest: '1',
                     );

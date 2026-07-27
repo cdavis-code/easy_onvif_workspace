@@ -90,7 +90,7 @@ class PtzService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetConfigurationsResponse',
-        namespace: Xmlns.tptz,
+        namespaceUri: Xmlns.tptz,
         nest: () {
           _writePtzConfiguration(b);
         },
@@ -102,7 +102,7 @@ class PtzService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetConfigurationResponse',
-        namespace: Xmlns.tptz,
+        namespaceUri: Xmlns.tptz,
         nest: () {
           _writePtzConfiguration(b);
         },
@@ -114,7 +114,7 @@ class PtzService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetCompatibleConfigurationsResponse',
-        namespace: Xmlns.tptz,
+        namespaceUri: Xmlns.tptz,
         nest: () {
           _writePtzConfiguration(b);
         },
@@ -126,15 +126,15 @@ class PtzService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetConfigurationOptionsResponse',
-        namespace: Xmlns.tptz,
+        namespaceUri: Xmlns.tptz,
         nest: () {
           b.element(
             'PTZConfigurationOptions',
-            namespace: Xmlns.tptz,
+            namespaceUri: Xmlns.tptz,
             nest: () {
               b.element(
                 'Spaces',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   _writeSpace2D(
                     b,
@@ -172,10 +172,10 @@ class PtzService implements OnvifService {
               );
               b.element(
                 'PTZTimeout',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
-                  b.element('Min', namespace: Xmlns.tt, nest: 'PT0S');
-                  b.element('Max', namespace: Xmlns.tt, nest: 'PT300S');
+                  b.element('Min', namespaceUri: Xmlns.tt, nest: 'PT0S');
+                  b.element('Max', namespaceUri: Xmlns.tt, nest: 'PT300S');
                 },
               );
             },
@@ -193,19 +193,19 @@ class PtzService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetStatusResponse',
-        namespace: Xmlns.tptz,
+        namespaceUri: Xmlns.tptz,
         nest: () {
           b.element(
             'PTZStatus',
-            namespace: Xmlns.tptz,
+            namespaceUri: Xmlns.tptz,
             nest: () {
               b.element(
                 'Position',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   b.element(
                     'PanTilt',
-                    namespace: Xmlns.tt,
+                    namespaceUri: Xmlns.tt,
                     attributes: {
                       'x': position.pan.toString(),
                       'y': position.tilt.toString(),
@@ -214,7 +214,7 @@ class PtzService implements OnvifService {
                   );
                   b.element(
                     'Zoom',
-                    namespace: Xmlns.tt,
+                    namespaceUri: Xmlns.tt,
                     attributes: {
                       'x': position.zoom.toString(),
                       'space': _zoomPositionSpace,
@@ -224,15 +224,15 @@ class PtzService implements OnvifService {
               );
               b.element(
                 'MoveStatus',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
-                  b.element('PanTilt', namespace: Xmlns.tt, nest: 'IDLE');
-                  b.element('Zoom', namespace: Xmlns.tt, nest: 'IDLE');
+                  b.element('PanTilt', namespaceUri: Xmlns.tt, nest: 'IDLE');
+                  b.element('Zoom', namespaceUri: Xmlns.tt, nest: 'IDLE');
                 },
               );
               b.element(
                 'UtcTime',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: DateTime.now().toUtc().toIso8601String(),
               );
             },
@@ -246,11 +246,11 @@ class PtzService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetServiceCapabilitiesResponse',
-        namespace: Xmlns.tptz,
+        namespaceUri: Xmlns.tptz,
         nest: () {
           b.element(
             'Capabilities',
-            namespace: Xmlns.tptz,
+            namespaceUri: Xmlns.tptz,
             attributes: {'EFlip': 'false', 'Reverse': 'false'},
           );
         },
@@ -264,22 +264,22 @@ class PtzService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetPresetsResponse',
-        namespace: Xmlns.tptz,
+        namespaceUri: Xmlns.tptz,
         nest: () {
           for (final preset in state.presets.values) {
             b.element(
               'Preset',
-              namespace: Xmlns.tptz,
+              namespaceUri: Xmlns.tptz,
               attributes: {'token': preset.token},
               nest: () {
-                b.element('Name', namespace: Xmlns.tt, nest: preset.name);
+                b.element('Name', namespaceUri: Xmlns.tt, nest: preset.name);
                 b.element(
                   'PTZPosition',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: () {
                     b.element(
                       'PanTilt',
-                      namespace: Xmlns.tt,
+                      namespaceUri: Xmlns.tt,
                       attributes: {
                         'x': preset.position.pan.toString(),
                         'y': preset.position.tilt.toString(),
@@ -288,7 +288,7 @@ class PtzService implements OnvifService {
                     );
                     b.element(
                       'Zoom',
-                      namespace: Xmlns.tt,
+                      namespaceUri: Xmlns.tt,
                       attributes: {
                         'x': preset.position.zoom.toString(),
                         'space': _zoomPositionSpace,
@@ -313,9 +313,9 @@ class PtzService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'SetPresetResponse',
-        namespace: Xmlns.tptz,
+        namespaceUri: Xmlns.tptz,
         nest: () {
-          b.element('PresetToken', namespace: Xmlns.tptz, nest: presetToken);
+          b.element('PresetToken', namespaceUri: Xmlns.tptz, nest: presetToken);
         },
       );
     });
@@ -405,36 +405,36 @@ class PtzService implements OnvifService {
   void _writePtzConfiguration(XmlBuilder b) {
     b.element(
       'PTZConfiguration',
-      namespace: Xmlns.tptz,
+      namespaceUri: Xmlns.tptz,
       attributes: {'token': DeviceState.ptzConfigurationToken},
       nest: () {
-        b.element('Name', namespace: Xmlns.tt, nest: 'PTZ Configuration');
-        b.element('UseCount', namespace: Xmlns.tt, nest: '1');
-        b.element('NodeToken', namespace: Xmlns.tt, nest: 'PTZNode_1');
+        b.element('Name', namespaceUri: Xmlns.tt, nest: 'PTZ Configuration');
+        b.element('UseCount', namespaceUri: Xmlns.tt, nest: '1');
+        b.element('NodeToken', namespaceUri: Xmlns.tt, nest: 'PTZNode_1');
         b.element(
           'DefaultPTZSpeed',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: () {
             b.element(
               'PanTilt',
-              namespace: Xmlns.tt,
+              namespaceUri: Xmlns.tt,
               attributes: {'x': '0.5', 'y': '0.5'},
             );
-            b.element('Zoom', namespace: Xmlns.tt, attributes: {'x': '1.0'});
+            b.element('Zoom', namespaceUri: Xmlns.tt, attributes: {'x': '1.0'});
           },
         );
-        b.element('DefaultPTZTimeout', namespace: Xmlns.tt, nest: 'PT300S');
+        b.element('DefaultPTZTimeout', namespaceUri: Xmlns.tt, nest: 'PT300S');
         b.element(
           'PanTiltLimits',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: () {
             b.element(
               'Range',
-              namespace: Xmlns.tt,
+              namespaceUri: Xmlns.tt,
               nest: () {
                 b.element(
                   'URI',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: _panTiltPositionSpace,
                 );
                 _writeRange(b, -1, 1, includeY: true);
@@ -444,13 +444,13 @@ class PtzService implements OnvifService {
         );
         b.element(
           'ZoomLimits',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: () {
             b.element(
               'Range',
-              namespace: Xmlns.tt,
+              namespaceUri: Xmlns.tt,
               nest: () {
-                b.element('URI', namespace: Xmlns.tt, nest: _zoomPositionSpace);
+                b.element('URI', namespaceUri: Xmlns.tt, nest: _zoomPositionSpace);
                 _writeRange(b, 0, 1, includeY: false);
               },
             );
@@ -463,19 +463,19 @@ class PtzService implements OnvifService {
   void _writeRange(XmlBuilder b, num minX, num maxX, {required bool includeY}) {
     b.element(
       'XRange',
-      namespace: Xmlns.tt,
+      namespaceUri: Xmlns.tt,
       nest: () {
-        b.element('Min', namespace: Xmlns.tt, nest: '$minX');
-        b.element('Max', namespace: Xmlns.tt, nest: '$maxX');
+        b.element('Min', namespaceUri: Xmlns.tt, nest: '$minX');
+        b.element('Max', namespaceUri: Xmlns.tt, nest: '$maxX');
       },
     );
     if (includeY) {
       b.element(
         'YRange',
-        namespace: Xmlns.tt,
+        namespaceUri: Xmlns.tt,
         nest: () {
-          b.element('Min', namespace: Xmlns.tt, nest: '$minX');
-          b.element('Max', namespace: Xmlns.tt, nest: '$maxX');
+          b.element('Min', namespaceUri: Xmlns.tt, nest: '$minX');
+          b.element('Max', namespaceUri: Xmlns.tt, nest: '$maxX');
         },
       );
     }
@@ -492,23 +492,23 @@ class PtzService implements OnvifService {
   ) {
     b.element(
       tag,
-      namespace: Xmlns.tt,
+      namespaceUri: Xmlns.tt,
       nest: () {
-        b.element('URI', namespace: Xmlns.tt, nest: uri);
+        b.element('URI', namespaceUri: Xmlns.tt, nest: uri);
         b.element(
           'XRange',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: () {
-            b.element('Min', namespace: Xmlns.tt, nest: '$minX');
-            b.element('Max', namespace: Xmlns.tt, nest: '$maxX');
+            b.element('Min', namespaceUri: Xmlns.tt, nest: '$minX');
+            b.element('Max', namespaceUri: Xmlns.tt, nest: '$maxX');
           },
         );
         b.element(
           'YRange',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: () {
-            b.element('Min', namespace: Xmlns.tt, nest: '$minY');
-            b.element('Max', namespace: Xmlns.tt, nest: '$maxY');
+            b.element('Min', namespaceUri: Xmlns.tt, nest: '$minY');
+            b.element('Max', namespaceUri: Xmlns.tt, nest: '$maxY');
           },
         );
       },
@@ -518,15 +518,15 @@ class PtzService implements OnvifService {
   void _writeSpace1D(XmlBuilder b, String tag, String uri, num min, num max) {
     b.element(
       tag,
-      namespace: Xmlns.tt,
+      namespaceUri: Xmlns.tt,
       nest: () {
-        b.element('URI', namespace: Xmlns.tt, nest: uri);
+        b.element('URI', namespaceUri: Xmlns.tt, nest: uri);
         b.element(
           'XRange',
-          namespace: Xmlns.tt,
+          namespaceUri: Xmlns.tt,
           nest: () {
-            b.element('Min', namespace: Xmlns.tt, nest: '$min');
-            b.element('Max', namespace: Xmlns.tt, nest: '$max');
+            b.element('Min', namespaceUri: Xmlns.tt, nest: '$min');
+            b.element('Max', namespaceUri: Xmlns.tt, nest: '$max');
           },
         );
       },
@@ -535,7 +535,7 @@ class PtzService implements OnvifService {
 
   String _empty(String responseName) {
     return SoapEnvelopeBuilder.response((b) {
-      b.element(responseName, namespace: Xmlns.tptz, nest: () {});
+      b.element(responseName, namespaceUri: Xmlns.tptz, nest: () {});
     });
   }
 }

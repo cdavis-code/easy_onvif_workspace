@@ -10,42 +10,45 @@ Uint8List _idrNal() => Uint8List.fromList([0x65, 0x88, 0x84, 0x00]);
 
 void main() {
   group('AccessUnitFramer live timestamps', () {
-    test('stamps access units from the wall clock, not a fixed increment', () async {
-      var nowMicros = 0;
+    test(
+      'stamps access units from the wall clock, not a fixed increment',
+      () async {
+        var nowMicros = 0;
 
-      final framer = AccessUnitFramer(
-        frameRate: 15,
-        liveTimestamps: true,
-        clockMicros: () => nowMicros,
-      );
+        final framer = AccessUnitFramer(
+          frameRate: 15,
+          liveTimestamps: true,
+          clockMicros: () => nowMicros,
+        );
 
-      final received = <H264NalUnit>[];
-      framer.nals.listen(received.add);
+        final received = <H264NalUnit>[];
+        framer.nals.listen(received.add);
 
-      // Frames arriving at 30 fps (33_333 us apart) — twice the configured
-      // frame rate, as a 30 fps camera delivers against a 15 fps config.
-      for (var i = 0; i < 4; i++) {
-        nowMicros = i * 33333;
-        framer.addNal(_idrNal());
-      }
-      framer.flush();
+        // Frames arriving at 30 fps (33_333 us apart) — twice the configured
+        // frame rate, as a 30 fps camera delivers against a 15 fps config.
+        for (var i = 0; i < 4; i++) {
+          nowMicros = i * 33333;
+          framer.addNal(_idrNal());
+        }
+        framer.flush();
 
-      // The broadcast stream delivers in microtasks; let them drain.
-      await Future<void>.delayed(Duration.zero);
+        // The broadcast stream delivers in microtasks; let them drain.
+        await Future<void>.delayed(Duration.zero);
 
-      expect(received, hasLength(4));
+        expect(received, hasLength(4));
 
-      // Each access unit must carry the 90 kHz equivalent of its arrival
-      // time: 33_333 us → ~3_000 ticks, NOT the fixed 6_000 (90_000 / 15).
-      final deltas = [
-        for (var i = 1; i < received.length; i++)
-          received[i].timestamp - received[i - 1].timestamp,
-      ];
+        // Each access unit must carry the 90 kHz equivalent of its arrival
+        // time: 33_333 us → ~3_000 ticks, NOT the fixed 6_000 (90_000 / 15).
+        final deltas = [
+          for (var i = 1; i < received.length; i++)
+            received[i].timestamp - received[i - 1].timestamp,
+        ];
 
-      for (final delta in deltas) {
-        expect(delta, closeTo(3000, 10));
-      }
-    });
+        for (final delta in deltas) {
+          expect(delta, closeTo(3000, 10));
+        }
+      },
+    );
 
     test('offline mode keeps fixed frame-rate increments (replay)', () async {
       final framer = AccessUnitFramer(frameRate: 15);

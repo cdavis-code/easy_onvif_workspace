@@ -74,41 +74,48 @@ void main() {
     timeout: const Timeout(Duration(seconds: 60)),
   );
 
-  test('rejects an unauthenticated RTSP request with 401', () async {
-    const config = ServerConfig(httpPort: 8108, rtspPort: 8568);
+  test(
+    'rejects an unauthenticated RTSP request with 401',
+    () async {
+      const config = ServerConfig(httpPort: 8108, rtspPort: 8568);
 
-    final backend = FfmpegBackend(
-      config: config,
-      frameRate: 15,
-      inputArgs: ['-f', 'lavfi', '-i', 'testsrc=size=640x480:rate=15'],
-    );
-
-    await backend.start('Profile_1', host: 'localhost');
-
-    try {
-      final socket = await Socket.connect('127.0.0.1', 8568);
-      socket.write(
-        'OPTIONS rtsp://127.0.0.1:8568/onvif/Profile_1 RTSP/1.0\r\n'
-        'CSeq: 1\r\n\r\n',
+      final backend = FfmpegBackend(
+        config: config,
+        frameRate: 15,
+        inputArgs: ['-f', 'lavfi', '-i', 'testsrc=size=640x480:rate=15'],
       );
-      await socket.flush();
 
-      final response = StringBuffer();
-      final stream = utf8.decoder
-          .bind(socket)
-          .timeout(const Duration(seconds: 3), onTimeout: (sink) => sink.close());
+      await backend.start('Profile_1', host: 'localhost');
 
-      await for (final chunk in stream) {
-        response.write(chunk);
-        if (response.toString().contains('\r\n\r\n')) break;
+      try {
+        final socket = await Socket.connect('127.0.0.1', 8568);
+        socket.write(
+          'OPTIONS rtsp://127.0.0.1:8568/onvif/Profile_1 RTSP/1.0\r\n'
+          'CSeq: 1\r\n\r\n',
+        );
+        await socket.flush();
+
+        final response = StringBuffer();
+        final stream = utf8.decoder
+            .bind(socket)
+            .timeout(
+              const Duration(seconds: 3),
+              onTimeout: (sink) => sink.close(),
+            );
+
+        await for (final chunk in stream) {
+          response.write(chunk);
+          if (response.toString().contains('\r\n\r\n')) break;
+        }
+
+        socket.destroy();
+
+        expect(response.toString(), contains('401'));
+        expect(response.toString(), contains('WWW-Authenticate'));
+      } finally {
+        await backend.stop();
       }
-
-      socket.destroy();
-
-      expect(response.toString(), contains('401'));
-      expect(response.toString(), contains('WWW-Authenticate'));
-    } finally {
-      await backend.stop();
-    }
-  }, timeout: const Timeout(Duration(seconds: 60)));
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
 }

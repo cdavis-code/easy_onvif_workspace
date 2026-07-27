@@ -123,24 +123,24 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetSystemDateAndTimeResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'SystemDateAndTime',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
-              b.element('DateTimeType', namespace: Xmlns.tt, nest: 'NTP');
-              b.element('DaylightSavings', namespace: Xmlns.tt, nest: 'false');
+              b.element('DateTimeType', namespaceUri: Xmlns.tt, nest: 'NTP');
+              b.element('DaylightSavings', namespaceUri: Xmlns.tt, nest: 'false');
               b.element(
                 'TimeZone',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
-                  b.element('TZ', namespace: Xmlns.tt, nest: 'UTC0');
+                  b.element('TZ', namespaceUri: Xmlns.tt, nest: 'UTC0');
                 },
               );
               b.element(
                 'UTCDateTime',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   _writeTime(b, now);
                   _writeDate(b, now);
@@ -148,7 +148,7 @@ class DeviceService implements OnvifService {
               );
               b.element(
                 'LocalDateTime',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   _writeTime(b, now);
                   _writeDate(b, now);
@@ -178,18 +178,18 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetServicesResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           for (final (namespace, xAddr) in services) {
             b.element(
               'Service',
-              namespace: Xmlns.tds,
+              namespaceUri: Xmlns.tds,
               nest: () {
-                b.element('Namespace', namespace: Xmlns.tds, nest: namespace);
-                b.element('XAddr', namespace: Xmlns.tds, nest: xAddr);
+                b.element('Namespace', namespaceUri: Xmlns.tds, nest: namespace);
+                b.element('XAddr', namespaceUri: Xmlns.tds, nest: xAddr);
                 b.element(
                   'Version',
-                  namespace: Xmlns.tds,
+                  namespaceUri: Xmlns.tds,
                   nest: () {
                     _writeVersion(b);
                   },
@@ -206,45 +206,45 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetCapabilitiesResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'Capabilities',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
               b.element(
                 'Device',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   b.element(
                     'XAddr',
-                    namespace: Xmlns.tt,
+                    namespaceUri: Xmlns.tt,
                     nest: config.deviceServiceUrl(host),
                   );
                 },
               );
               b.element(
                 'Media',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   b.element(
                     'XAddr',
-                    namespace: Xmlns.tt,
+                    namespaceUri: Xmlns.tt,
                     nest: config.mediaServiceUrl(host),
                   );
                   b.element(
                     'StreamingCapabilities',
-                    namespace: Xmlns.tt,
+                    namespaceUri: Xmlns.tt,
                     nest: () {
                       b.element(
                         'RTPMulticast',
-                        namespace: Xmlns.tt,
+                        namespaceUri: Xmlns.tt,
                         nest: 'true',
                       );
-                      b.element('RTP_TCP', namespace: Xmlns.tt, nest: 'true');
+                      b.element('RTP_TCP', namespaceUri: Xmlns.tt, nest: 'true');
                       b.element(
                         'RTP_RTSP_TCP',
-                        namespace: Xmlns.tt,
+                        namespaceUri: Xmlns.tt,
                         nest: 'true',
                       );
                     },
@@ -253,11 +253,11 @@ class DeviceService implements OnvifService {
               );
               b.element(
                 'PTZ',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   b.element(
                     'XAddr',
-                    namespace: Xmlns.tt,
+                    namespaceUri: Xmlns.tt,
                     nest: config.ptzServiceUrl(host),
                   );
                 },
@@ -265,11 +265,11 @@ class DeviceService implements OnvifService {
               if (settings.services.imaging) {
                 b.element(
                   'Imaging',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: () {
                     b.element(
                       'XAddr',
-                      namespace: Xmlns.tt,
+                      namespaceUri: Xmlns.tt,
                       nest: config.imagingServiceUrl(host),
                     );
                   },
@@ -280,7 +280,7 @@ class DeviceService implements OnvifService {
                   settings.services.replay) {
                 b.element(
                   'Extension',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: () => _writeCapabilityExtension(b, host),
                 );
               }
@@ -297,43 +297,43 @@ class DeviceService implements OnvifService {
     if (settings.services.recording) {
       b.element(
         'Recording',
-        namespace: Xmlns.tt,
+        namespaceUri: Xmlns.tt,
         nest: () {
           b.element(
             'XAddr',
-            namespace: Xmlns.tt,
+            namespaceUri: Xmlns.tt,
             nest: config.recordingServiceUrl(host),
           );
-          b.element('ReceiverSource', namespace: Xmlns.tt, nest: 'false');
-          b.element('MediaProfileSource', namespace: Xmlns.tt, nest: 'true');
-          b.element('DynamicRecordings', namespace: Xmlns.tt, nest: 'true');
-          b.element('DynamicTracks', namespace: Xmlns.tt, nest: 'false');
-          b.element('MaxStringLength', namespace: Xmlns.tt, nest: '256');
+          b.element('ReceiverSource', namespaceUri: Xmlns.tt, nest: 'false');
+          b.element('MediaProfileSource', namespaceUri: Xmlns.tt, nest: 'true');
+          b.element('DynamicRecordings', namespaceUri: Xmlns.tt, nest: 'true');
+          b.element('DynamicTracks', namespaceUri: Xmlns.tt, nest: 'false');
+          b.element('MaxStringLength', namespaceUri: Xmlns.tt, nest: '256');
         },
       );
     }
     if (settings.services.search) {
       b.element(
         'Search',
-        namespace: Xmlns.tt,
+        namespaceUri: Xmlns.tt,
         nest: () {
           b.element(
             'XAddr',
-            namespace: Xmlns.tt,
+            namespaceUri: Xmlns.tt,
             nest: config.searchServiceUrl(host),
           );
-          b.element('MetadataSearch', namespace: Xmlns.tt, nest: 'false');
+          b.element('MetadataSearch', namespaceUri: Xmlns.tt, nest: 'false');
         },
       );
     }
     if (settings.services.replay) {
       b.element(
         'Replay',
-        namespace: Xmlns.tt,
+        namespaceUri: Xmlns.tt,
         nest: () {
           b.element(
             'XAddr',
-            namespace: Xmlns.tt,
+            namespaceUri: Xmlns.tt,
             nest: config.replayServiceUrl(host),
           );
         },
@@ -345,27 +345,27 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetDeviceInformationResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'Manufacturer',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: config.manufacturer,
           );
-          b.element('Model', namespace: Xmlns.tds, nest: config.model);
+          b.element('Model', namespaceUri: Xmlns.tds, nest: config.model);
           b.element(
             'FirmwareVersion',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: config.firmwareVersion,
           );
           b.element(
             'SerialNumber',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: config.serialNumber,
           );
           b.element(
             'HardwareId',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: config.hardwareId,
           );
         },
@@ -377,14 +377,14 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetHostnameResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'HostnameInformation',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
-              b.element('FromDHCP', namespace: Xmlns.tt, nest: 'false');
-              b.element('Name', namespace: Xmlns.tt, nest: config.hostname);
+              b.element('FromDHCP', namespaceUri: Xmlns.tt, nest: 'false');
+              b.element('Name', namespaceUri: Xmlns.tt, nest: config.hostname);
             },
           );
         },
@@ -396,15 +396,15 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetServiceCapabilitiesResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'Capabilities',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
               b.element(
                 'Network',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 attributes: {
                   'IPFilter': 'false',
                   'ZeroConfiguration': 'false',
@@ -414,7 +414,7 @@ class DeviceService implements OnvifService {
               );
               b.element(
                 'Security',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 attributes: {
                   'TLS1.1': 'false',
                   'TLS1.2': 'false',
@@ -428,7 +428,7 @@ class DeviceService implements OnvifService {
               );
               b.element(
                 'System',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 attributes: {
                   'DiscoveryResolve': 'false',
                   'DiscoveryBye': 'true',
@@ -449,11 +449,11 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetDiscoveryModeResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'DiscoveryMode',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: 'Discoverable',
           );
         },
@@ -465,17 +465,17 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetNetworkProtocolsResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'NetworkProtocols',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
-              b.element('Name', namespace: Xmlns.tt, nest: 'HTTP');
-              b.element('Enabled', namespace: Xmlns.tt, nest: 'true');
+              b.element('Name', namespaceUri: Xmlns.tt, nest: 'HTTP');
+              b.element('Enabled', namespaceUri: Xmlns.tt, nest: 'true');
               b.element(
                 'Port',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: '${config.httpPort}',
               );
             },
@@ -489,14 +489,14 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetDNSResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'DNSInformation',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
-              b.element('FromDHCP', namespace: Xmlns.tt, nest: 'false');
-              b.element('SearchDomain', namespace: Xmlns.tt, nest: 'local');
+              b.element('FromDHCP', namespaceUri: Xmlns.tt, nest: 'false');
+              b.element('SearchDomain', namespaceUri: Xmlns.tt, nest: 'local');
             },
           );
         },
@@ -508,13 +508,13 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetNTPResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'NTPInformation',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
-              b.element('FromDHCP', namespace: Xmlns.tt, nest: 'false');
+              b.element('FromDHCP', namespaceUri: Xmlns.tt, nest: 'false');
             },
           );
         },
@@ -526,15 +526,15 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetUsersResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           for (final user in state.users) {
             b.element(
               'User',
-              namespace: Xmlns.tds,
+              namespaceUri: Xmlns.tds,
               nest: () {
-                b.element('Username', namespace: Xmlns.tt, nest: user.username);
-                b.element('UserLevel', namespace: Xmlns.tt, nest: user.level);
+                b.element('Username', namespaceUri: Xmlns.tt, nest: user.username);
+                b.element('UserLevel', namespaceUri: Xmlns.tt, nest: user.level);
               },
             );
           }
@@ -545,7 +545,7 @@ class DeviceService implements OnvifService {
 
   String _getSystemUris() {
     return SoapEnvelopeBuilder.response((b) {
-      b.element('GetSystemUrisResponse', namespace: Xmlns.tds, nest: () {});
+      b.element('GetSystemUrisResponse', namespaceUri: Xmlns.tds, nest: () {});
     });
   }
 
@@ -559,13 +559,13 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetSystemLogResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'SystemLog',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
-              b.element('String', namespace: Xmlns.tt, nest: text);
+              b.element('String', namespaceUri: Xmlns.tt, nest: text);
             },
           );
         },
@@ -577,15 +577,15 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetSystemSupportInformationResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'SupportInformation',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
               b.element(
                 'String',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest:
                     'OS: ${Platform.operatingSystemVersion}\n'
                     'Dart: ${Platform.version}',
@@ -601,9 +601,9 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetEndpointReferenceResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
-          b.element('GUID', namespace: Xmlns.tds, nest: config.endpointUuid);
+          b.element('GUID', namespaceUri: Xmlns.tds, nest: config.endpointUuid);
         },
       );
     });
@@ -613,13 +613,13 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetIPAddressFilterResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'IPAddressFilter',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: () {
-              b.element('Type', namespace: Xmlns.tt, nest: 'Allow');
+              b.element('Type', namespaceUri: Xmlns.tt, nest: 'Allow');
             },
           );
         },
@@ -640,17 +640,17 @@ class DeviceService implements OnvifService {
   void _writeStorageConfiguration(XmlBuilder b, {required String element}) {
     b.element(
       element,
-      namespace: Xmlns.tds,
+      namespaceUri: Xmlns.tds,
       attributes: {'token': _storageToken},
       nest: () {
         b.element(
           'Data',
-          namespace: Xmlns.tds,
+          namespaceUri: Xmlns.tds,
           attributes: {'type': 'Local'},
           nest: () {
             b.element(
               'LocalPath',
-              namespace: Xmlns.tds,
+              namespaceUri: Xmlns.tds,
               nest: _recordingDirectory,
             );
           },
@@ -663,7 +663,7 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetStorageConfigurationsResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () =>
             _writeStorageConfiguration(b, element: 'StorageConfigurations'),
       );
@@ -683,7 +683,7 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetStorageConfigurationResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () =>
             _writeStorageConfiguration(b, element: 'StorageConfiguration'),
       );
@@ -697,31 +697,31 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetGeoLocationResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           if (location != null) {
             b.element(
               'Location',
-              namespace: Xmlns.tds,
+              namespaceUri: Xmlns.tds,
               nest: () {
                 b.element(
                   'Location',
-                  namespace: Xmlns.tt,
+                  namespaceUri: Xmlns.tt,
                   nest: () {
                     b.element(
                       'lat',
-                      namespace: Xmlns.tt,
+                      namespaceUri: Xmlns.tt,
                       nest: location.latitude.toString(),
                     );
                     b.element(
                       'lon',
-                      namespace: Xmlns.tt,
+                      namespaceUri: Xmlns.tt,
                       nest: location.longitude.toString(),
                     );
                     if (location.elevation != null) {
                       b.element(
                         'elevation',
-                        namespace: Xmlns.tt,
+                        namespaceUri: Xmlns.tt,
                         nest: location.elevation.toString(),
                       );
                     }
@@ -749,7 +749,7 @@ class DeviceService implements OnvifService {
     }
 
     return SoapEnvelopeBuilder.response((b) {
-      b.element('CreateUsersResponse', namespace: Xmlns.tds, nest: () {});
+      b.element('CreateUsersResponse', namespaceUri: Xmlns.tds, nest: () {});
     });
   }
 
@@ -762,7 +762,7 @@ class DeviceService implements OnvifService {
     state.users.removeWhere((user) => usernames.contains(user.username));
 
     return SoapEnvelopeBuilder.response((b) {
-      b.element('DeleteUsersResponse', namespace: Xmlns.tds, nest: () {});
+      b.element('DeleteUsersResponse', namespaceUri: Xmlns.tds, nest: () {});
     });
   }
 
@@ -770,11 +770,11 @@ class DeviceService implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'SystemRebootResponse',
-        namespace: Xmlns.tds,
+        namespaceUri: Xmlns.tds,
         nest: () {
           b.element(
             'Message',
-            namespace: Xmlns.tds,
+            namespaceUri: Xmlns.tds,
             nest: 'Rebooting (simulated).',
           );
         },
@@ -787,11 +787,11 @@ class DeviceService implements OnvifService {
   void _writeTime(XmlBuilder b, DateTime dt) {
     b.element(
       'Time',
-      namespace: Xmlns.tt,
+      namespaceUri: Xmlns.tt,
       nest: () {
-        b.element('Hour', namespace: Xmlns.tt, nest: '${dt.hour}');
-        b.element('Minute', namespace: Xmlns.tt, nest: '${dt.minute}');
-        b.element('Second', namespace: Xmlns.tt, nest: '${dt.second}');
+        b.element('Hour', namespaceUri: Xmlns.tt, nest: '${dt.hour}');
+        b.element('Minute', namespaceUri: Xmlns.tt, nest: '${dt.minute}');
+        b.element('Second', namespaceUri: Xmlns.tt, nest: '${dt.second}');
       },
     );
   }
@@ -799,18 +799,18 @@ class DeviceService implements OnvifService {
   void _writeDate(XmlBuilder b, DateTime dt) {
     b.element(
       'Date',
-      namespace: Xmlns.tt,
+      namespaceUri: Xmlns.tt,
       nest: () {
-        b.element('Year', namespace: Xmlns.tt, nest: '${dt.year}');
-        b.element('Month', namespace: Xmlns.tt, nest: '${dt.month}');
-        b.element('Day', namespace: Xmlns.tt, nest: '${dt.day}');
+        b.element('Year', namespaceUri: Xmlns.tt, nest: '${dt.year}');
+        b.element('Month', namespaceUri: Xmlns.tt, nest: '${dt.month}');
+        b.element('Day', namespaceUri: Xmlns.tt, nest: '${dt.day}');
       },
     );
   }
 
   void _writeVersion(XmlBuilder b, {int major = 2, int minor = 60}) {
-    b.element('Major', namespace: Xmlns.tt, nest: '$major');
-    b.element('Minor', namespace: Xmlns.tt, nest: '$minor');
+    b.element('Major', namespaceUri: Xmlns.tt, nest: '$major');
+    b.element('Minor', namespaceUri: Xmlns.tt, nest: '$minor');
   }
 
   static String? _childText(XmlElement parent, String localName) {

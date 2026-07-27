@@ -62,7 +62,8 @@ void main() {
     );
     final responses = <Map<String, dynamic>>[];
     client.listen(
-      (data) => responses.add(jsonDecode(data as String) as Map<String, dynamic>),
+      (data) =>
+          responses.add(jsonDecode(data as String) as Map<String, dynamic>),
     );
 
     client.add(jsonEncode({'type': 'offer', 'sdp': 'offer-sdp'}));

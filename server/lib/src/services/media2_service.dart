@@ -88,15 +88,15 @@ class Media2Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetProfilesResponse',
-        namespace: Xmlns.tr2,
+        namespaceUri: Xmlns.tr2,
         nest: () {
           for (final profile in state.profiles) {
             b.element(
               'Profiles',
-              namespace: Xmlns.tr2,
+              namespaceUri: Xmlns.tr2,
               attributes: {'token': profile.token, 'fixed': 'true'},
               nest: () {
-                b.element('Name', namespace: Xmlns.tr2, nest: profile.name);
+                b.element('Name', namespaceUri: Xmlns.tr2, nest: profile.name);
               },
             );
           }
@@ -113,9 +113,9 @@ class Media2Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetStreamUriResponse',
-        namespace: Xmlns.tr2,
+        namespaceUri: Xmlns.tr2,
         nest: () {
-          b.element('Uri', namespace: Xmlns.tr2, nest: uri);
+          b.element('Uri', namespaceUri: Xmlns.tr2, nest: uri);
         },
       );
     });
@@ -127,11 +127,11 @@ class Media2Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetSnapshotUriResponse',
-        namespace: Xmlns.tr2,
+        namespaceUri: Xmlns.tr2,
         nest: () {
           b.element(
             'Uri',
-            namespace: Xmlns.tr2,
+            namespaceUri: Xmlns.tr2,
             nest: config.snapshotUrl(host, profileToken),
           );
         },
@@ -143,11 +143,11 @@ class Media2Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetServiceCapabilitiesResponse',
-        namespace: Xmlns.tr2,
+        namespaceUri: Xmlns.tr2,
         nest: () {
           b.element(
             'Capabilities',
-            namespace: Xmlns.tr2,
+            namespaceUri: Xmlns.tr2,
             attributes: {
               'SnapshotUri': 'true',
               'Rotation': 'false',
@@ -158,12 +158,12 @@ class Media2Service implements OnvifService {
             nest: () {
               b.element(
                 'ProfileCapabilities',
-                namespace: Xmlns.tr2,
+                namespaceUri: Xmlns.tr2,
                 attributes: {'MaximumNumberOfProfiles': '10'},
               );
               b.element(
                 'StreamingCapabilities',
-                namespace: Xmlns.tr2,
+                namespaceUri: Xmlns.tr2,
                 attributes: {
                   'RTSPStreaming': 'true',
                   'RTPMulticast': 'true',
@@ -185,37 +185,37 @@ class Media2Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetVideoEncoderConfigurationsResponse',
-        namespace: Xmlns.tr2,
+        namespaceUri: Xmlns.tr2,
         nest: () {
           b.element(
             'Configurations',
-            namespace: Xmlns.tr2,
+            namespaceUri: Xmlns.tr2,
             attributes: {
               'token': 'VideoEncoderConfig_1',
               'GovLength': '15',
               'Profile': 'Main',
             },
             nest: () {
-              b.element('Name', namespace: Xmlns.tt, nest: 'VideoEncoder_1');
-              b.element('UseCount', namespace: Xmlns.tt, nest: '1');
-              b.element('Encoding', namespace: Xmlns.tt, nest: 'H264');
+              b.element('Name', namespaceUri: Xmlns.tt, nest: 'VideoEncoder_1');
+              b.element('UseCount', namespaceUri: Xmlns.tt, nest: '1');
+              b.element('Encoding', namespaceUri: Xmlns.tt, nest: 'H264');
               b.element(
                 'Resolution',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
-                  b.element('Width', namespace: Xmlns.tt, nest: '1280');
-                  b.element('Height', namespace: Xmlns.tt, nest: '720');
+                  b.element('Width', namespaceUri: Xmlns.tt, nest: '1280');
+                  b.element('Height', namespaceUri: Xmlns.tt, nest: '720');
                 },
               );
               b.element(
                 'RateControl',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
-                  b.element('FrameRateLimit', namespace: Xmlns.tt, nest: '15');
-                  b.element('BitrateLimit', namespace: Xmlns.tt, nest: '2048');
+                  b.element('FrameRateLimit', namespaceUri: Xmlns.tt, nest: '15');
+                  b.element('BitrateLimit', namespaceUri: Xmlns.tt, nest: '2048');
                 },
               );
-              b.element('Quality', namespace: Xmlns.tt, nest: '5.0');
+              b.element('Quality', namespaceUri: Xmlns.tt, nest: '5.0');
             },
           );
         },
@@ -227,13 +227,13 @@ class Media2Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetVideoEncoderInstancesResponse',
-        namespace: Xmlns.tr2,
+        namespaceUri: Xmlns.tr2,
         nest: () {
           b.element(
             'Info',
-            namespace: Xmlns.tr2,
+            namespaceUri: Xmlns.tr2,
             nest: () {
-              b.element('Total', namespace: Xmlns.tr2, nest: '1');
+              b.element('Total', namespaceUri: Xmlns.tr2, nest: '1');
             },
           );
         },
@@ -247,15 +247,15 @@ class Media2Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetVideoSourceConfigurationOptionsResponse',
-        namespace: Xmlns.tr2,
+        namespaceUri: Xmlns.tr2,
         nest: () {
           b.element(
             'Options',
-            namespace: Xmlns.tr2,
+            namespaceUri: Xmlns.tr2,
             nest: () {
               b.element(
                 'BoundsRange',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   _writeIntRange(b, 'XRange', 0, 0);
                   _writeIntRange(b, 'YRange', 0, 0);
@@ -265,7 +265,7 @@ class Media2Service implements OnvifService {
               );
               b.element(
                 'VideoSourceTokensAvailable',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: DeviceState.videoSourceToken,
               );
             },
@@ -279,24 +279,24 @@ class Media2Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetMetadataConfigurationOptionsResponse',
-        namespace: Xmlns.tr2,
+        namespaceUri: Xmlns.tr2,
         nest: () {
           b.element(
             'Options',
-            namespace: Xmlns.tr2,
+            namespaceUri: Xmlns.tr2,
             nest: () {
               b.element(
                 'PTZStatusFilterOptions',
-                namespace: Xmlns.tt,
+                namespaceUri: Xmlns.tt,
                 nest: () {
                   b.element(
                     'PanTiltStatusSupported',
-                    namespace: Xmlns.tt,
+                    namespaceUri: Xmlns.tt,
                     nest: 'false',
                   );
                   b.element(
                     'ZoomStatusSupported',
-                    namespace: Xmlns.tt,
+                    namespaceUri: Xmlns.tt,
                     nest: 'false',
                   );
                 },
@@ -311,10 +311,10 @@ class Media2Service implements OnvifService {
   void _writeIntRange(XmlBuilder b, String name, int min, int max) {
     b.element(
       name,
-      namespace: Xmlns.tt,
+      namespaceUri: Xmlns.tt,
       nest: () {
-        b.element('Min', namespace: Xmlns.tt, nest: '$min');
-        b.element('Max', namespace: Xmlns.tt, nest: '$max');
+        b.element('Min', namespaceUri: Xmlns.tt, nest: '$min');
+        b.element('Max', namespaceUri: Xmlns.tt, nest: '$max');
       },
     );
   }
@@ -327,31 +327,35 @@ class Media2Service implements OnvifService {
     return SoapEnvelopeBuilder.response((b) {
       b.element(
         'GetWebRTCConfigurationsResponse',
-        namespace: Xmlns.tr2,
+        namespaceUri: Xmlns.tr2,
         nest: () {
           b.element(
             'WebRTCConfiguration',
-            namespace: Xmlns.tr2,
+            namespaceUri: Xmlns.tr2,
             nest: () {
               b.element(
                 'SignalingServer',
-                namespace: Xmlns.tr2,
+                namespaceUri: Xmlns.tr2,
                 nest: 'ws://$host:${config.httpPort}/onvif/webrtc',
               );
               b.element(
                 'AuthorizationServer',
-                namespace: Xmlns.tr2,
+                namespaceUri: Xmlns.tr2,
                 nest: 'AuthorizationServer_1',
               );
               b.element(
                 'DefaultProfile',
-                namespace: Xmlns.tr2,
+                namespaceUri: Xmlns.tr2,
                 nest: _webRtcDefaultProfileToken,
               );
-              b.element('Enabled', namespace: Xmlns.tr2, nest: '$_webRtcEnabled');
+              b.element(
+                'Enabled',
+                namespaceUri: Xmlns.tr2,
+                nest: '$_webRtcEnabled',
+              );
               b.element(
                 'Connected',
-                namespace: Xmlns.tr2,
+                namespaceUri: Xmlns.tr2,
                 nest: '${webrtcService?.hasActiveSession ?? false}',
               );
             },
@@ -418,7 +422,7 @@ class Media2Service implements OnvifService {
 
   String _empty(String responseName) {
     return SoapEnvelopeBuilder.response((b) {
-      b.element(responseName, namespace: Xmlns.tr2, nest: () {});
+      b.element(responseName, namespaceUri: Xmlns.tr2, nest: () {});
     });
   }
 }

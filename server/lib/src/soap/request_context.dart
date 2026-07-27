@@ -54,7 +54,7 @@ class RequestContext {
     final document = XmlDocument.parse(rawXml);
 
     final body = document
-        .findAllElements('Body', namespace: Xmlns.s)
+        .findAllElements('Body', namespaceUri: Xmlns.s)
         .firstOrNull;
 
     if (body == null) {

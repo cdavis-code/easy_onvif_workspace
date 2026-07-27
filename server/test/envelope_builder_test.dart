@@ -11,29 +11,29 @@ void main() {
       final xml = SoapEnvelopeBuilder.response((builder) {
         builder.element(
           'GetDeviceInformationResponse',
-          namespace: Xmlns.tds,
+          namespaceUri: Xmlns.tds,
           nest: () {
             builder.element(
               'Manufacturer',
-              namespace: Xmlns.tds,
+              namespaceUri: Xmlns.tds,
               nest: 'easy_onvif',
             );
             builder.element(
               'Model',
-              namespace: Xmlns.tds,
+              namespaceUri: Xmlns.tds,
               nest: 'Dart ONVIF Server',
             );
             builder.element(
               'FirmwareVersion',
-              namespace: Xmlns.tds,
+              namespaceUri: Xmlns.tds,
               nest: '0.1.0',
             );
             builder.element(
               'SerialNumber',
-              namespace: Xmlns.tds,
+              namespaceUri: Xmlns.tds,
               nest: 'SN-0001',
             );
-            builder.element('HardwareId', namespace: Xmlns.tds, nest: '1');
+            builder.element('HardwareId', namespaceUri: Xmlns.tds, nest: '1');
           },
         );
       });
