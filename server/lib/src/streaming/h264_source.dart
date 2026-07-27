@@ -117,13 +117,37 @@ abstract interface class NalStreamSource {
 ///
 /// Shared by every [NalStreamSource] so the ffmpeg- and camera-backed sources
 /// produce identically framed output.
+///
+/// With [liveTimestamps] enabled, each access unit is stamped with its actual
+/// wall-clock arrival time instead of a fixed `90000 / frameRate` increment.
+/// Live capture sources must use this: cameras deliver at their native rate
+/// (often 30 fps) regardless of the configured [frameRate], and fixed
+/// increments would make the RTP media clock run faster than real time —
+/// players pace by RTP timestamps, so playback turns into slow motion with an
+/// ever-growing delay. Offline consumers (replay's [frameRate]-paced file
+/// loading) keep the fixed increments.
 class AccessUnitFramer {
   final int frameRate;
+
+  /// Stamp access units with wall-clock arrival time (live capture) instead
+  /// of fixed [frameRate] increments (offline/replay).
+  final bool liveTimestamps;
+
+  /// Injectable monotonic clock (microseconds) for tests; defaults to a
+  /// [Stopwatch] started on the first frame.
+  final int Function()? _clockMicros;
+
+  Stopwatch? _liveClock;
 
   final _controller = StreamController<H264NalUnit>.broadcast();
 
   /// NAL units accumulated for the access unit currently being built.
   final List<Uint8List> _currentAu = [];
+
+  /// Wall-clock arrival time of the first NAL of the current access unit,
+  /// captured eagerly so the (later) flush stamps the unit with the time its
+  /// frame actually arrived.
+  int _currentAuArrivalMicros = 0;
 
   Completer<void>? _paramsCompleter;
 
@@ -133,7 +157,21 @@ class AccessUnitFramer {
   Uint8List? sps;
   Uint8List? pps;
 
-  AccessUnitFramer({this.frameRate = 15});
+  AccessUnitFramer({
+    this.frameRate = 15,
+    this.liveTimestamps = false,
+    int Function()? clockMicros,
+  }) : _clockMicros = clockMicros;
+
+  int _elapsedMicros() {
+    final clock = _clockMicros;
+
+    if (clock != null) return clock();
+
+    _liveClock ??= Stopwatch()..start();
+
+    return _liveClock!.elapsedMicroseconds;
+  }
 
   Stream<H264NalUnit> get nals => _controller.stream;
 
@@ -169,6 +207,12 @@ class AccessUnitFramer {
 
     if (type != 9) {
       // Drop access unit delimiters; they carry no payload we need.
+      if (_currentAu.isEmpty && liveTimestamps) {
+        // First NAL of a new access unit: record when its frame arrived, so
+        // the flush (which may run after further NALs) stamps arrival time.
+        _currentAuArrivalMicros = _elapsedMicros();
+      }
+
       _currentAu.add(nal);
     }
   }
@@ -186,10 +230,16 @@ class AccessUnitFramer {
   void _flush() {
     if (_currentAu.isEmpty) return;
 
+    // Live mode converts the frame's arrival time to 90 kHz ticks; offline
+    // mode advances a fixed interval per access unit.
+    final timestamp = liveTimestamps
+        ? (_currentAuArrivalMicros * 9 ~/ 100) & 0xffffffff
+        : _timestamp;
+
     for (var i = 0; i < _currentAu.length; i++) {
       final isLast = i == _currentAu.length - 1;
 
-      _controller.add(H264NalUnit(_currentAu[i], _timestamp, isLast));
+      _controller.add(H264NalUnit(_currentAu[i], timestamp, isLast));
     }
 
     _currentAu.clear();
@@ -214,6 +264,46 @@ class AccessUnitFramer {
   }
 }
 
+/// Thins a frame stream down to a target rate by dropping frames that arrive
+/// early.
+///
+/// Cameras capture at their native rate (often 30 fps) with no way to slow
+/// them down through the `camera` plugin, so sources gate the raw frames
+/// before encoding to keep the encoded stream, its bandwidth, and recordings
+/// at the advertised [frameRate].
+class FrameRateGate {
+  final int frameRate;
+
+  /// Injectable monotonic clock (microseconds) for tests.
+  final int Function()? _clockMicros;
+
+  Stopwatch? _clock;
+
+  late final int _intervalMicros = 1000000 ~/ frameRate;
+  int _nextDueMicros = 0;
+
+  FrameRateGate({required this.frameRate, int Function()? clockMicros})
+    : _clockMicros = clockMicros;
+
+  /// Returns true when a frame arriving now should be kept.
+  bool accept() {
+    final int now;
+
+    if (_clockMicros != null) {
+      now = _clockMicros();
+    } else {
+      _clock ??= Stopwatch()..start();
+      now = _clock!.elapsedMicroseconds;
+    }
+
+    if (now < _nextDueMicros) return false;
+
+    _nextDueMicros = now + _intervalMicros;
+
+    return true;
+  }
+}
+
 /// Produces a live stream of H.264 NAL units by running `ffmpeg` and reading
 /// the encoded Annex-B bitstream from its stdout.
 ///
@@ -231,7 +321,10 @@ class H264Source implements NalStreamSource {
   final _log = Loggy('H264Source');
 
   final _splitter = AnnexBSplitter();
-  late final AccessUnitFramer _framer = AccessUnitFramer(frameRate: frameRate);
+  late final AccessUnitFramer _framer = AccessUnitFramer(
+    frameRate: frameRate,
+    liveTimestamps: true,
+  );
 
   H264Source({
     this.ffmpegPath = 'ffmpeg',

@@ -43,7 +43,14 @@ class CameraH264Source with UiLoggy implements NalStreamSource {
   final CameraDescription? _camera;
 
   final _splitter = AnnexBSplitter();
-  late final AccessUnitFramer _framer = AccessUnitFramer(frameRate: frameRate);
+  late final AccessUnitFramer _framer = AccessUnitFramer(
+    frameRate: frameRate,
+    liveTimestamps: true,
+  );
+
+  /// Thins the camera's native delivery rate (often 30 fps) down to
+  /// [frameRate] before the frames reach the encoder.
+  late final FrameRateGate _frameGate = FrameRateGate(frameRate: frameRate);
 
   CameraController? _controller;
   StreamSubscription<Uint8List>? _encoderSubscription;
@@ -99,7 +106,11 @@ class CameraH264Source with UiLoggy implements NalStreamSource {
 
     _encoderSubscription = encoder.output.listen(_onEncodedChunk);
 
-    await controller.startImageStream(encoder.encode);
+    // The camera streams at its native rate regardless of [frameRate]; drop
+    // the excess frames so the encoded stream matches the advertised rate.
+    await controller.startImageStream((frame) {
+      if (_frameGate.accept()) encoder.encode(frame);
+    });
 
     _controller = controller;
 

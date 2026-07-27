@@ -19,7 +19,10 @@ class ScreenH264Source with UiLoggy implements NalStreamSource {
   final int frameRate;
 
   final _splitter = AnnexBSplitter();
-  late final AccessUnitFramer _framer = AccessUnitFramer(frameRate: frameRate);
+  late final AccessUnitFramer _framer = AccessUnitFramer(
+    frameRate: frameRate,
+    liveTimestamps: true,
+  );
 
   StreamSubscription<Object?>? _subscription;
   bool _running = false;
