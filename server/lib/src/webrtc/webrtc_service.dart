@@ -39,6 +39,11 @@ class WebrtcService with UiLoggy {
   /// Serializes session creation (single-consumer capture).
   Future<void> _creationLock = Future.value();
 
+  /// Whether a signaling session is currently active (used by the Media2
+  /// `GetWebRTCConfigurations` response to report the read-only `Connected`
+  /// state).
+  bool get hasActiveSession => _active != null;
+
   /// Handles one upgraded WebSocket signaling connection. Never throws:
   /// failures are logged and reported to the client over the socket.
   Future<void> handleConnection(WebSocket socket) {
@@ -61,10 +66,12 @@ class WebrtcService with UiLoggy {
     await _safeDispose(previous);
     if (previousSocket != null) {
       try {
-        previousSocket.add(jsonEncode({
-          'type': 'error',
-          'message': 'Session replaced by a newer connection',
-        }));
+        previousSocket.add(
+          jsonEncode({
+            'type': 'error',
+            'message': 'Session replaced by a newer connection',
+          }),
+        );
         await previousSocket.close();
       } catch (_) {
         // The previous client already left; nothing to notify.
@@ -106,10 +113,14 @@ class WebrtcService with UiLoggy {
     // before the offer's remote description is set.
     var messageQueue = Future<void>.value();
     void enqueue(Future<void> Function() action) {
-      messageQueue = messageQueue.then((_) => action()).then((_) {},
-          onError: (Object error) {
-        loggy.warning('WebRTC signaling error: $error');
-      });
+      messageQueue = messageQueue
+          .then((_) => action())
+          .then(
+            (_) {},
+            onError: (Object error) {
+              loggy.warning('WebRTC signaling error: $error');
+            },
+          );
     }
 
     // Idempotent teardown: both onDone and onError may fire.

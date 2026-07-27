@@ -6,6 +6,7 @@ import '../hardware/device_state.dart';
 import '../soap/envelope_builder.dart';
 import '../soap/request_context.dart';
 import '../streaming/stream_backend.dart';
+import '../webrtc/webrtc_service.dart';
 import 'onvif_service.dart';
 
 /// Implements the ONVIF Media2 service (`tr2` namespace, ver20).
@@ -18,11 +19,27 @@ class Media2Service implements OnvifService {
   final DeviceState state;
   final StreamBackend streamBackend;
 
+  /// The WebRTC signaling service, used to report the read-only `Connected`
+  /// state in `GetWebRTCConfigurations`. Optional so the service works when
+  /// WebRTC is not wired up.
+  final WebrtcService? webrtcService;
+
+  /// In-memory WebRTC configuration state surfaced by
+  /// `Get/SetWebRTCConfigurations`. The server reflects its own built-in
+  /// `/onvif/webrtc` signaling endpoint rather than connecting to an external
+  /// signaling server.
+  bool _webRtcEnabled = true;
+  String? _webRtcDefaultProfile;
+
   Media2Service({
     required this.config,
     required this.state,
     required this.streamBackend,
+    this.webrtcService,
   });
+
+  String get _webRtcDefaultProfileToken =>
+      _webRtcDefaultProfile ?? DeviceState.profileToken;
 
   @override
   bool handles(String namespace) => namespace == Xmlns.tr2;
@@ -55,6 +72,10 @@ class Media2Service implements OnvifService {
         return _empty('StartMulticastStreamingResponse');
       case 'StopMulticastStreaming':
         return _empty('StopMulticastStreamingResponse');
+      case 'GetWebRTCConfigurations':
+        return _getWebRTCConfigurations(host);
+      case 'SetWebRTCConfigurations':
+        return _setWebRTCConfigurations(ctx);
       default:
         return SoapEnvelopeBuilder.fault(
           subcode: 'ActionNotSupported',
@@ -296,6 +317,82 @@ class Media2Service implements OnvifService {
         b.element('Max', namespace: Xmlns.tt, nest: '$max');
       },
     );
+  }
+
+  /// Returns a single WebRTC configuration describing this device's built-in
+  /// `/onvif/webrtc` signaling endpoint. The `AuthorizationServer` is a
+  /// placeholder (OAuth2 / the Security Service spec is out of scope), and
+  /// `Connected` reflects whether a signaling session is currently active.
+  String _getWebRTCConfigurations(String host) {
+    return SoapEnvelopeBuilder.response((b) {
+      b.element(
+        'GetWebRTCConfigurationsResponse',
+        namespace: Xmlns.tr2,
+        nest: () {
+          b.element(
+            'WebRTCConfiguration',
+            namespace: Xmlns.tr2,
+            nest: () {
+              b.element(
+                'SignalingServer',
+                namespace: Xmlns.tr2,
+                nest: 'ws://$host:${config.httpPort}/onvif/webrtc',
+              );
+              b.element(
+                'AuthorizationServer',
+                namespace: Xmlns.tr2,
+                nest: 'AuthorizationServer_1',
+              );
+              b.element(
+                'DefaultProfile',
+                namespace: Xmlns.tr2,
+                nest: _webRtcDefaultProfileToken,
+              );
+              b.element('Enabled', namespace: Xmlns.tr2, nest: '$_webRtcEnabled');
+              b.element(
+                'Connected',
+                namespace: Xmlns.tr2,
+                nest: '${webrtcService?.hasActiveSession ?? false}',
+              );
+            },
+          );
+        },
+      );
+    });
+  }
+
+  /// Stores the mutable fields (`Enabled`, `DefaultProfile`) of the provided
+  /// configuration in memory. The server reflects its own built-in signaling
+  /// endpoint, so `SignalingServer`/`AuthorizationServer` are acknowledged but
+  /// never acted upon (no external connection is made). An empty set resets to
+  /// defaults.
+  String _setWebRTCConfigurations(RequestContext ctx) {
+    final configurations = ctx.params('WebRTCConfiguration');
+
+    if (configurations.isEmpty) {
+      _webRtcEnabled = true;
+      _webRtcDefaultProfile = null;
+    } else {
+      final configuration = configurations.last;
+
+      final enabled = _childText(configuration, 'Enabled');
+      if (enabled != null) _webRtcEnabled = enabled.toLowerCase() == 'true';
+
+      final defaultProfile = _childText(configuration, 'DefaultProfile');
+      if (defaultProfile != null) _webRtcDefaultProfile = defaultProfile;
+    }
+
+    return _empty('SetWebRTCConfigurationsResponse');
+  }
+
+  /// The trimmed text of the first direct child of [element] named
+  /// [localName], or `null` if absent.
+  String? _childText(XmlElement element, String localName) {
+    for (final child in element.childElements) {
+      if (child.localName == localName) return child.innerText.trim();
+    }
+
+    return null;
   }
 
   String _empty(String responseName) {

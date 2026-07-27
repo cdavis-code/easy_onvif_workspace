@@ -141,6 +141,12 @@ class OnvifDevice with UiLoggy {
       };
     }
 
+    final webrtcService = WebrtcService(
+      media: this.settings.media,
+      sessionFactory: (send) =>
+          NativeWebrtcSession(media: this.settings.media, send: send),
+    );
+
     final List<OnvifService> services = [
       DeviceService(
         config: config,
@@ -160,6 +166,7 @@ class OnvifDevice with UiLoggy {
         config: config,
         state: this.state,
         streamBackend: streamBackend,
+        webrtcService: webrtcService,
       ),
       PtzService(state: this.state),
       if (this.settings.services.imaging) ImagingService(state: this.state),
@@ -174,14 +181,6 @@ class OnvifDevice with UiLoggy {
     dispatcher = SoapDispatcher(
       services: services,
       authenticator: authenticator,
-    );
-
-    final webrtcService = WebrtcService(
-      media: this.settings.media,
-      sessionFactory: (send) => NativeWebrtcSession(
-        media: this.settings.media,
-        send: send,
-      ),
     );
 
     server = OnvifServer(
