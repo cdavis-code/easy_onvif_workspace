@@ -211,16 +211,16 @@ class AppDelegate: FlutterAppDelegate {
 
   /// Requests access to [mediaType], showing the system prompt the first time,
   /// and returns whether access is authorized.
+  ///
+  /// Calls `requestAccess` unconditionally: it prompts when the status is
+  /// undetermined and answers immediately otherwise. Preflighting with
+  /// `authorizationStatus` first is unreliable — it can report an "unknown"
+  /// state (e.g. right after a `tccutil` reset) that maps to the no-prompt
+  /// branch, leaving the permission permanently unrequested.
   private static func requestAccess(for mediaType: AVMediaType, result: @escaping FlutterResult) {
-    switch AVCaptureDevice.authorizationStatus(for: mediaType) {
-    case .authorized:
-      result(true)
-    case .notDetermined:
-      AVCaptureDevice.requestAccess(for: mediaType) { granted in
-        DispatchQueue.main.async { result(granted) }
-      }
-    default:
-      result(false)
+    AVCaptureDevice.requestAccess(for: mediaType) { granted in
+      NSLog("easy_onvif_server: \(mediaType.rawValue) access \(granted ? "granted" : "denied")")
+      DispatchQueue.main.async { result(granted) }
     }
   }
 }
