@@ -38,11 +38,12 @@ class NativeAudioSource implements AudioStreamSource {
   /// Feeds PCM16LE bytes through A-law into 20 ms frames. Exposed for tests;
   /// the event channel calls this with each native chunk.
   void addPcmBytes(Uint8List bytes) {
-    final samples = Int16List.view(
-      bytes.buffer,
-      bytes.offsetInBytes,
-      bytes.length ~/ 2,
-    );
+    // The standard message codec hands us a view into the shared message
+    // buffer, which can start at an odd offset; Int16List.view requires
+    // 2-byte alignment, so copy misaligned chunks into a fresh buffer.
+    final samples = bytes.offsetInBytes.isEven
+        ? Int16List.view(bytes.buffer, bytes.offsetInBytes, bytes.length ~/ 2)
+        : Uint8List.fromList(bytes).buffer.asInt16List(0, bytes.length ~/ 2);
 
     _framer.add(alawEncode(samples));
   }

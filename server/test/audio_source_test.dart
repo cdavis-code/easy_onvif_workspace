@@ -56,4 +56,29 @@ void main() {
     expect(frames.first.data.every((byte) => byte == 0xD5), isTrue);
     expect(frames[1].timestamp, 160);
   });
+
+  test(
+    'NativeAudioSource tolerates odd-offset platform channel views',
+    () async {
+      // The standard message codec returns views into the shared message
+      // buffer, which can start at an odd byte offset (regression: RangeError
+      // from Int16List.view's alignment check).
+      final backing = Uint8List(1 + 640); // 1-byte header, then the PCM chunk.
+      final chunk = Uint8List.view(backing.buffer, 1, 640);
+
+      expect(chunk.offsetInBytes.isOdd, isTrue);
+
+      final source = NativeAudioSource();
+      final frames = <AudioFrame>[];
+      final subscription = source.frames.listen(frames.add);
+
+      source.addPcmBytes(chunk);
+
+      await Future<void>.delayed(Duration.zero);
+      await subscription.cancel();
+
+      expect(frames, hasLength(2));
+      expect(frames.first.data.every((byte) => byte == 0xD5), isTrue);
+    },
+  );
 }
