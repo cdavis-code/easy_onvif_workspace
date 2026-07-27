@@ -2,6 +2,7 @@ import 'package:easy_onvif/shared.dart';
 import 'package:easy_onvif/util.dart';
 import 'package:xml/xml.dart';
 
+import '../model/media2/webrtc_configuration.dart';
 import 'media_common.dart';
 import 'transport.dart';
 import 'xmlns.dart';
@@ -173,4 +174,26 @@ class Media2Request {
         profileToken: profileToken,
         namespace: Xmlns.tr2,
       );
+
+  /// XML for the [getWebRTCConfigurations]
+  static XmlDocumentFragment getWebRTCConfigurations() =>
+      Transport.quickTag('GetWebRTCConfigurations', Xmlns.tr2);
+
+  /// XML for the [setWebRTCConfigurations]
+  static XmlDocumentFragment setWebRTCConfigurations(
+    List<WebrtcConfiguration> configurations,
+  ) {
+    builder.element(
+      'SetWebRTCConfigurations',
+      nest: () {
+        builder.namespace(Xmlns.tr2);
+
+        for (var configuration in configurations) {
+          configuration.buildXml(builder);
+        }
+      },
+    );
+
+    return builder.buildFragment();
+  }
 }

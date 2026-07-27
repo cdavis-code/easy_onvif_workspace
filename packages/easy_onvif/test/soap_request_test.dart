@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:easy_onvif/device_management.dart';
 import 'package:easy_onvif/media1.dart';
+import 'package:easy_onvif/media2.dart';
 import 'package:easy_onvif/onvif.dart';
 import 'package:easy_onvif/ptz.dart';
 import 'package:easy_onvif/recordings.dart';
@@ -803,6 +804,37 @@ void main() {
       expect(
         builder.buildDocument().toXmlString(),
         '<Test><StopMulticastStreaming xmlns="http://www.onvif.org/ver20/media/wsdl"><ProfileToken>testToken</ProfileToken></StopMulticastStreaming></Test>',
+      );
+    });
+
+    test('getWebRTCConfigurations', () {
+      builder.element(
+        'Test',
+        nest: Media2Request.getWebRTCConfigurations(),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><GetWebRTCConfigurations xmlns="http://www.onvif.org/ver20/media/wsdl"/></Test>',
+      );
+    });
+
+    test('setWebRTCConfigurations', () {
+      builder.element(
+        'Test',
+        nest: Media2Request.setWebRTCConfigurations([
+          WebrtcConfiguration(
+            signalingServer: 'ws://192.168.0.10:8080/onvif/webrtc',
+            authorizationServer: 'AuthorizationServer_1',
+            defaultProfile: 'Profile_1',
+            enabled: true,
+          ),
+        ]),
+      );
+
+      expect(
+        builder.buildDocument().toXmlString(),
+        '<Test><SetWebRTCConfigurations xmlns="http://www.onvif.org/ver20/media/wsdl"><WebRTCConfiguration xmlns="http://www.onvif.org/ver20/media/wsdl"><SignalingServer>ws://192.168.0.10:8080/onvif/webrtc</SignalingServer><AuthorizationServer>AuthorizationServer_1</AuthorizationServer><DefaultProfile>Profile_1</DefaultProfile><Enabled>true</Enabled></WebRTCConfiguration></SetWebRTCConfigurations></Test>',
       );
     });
   });

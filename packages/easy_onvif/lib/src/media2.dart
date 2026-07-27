@@ -366,4 +366,48 @@ class Media2 extends Operation {
     }
     return true;
   }
+
+  /// This operation returns the configured WebRTC signaling configurations of a
+  /// device.
+  ///
+  /// ACCESS CLASS: READ_MEDIA
+  Future<List<WebrtcConfiguration>> getWebRTCConfigurations() async {
+    loggy.debug('getWebRTCConfigurations');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(request: Media2Request.getWebRTCConfigurations()),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return GetWebrtcConfigurationsResponse.fromJson(
+      responseEnvelope.body.response!,
+    ).configurations;
+  }
+
+  /// This operation configures the WebRTC signaling configurations of a device.
+  /// Passing an empty list deletes the existing configurations.
+  ///
+  /// ACCESS CLASS: WRITE_SYSTEM
+  Future<bool> setWebRTCConfigurations(
+    List<WebrtcConfiguration> configurations,
+  ) async {
+    loggy.debug('setWebRTCConfigurations');
+
+    final responseEnvelope = await transport.securedRequest(
+      uri,
+      soap.Body(
+        request: Media2Request.setWebRTCConfigurations(configurations),
+      ),
+    );
+
+    if (responseEnvelope.body.hasFault) {
+      throw Exception(responseEnvelope.body.fault.toString());
+    }
+
+    return true;
+  }
 }
