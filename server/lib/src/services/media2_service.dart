@@ -373,23 +373,44 @@ class Media2Service implements OnvifService {
       _webRtcEnabled = true;
       _webRtcDefaultProfile = null;
     } else {
-      final configuration = configurations.last;
+      // The device reflects a single built-in signaling endpoint, so it holds
+      // exactly one configuration.
+      if (configurations.length > 1) {
+        return SoapEnvelopeBuilder.fault(
+          subcode: 'InvalidArgVal',
+          reason: 'This device supports a single WebRTC configuration.',
+        );
+      }
+
+      final configuration = configurations.first;
 
       final enabled = _childText(configuration, 'Enabled');
       if (enabled != null) _webRtcEnabled = enabled.toLowerCase() == 'true';
 
       final defaultProfile = _childText(configuration, 'DefaultProfile');
-      if (defaultProfile != null) _webRtcDefaultProfile = defaultProfile;
+      if (defaultProfile != null) {
+        if (!state.profiles.any((profile) => profile.token == defaultProfile)) {
+          return SoapEnvelopeBuilder.fault(
+            subcode: 'InvalidArgVal',
+            reason: 'Unknown DefaultProfile token: $defaultProfile',
+          );
+        }
+        _webRtcDefaultProfile = defaultProfile;
+      }
     }
 
     return _empty('SetWebRTCConfigurationsResponse');
   }
 
   /// The trimmed text of the first direct child of [element] named
-  /// [localName], or `null` if absent.
+  /// [localName], or `null` if absent or empty.
   String? _childText(XmlElement element, String localName) {
     for (final child in element.childElements) {
-      if (child.localName == localName) return child.innerText.trim();
+      if (child.localName == localName) {
+        final text = child.innerText.trim();
+
+        return text.isEmpty ? null : text;
+      }
     }
 
     return null;

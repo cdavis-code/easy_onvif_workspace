@@ -58,7 +58,7 @@ void main() {
         WebrtcConfiguration(
           signalingServer: 'ws://ignored:1/onvif/webrtc',
           authorizationServer: 'AuthorizationServer_1',
-          defaultProfile: 'Profile_2',
+          defaultProfile: 'Profile_1',
           enabled: false,
         ),
       ]);
@@ -69,13 +69,27 @@ void main() {
           (await onvif.media.media2.getWebRTCConfigurations()).single;
 
       // The mutable fields round-trip...
-      expect(configuration.defaultProfile, 'Profile_2');
+      expect(configuration.defaultProfile, 'Profile_1');
       expect(configuration.enabled, isFalse);
 
       // ...but the signaling server always reflects the built-in endpoint.
       expect(
         configuration.signalingServer,
         'ws://localhost:$httpPort/onvif/webrtc',
+      );
+    });
+
+    test('setWebRTCConfigurations rejects an unknown DefaultProfile', () async {
+      expect(
+        () => onvif.media.media2.setWebRTCConfigurations([
+          WebrtcConfiguration(
+            signalingServer: 'ws://ignored:1/onvif/webrtc',
+            authorizationServer: 'AuthorizationServer_1',
+            defaultProfile: 'Profile_does_not_exist',
+            enabled: true,
+          ),
+        ]),
+        throwsException,
       );
     });
   });
