@@ -17,7 +17,7 @@ class PtzRequest {
     builder.element(
       'AbsoluteMove',
       nest: () {
-        builder.namespace(Xmlns.tptz); //tptz
+        builder.namespaceUri(null, Xmlns.tptz); //tptz
 
         ReferenceToken(profileToken).buildXml(builder);
 
@@ -40,7 +40,7 @@ class PtzRequest {
     builder.element(
       'ContinuousMove',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
 
@@ -64,7 +64,7 @@ class PtzRequest {
     builder.element(
       'GetCompatibleConfigurations',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
       },
@@ -78,7 +78,7 @@ class PtzRequest {
     builder.element(
       'GetConfiguration',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(
           profileToken,
@@ -94,7 +94,7 @@ class PtzRequest {
     builder.element(
       'GetConfigurationOptions',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(
           profileToken,
@@ -114,7 +114,7 @@ class PtzRequest {
     builder.element(
       'GetPresets',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
       },
@@ -131,7 +131,7 @@ class PtzRequest {
     builder.element(
       'GetPresetTour',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
 
@@ -149,7 +149,7 @@ class PtzRequest {
     builder.element(
       'GetPresetTours',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
       },
@@ -167,7 +167,7 @@ class PtzRequest {
     builder.element(
       'GetStatus',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
       },
@@ -184,7 +184,7 @@ class PtzRequest {
     builder.element(
       'GotoHomePosition',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
 
@@ -204,7 +204,7 @@ class PtzRequest {
     builder.element(
       'GotoPreset',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
 
@@ -226,7 +226,7 @@ class PtzRequest {
     builder.element(
       'RelativeMove',
       nest: () {
-        builder.namespace(Xmlns.tptz); //tptz
+        builder.namespaceUri(null, Xmlns.tptz); //tptz
 
         ReferenceToken(profileToken).buildXml(builder, namespace: Xmlns.tptz);
 
@@ -251,7 +251,7 @@ class PtzRequest {
     builder.element(
       'RemovePreset',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
 
@@ -270,7 +270,7 @@ class PtzRequest {
     builder.element(
       'RemovePresetTour',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
 
@@ -286,7 +286,7 @@ class PtzRequest {
     builder.element(
       'SetHomePosition',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
       },
@@ -305,7 +305,7 @@ class PtzRequest {
     builder.element(
       'SetPreset',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
 
@@ -343,7 +343,7 @@ class PtzRequest {
     builder.element(
       'ContinuousMove',
       nest: () {
-        builder.namespace(Xmlns.tptz);
+        builder.namespaceUri(null, Xmlns.tptz);
 
         ReferenceToken(profileToken).buildXml(builder);
 
@@ -354,7 +354,7 @@ class PtzRequest {
     // builder.element(
     //   'Stop',
     //   nest: () {
-    //     builder.namespace(Xmlns.tptz); //tptz
+    //     builder.namespaceUri(null, Xmlns.tptz); //tptz
 
     //     ReferenceToken(profileToken).buildXml(builder);
 

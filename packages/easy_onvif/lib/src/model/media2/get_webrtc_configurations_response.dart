@@ -16,9 +16,8 @@ class GetWebrtcConfigurationsResponse {
 
   GetWebrtcConfigurationsResponse({required this.configurations});
 
-  factory GetWebrtcConfigurationsResponse.fromJson(
-    Map<String, dynamic> json,
-  ) => _$GetWebrtcConfigurationsResponseFromJson(json);
+  factory GetWebrtcConfigurationsResponse.fromJson(Map<String, dynamic> json) =>
+      _$GetWebrtcConfigurationsResponseFromJson(json);
 
   Map<String, dynamic> toJson() =>
       _$GetWebrtcConfigurationsResponseToJson(this);

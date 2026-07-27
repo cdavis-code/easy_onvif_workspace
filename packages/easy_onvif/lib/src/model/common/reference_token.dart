@@ -25,7 +25,7 @@ class ReferenceToken implements XmlSerializable {
       builder.text(token);
 
       if (namespace != null) {
-        builder.namespace(namespace);
+        builder.namespaceUri(null, namespace);
       }
     },
   );

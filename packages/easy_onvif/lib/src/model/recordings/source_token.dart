@@ -41,7 +41,7 @@ class SourceToken implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       type?.buildXml(builder, tag: 'Type', namespace: Xmlns.tt);
 

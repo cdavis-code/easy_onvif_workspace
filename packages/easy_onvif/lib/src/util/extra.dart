@@ -19,7 +19,7 @@ extension Helpers on String {
         tag,
         nest: () {
           if (namespace != null) {
-            builder.namespace(namespace);
+            builder.namespaceUri(null, namespace);
           }
 
           builder.text(this);

@@ -75,7 +75,7 @@ class LocationEntity implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      if (namespace != null) builder.namespace(namespace);
+      if (namespace != null) builder.namespaceUri(null, namespace);
 
       // Entity, Token, Fixed, GeoSource and AutoGeo are attributes of
       // tt:LocationEntity.
@@ -87,52 +87,64 @@ class LocationEntity implements XmlSerializable {
 
       final geo = geoLocation;
       if (geo != null) {
-        builder.element('GeoLocation', nest: () {
-          if (geo.lon != null) builder.attribute('lon', geo.lon.toString());
-          if (geo.lat != null) builder.attribute('lat', geo.lat.toString());
-          if (geo.elevation != null) {
-            builder.attribute('elevation', geo.elevation.toString());
-          }
-        });
+        builder.element(
+          'GeoLocation',
+          nest: () {
+            if (geo.lon != null) builder.attribute('lon', geo.lon.toString());
+            if (geo.lat != null) builder.attribute('lat', geo.lat.toString());
+            if (geo.elevation != null) {
+              builder.attribute('elevation', geo.elevation.toString());
+            }
+          },
+        );
       }
 
       final orientation = geoOrientation;
       if (orientation != null) {
-        builder.element('GeoOrientation', nest: () {
-          if (orientation.roll != null) {
-            builder.attribute('roll', orientation.roll.toString());
-          }
-          if (orientation.pitch != null) {
-            builder.attribute('pitch', orientation.pitch.toString());
-          }
-          if (orientation.yaw != null) {
-            builder.attribute('yaw', orientation.yaw.toString());
-          }
-        });
+        builder.element(
+          'GeoOrientation',
+          nest: () {
+            if (orientation.roll != null) {
+              builder.attribute('roll', orientation.roll.toString());
+            }
+            if (orientation.pitch != null) {
+              builder.attribute('pitch', orientation.pitch.toString());
+            }
+            if (orientation.yaw != null) {
+              builder.attribute('yaw', orientation.yaw.toString());
+            }
+          },
+        );
       }
 
       final local = localLocation;
       if (local != null) {
-        builder.element('LocalLocation', nest: () {
-          if (local.x != null) builder.attribute('x', local.x.toString());
-          if (local.y != null) builder.attribute('y', local.y.toString());
-          if (local.z != null) builder.attribute('z', local.z.toString());
-        });
+        builder.element(
+          'LocalLocation',
+          nest: () {
+            if (local.x != null) builder.attribute('x', local.x.toString());
+            if (local.y != null) builder.attribute('y', local.y.toString());
+            if (local.z != null) builder.attribute('z', local.z.toString());
+          },
+        );
       }
 
       final localOrientation = this.localOrientation;
       if (localOrientation != null) {
-        builder.element('LocalOrientation', nest: () {
-          if (localOrientation.pan != null) {
-            builder.attribute('pan', localOrientation.pan.toString());
-          }
-          if (localOrientation.tilt != null) {
-            builder.attribute('tilt', localOrientation.tilt.toString());
-          }
-          if (localOrientation.roll != null) {
-            builder.attribute('roll', localOrientation.roll.toString());
-          }
-        });
+        builder.element(
+          'LocalOrientation',
+          nest: () {
+            if (localOrientation.pan != null) {
+              builder.attribute('pan', localOrientation.pan.toString());
+            }
+            if (localOrientation.tilt != null) {
+              builder.attribute('tilt', localOrientation.tilt.toString());
+            }
+            if (localOrientation.roll != null) {
+              builder.attribute('roll', localOrientation.roll.toString());
+            }
+          },
+        );
       }
     },
   );

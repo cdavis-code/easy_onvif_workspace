@@ -56,12 +56,12 @@ class Track {
     Transport.builder.element(
       'Track',
       nest: () {
-        Transport.builder.namespace(Xmlns.tt);
+        Transport.builder.namespaceUri(null, Xmlns.tt);
 
         Transport.builder.element(
           'SourceTag',
           nest: () {
-            Transport.builder.namespace(Xmlns.tt);
+            Transport.builder.namespaceUri(null, Xmlns.tt);
             Transport.builder.text(sourceTag);
           },
         );
@@ -69,7 +69,7 @@ class Track {
         Transport.builder.element(
           'Destination',
           nest: () {
-            Transport.builder.namespace(Xmlns.tt);
+            Transport.builder.namespaceUri(null, Xmlns.tt);
             Transport.builder.text(destination);
           },
         );

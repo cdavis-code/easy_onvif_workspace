@@ -16,7 +16,7 @@ class RecordingsRequest {
     builder.element(
       'CreateRecording',
       nest: () {
-        builder.namespace(Xmlns.trc);
+        builder.namespaceUri(null, Xmlns.trc);
 
         recordingConfiguration.buildXml(builder);
       },
@@ -32,7 +32,7 @@ class RecordingsRequest {
     builder.element(
       'CreateRecordingJob',
       nest: () {
-        builder.namespace(Xmlns.trc);
+        builder.namespaceUri(null, Xmlns.trc);
 
         recordingJobConfiguration.buildXml(builder);
       },
@@ -46,7 +46,7 @@ class RecordingsRequest {
     builder.element(
       'DeleteRecordingJob',
       nest: () {
-        builder.namespace(Xmlns.trc);
+        builder.namespaceUri(null, Xmlns.trc);
 
         recordingToken.buildXml(
           builder,
@@ -64,7 +64,7 @@ class RecordingsRequest {
     builder.element(
       'DeleteRecordingJob',
       nest: () {
-        builder.namespace(Xmlns.trc);
+        builder.namespaceUri(null, Xmlns.trc);
 
         jobToken.buildXml(builder, tag: 'JobToken', namespace: Xmlns.tt);
       },
@@ -82,7 +82,7 @@ class RecordingsRequest {
     builder.element(
       'GetRecordingJobState',
       nest: () {
-        builder.namespace(Xmlns.trc);
+        builder.namespaceUri(null, Xmlns.trc);
 
         jobToken.buildXml(builder, tag: 'JobToken', namespace: Xmlns.tt);
       },
@@ -98,7 +98,7 @@ class RecordingsRequest {
     builder.element(
       'GetRecordingOptions',
       nest: () {
-        builder.namespace(Xmlns.trc);
+        builder.namespaceUri(null, Xmlns.trc);
 
         recordingToken.buildXml(
           builder,
@@ -127,7 +127,7 @@ class RecordingsRequest {
     builder.element(
       'SetRecordingJobMode',
       nest: () {
-        builder.namespace(Xmlns.trc);
+        builder.namespaceUri(null, Xmlns.trc);
 
         jobToken.buildXml(builder, tag: 'JobToken', namespace: Xmlns.tt);
 

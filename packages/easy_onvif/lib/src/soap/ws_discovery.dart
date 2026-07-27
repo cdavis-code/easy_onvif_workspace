@@ -24,16 +24,16 @@ class WsDiscovery {
 
     builder.element(
       'Envelope',
-      namespace: 'http://www.w3.org/2003/05/soap-envelope',
+      namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
       nest: () {
-        builder.namespace('http://www.w3.org/2003/05/soap-envelope', 's');
-        builder.namespace(
-          'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+        builder.namespaceUri('s', 'http://www.w3.org/2003/05/soap-envelope');
+        builder.namespaceUri(
           'a',
+          'http://schemas.xmlsoap.org/ws/2004/08/addressing',
         );
-        builder.namespace(
-          'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+        builder.namespaceUri(
           'd',
+          'http://schemas.xmlsoap.org/ws/2005/04/discovery',
         );
 
         builder.element(
@@ -42,19 +42,19 @@ class WsDiscovery {
           nest: () {
             builder.element(
               'Action',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest: 'http://schemas.xmlsoap.org/ws/2005/04/discovery/Hello',
             );
 
             builder.element(
               'MessageID',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest: 'uuid:${messageId ?? uuid}',
             );
 
             builder.element(
               'AppSequence',
-              namespace: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
               nest: () {
                 builder.attribute('InstanceId', '1');
 
@@ -72,11 +72,12 @@ class WsDiscovery {
           nest: () {
             builder.element(
               'Hello',
-              namespace: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
               nest: () {
                 builder.element(
                   'EndpointReference',
-                  namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+                  namespaceUri:
+                      'http://schemas.xmlsoap.org/ws/2004/08/addressing',
                   nest: () {
                     builder.element(
                       'Address',
@@ -113,18 +114,18 @@ class WsDiscovery {
 
     builder.element(
       'Envelope',
-      namespace: 'http://www.w3.org/2003/05/soap-envelope',
+      namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
       nest: () {
-        builder.namespace('http://www.w3.org/2003/05/soap-envelope', 's');
+        builder.namespaceUri('s', 'http://www.w3.org/2003/05/soap-envelope');
 
-        builder.namespace(
-          'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+        builder.namespaceUri(
           'a',
+          'http://schemas.xmlsoap.org/ws/2004/08/addressing',
         );
 
-        builder.namespace(
-          'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+        builder.namespaceUri(
           'd',
+          'http://schemas.xmlsoap.org/ws/2005/04/discovery',
         );
 
         builder.element(
@@ -133,13 +134,13 @@ class WsDiscovery {
           nest: () {
             builder.element(
               'Action',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest: 'http://schemas.xmlsoap.org/ws/2005/04/discovery/Bye',
             );
 
             builder.element(
               'MessageID',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest: 'uuid:${messageId ?? uuid}',
             );
           },
@@ -150,11 +151,12 @@ class WsDiscovery {
           nest: () {
             builder.element(
               'Bye',
-              namespace: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
               nest: () {
                 builder.element(
                   'EndpointReference',
-                  namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+                  namespaceUri:
+                      'http://schemas.xmlsoap.org/ws/2004/08/addressing',
                   nest: () {
                     builder.element(
                       'Address',
@@ -177,36 +179,36 @@ class WsDiscovery {
 
     builder.element(
       'Envelope',
-      namespace: 'http://www.w3.org/2003/05/soap-envelope',
+      namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
       nest: () {
-        builder.namespace('http://www.w3.org/2003/05/soap-envelope', 's');
-        builder.namespace(
-          'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+        builder.namespaceUri('s', 'http://www.w3.org/2003/05/soap-envelope');
+        builder.namespaceUri(
           'a',
+          'http://schemas.xmlsoap.org/ws/2004/08/addressing',
         );
-        builder.namespace(
-          'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+        builder.namespaceUri(
           'd',
+          'http://schemas.xmlsoap.org/ws/2005/04/discovery',
         );
 
         builder.element(
           'Header',
-          namespace: 'http://www.w3.org/2003/05/soap-envelope',
+          namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
           nest: () {
             builder.element(
               'MessageID',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest: 'uuid:${messageId ?? uuid}',
             );
 
             builder.element(
               'To',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest: () {
                 builder.attribute(
                   'mustUnderstand',
                   'true',
-                  namespace: 'http://www.w3.org/2003/05/soap-envelope',
+                  namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
                 );
                 builder.text('urn:schemas-xmlsoap-org:ws:2005:04:discovery');
               },
@@ -214,11 +216,12 @@ class WsDiscovery {
 
             builder.element(
               'ReplyTo',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest: () {
                 builder.element(
                   'Address',
-                  namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+                  namespaceUri:
+                      'http://schemas.xmlsoap.org/ws/2004/08/addressing',
                   nest: () {
                     builder.text(
                       'http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous',
@@ -230,12 +233,12 @@ class WsDiscovery {
 
             builder.element(
               'Action',
-              namespace: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2004/08/addressing',
               nest: () {
                 builder.attribute(
                   'mustUnderstand',
                   'true',
-                  namespace: 'http://www.w3.org/2003/05/soap-envelope',
+                  namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
                 );
                 builder.text(
                   'http://schemas.xmlsoap.org/ws/2005/04/discovery/Probe',
@@ -247,18 +250,19 @@ class WsDiscovery {
 
         builder.element(
           'Body',
-          namespace: 'http://www.w3.org/2003/05/soap-envelope',
+          namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
           nest: () {
             builder.element(
               'Probe',
-              namespace: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+              namespaceUri: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
               nest: () {
                 builder.element(
                   'Types',
-                  namespace: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+                  namespaceUri:
+                      'http://schemas.xmlsoap.org/ws/2005/04/discovery',
                   nest: () {
-                    builder.namespace(Xmlns.dn, 'dn');
-                    builder.namespace(Xmlns.tds, 'tds');
+                    builder.namespaceUri('dn', Xmlns.dn);
+                    builder.namespaceUri('tds', Xmlns.tds);
 
                     builder.text('dn:NetworkVideoTransmitter  tds:Device');
                   },

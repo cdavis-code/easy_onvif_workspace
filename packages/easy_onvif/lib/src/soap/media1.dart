@@ -24,7 +24,7 @@ class MediaRequest {
     builder.element(
       'GetMetadataConfiguration',
       nest: () {
-        builder.namespace(Xmlns.trt);
+        builder.namespaceUri(null, Xmlns.trt);
 
         ReferenceToken(
           configurationToken,
@@ -61,7 +61,7 @@ class MediaRequest {
     builder.element(
       'GetProfile',
       nest: () {
-        builder.namespace(Xmlns.trt);
+        builder.namespaceUri(null, Xmlns.trt);
 
         ReferenceToken(profileToken).buildXml(builder);
       },
@@ -86,7 +86,7 @@ class MediaRequest {
     builder.element(
       'GetSnapshotUri',
       nest: () {
-        builder.namespace(Xmlns.trt);
+        builder.namespaceUri(null, Xmlns.trt);
 
         ReferenceToken(profileToken).buildXml(builder);
       },
@@ -103,7 +103,7 @@ class MediaRequest {
     builder.element(
       'GetStreamUri',
       nest: () {
-        builder.namespace(Xmlns.trt);
+        builder.namespaceUri(null, Xmlns.trt);
 
         streamSetup.buildXml(builder);
 

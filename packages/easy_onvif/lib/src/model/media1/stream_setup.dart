@@ -41,7 +41,7 @@ class StreamSetup implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       stream.buildXml(builder, tag: 'Stream', namespace: Xmlns.tt);
 

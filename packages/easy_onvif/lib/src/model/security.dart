@@ -35,14 +35,19 @@ class Security implements XmlSerializable {
     String? namespace,
   }) => builder.element(
     'Security',
-    namespace: namespace,
+    namespaceUri: namespace,
     // namespaces: {Xmlns.s: 's'},
     nest: () {
-      builder.namespace(
+      builder.namespaceUri(
+        null,
         'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
       );
 
-      builder.attribute('mustUnderstand', mustUnderstand, namespace: Xmlns.s);
+      builder.attribute(
+        'mustUnderstand',
+        mustUnderstand,
+        namespaceUri: Xmlns.s,
+      );
 
       usernameToken.buildXml(builder);
     },

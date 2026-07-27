@@ -50,7 +50,7 @@ class RecordingEventFilter implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       if (filters.isNotEmpty) {
         for (var filter in filters) {

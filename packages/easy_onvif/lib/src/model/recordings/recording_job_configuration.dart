@@ -78,7 +78,7 @@ class RecordingJobConfiguration implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       if (scheduleToken != null) {
         ReferenceToken(

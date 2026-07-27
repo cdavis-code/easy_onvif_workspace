@@ -27,10 +27,7 @@ class WebrtcConfiguration implements XmlSerializable {
   final String? certPathValidationPolicyId;
 
   /// The Authorization Server used for obtaining access tokens.
-  @JsonKey(
-    name: 'AuthorizationServer',
-    fromJson: OnvifUtil.stringMappedFromXml,
-  )
+  @JsonKey(name: 'AuthorizationServer', fromJson: OnvifUtil.stringMappedFromXml)
   final String authorizationServer;
 
   /// The default media profile used for streaming.
@@ -75,7 +72,7 @@ class WebrtcConfiguration implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      if (namespace != null) builder.namespace(namespace);
+      if (namespace != null) builder.namespaceUri(null, namespace);
 
       signalingServer.buildXml(builder, tag: 'SignalingServer');
 

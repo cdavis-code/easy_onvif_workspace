@@ -32,7 +32,7 @@ class AppSequence implements XmlSerializable {
     String? namespace,
   }) => builder.element(
     tag,
-    namespaces: {Xmlns.ws: 'ws'},
+    namespaceUris: {'ws': Xmlns.ws},
     nest: () {
       builder.attribute('MessageNumber', messageNumber);
 

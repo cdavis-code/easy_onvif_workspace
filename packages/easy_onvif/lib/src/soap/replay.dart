@@ -21,7 +21,7 @@ class ReplayRequest {
     builder.element(
       'GetReplayUri',
       nest: () {
-        builder.namespace(Xmlns.trp);
+        builder.namespaceUri(null, Xmlns.trp);
 
         streamSetup.buildXml(builder);
 
@@ -43,7 +43,7 @@ class ReplayRequest {
     builder.element(
       'SetReplayConfiguration',
       nest: () {
-        builder.namespace(Xmlns.trp);
+        builder.namespaceUri(null, Xmlns.trp);
 
         configuration.buildXml(builder);
       },

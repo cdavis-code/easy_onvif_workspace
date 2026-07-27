@@ -56,7 +56,7 @@ class RecordingConfiguration implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       source.buildXml(builder);
 

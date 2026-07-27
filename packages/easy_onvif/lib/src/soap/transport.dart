@@ -121,7 +121,7 @@ class Transport with UiLoggy {
     Transport.builder.element(
       tagName,
       nest: () {
-        Transport.builder.namespace(nameSpace);
+        Transport.builder.namespaceUri(null, nameSpace);
       },
     );
 

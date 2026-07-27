@@ -399,9 +399,7 @@ class Media2 extends Operation {
 
     final responseEnvelope = await transport.securedRequest(
       uri,
-      soap.Body(
-        request: Media2Request.setWebRTCConfigurations(configurations),
-      ),
+      soap.Body(request: Media2Request.setWebRTCConfigurations(configurations)),
     );
 
     if (responseEnvelope.body.hasFault) {

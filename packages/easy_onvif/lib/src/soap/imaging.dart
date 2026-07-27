@@ -12,7 +12,7 @@ class ImagingRequest {
     Transport.builder.element(
       'GetCurrentPreset',
       nest: () {
-        Transport.builder.namespace(Xmlns.timg);
+        Transport.builder.namespaceUri(null, Xmlns.timg);
 
         ReferenceToken(
           videoSourceToken,
@@ -28,7 +28,7 @@ class ImagingRequest {
     Transport.builder.element(
       'GetPresets',
       nest: () {
-        Transport.builder.namespace(Xmlns.timg);
+        Transport.builder.namespaceUri(null, Xmlns.timg);
 
         ReferenceToken(
           videoSourceToken,
@@ -48,7 +48,7 @@ class ImagingRequest {
     Transport.builder.element(
       'GetStatus',
       nest: () {
-        Transport.builder.namespace(Xmlns.timg);
+        Transport.builder.namespaceUri(null, Xmlns.timg);
 
         ReferenceToken(
           videoSourceToken,
@@ -67,7 +67,7 @@ class ImagingRequest {
     Transport.builder.element(
       'SetPreset',
       nest: () {
-        Transport.builder.namespace(Xmlns.timg);
+        Transport.builder.namespaceUri(null, Xmlns.timg);
 
         ReferenceToken(
           videoSourceToken,

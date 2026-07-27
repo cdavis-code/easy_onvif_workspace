@@ -34,7 +34,7 @@ class PtzSpeed implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       panTilt?.buildXml(builder, tag: 'PanTilt');
 

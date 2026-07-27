@@ -15,7 +15,7 @@ class Media2Request {
     builder.element(
       'DeleteProfile',
       nest: () {
-        builder.namespace(Xmlns.tr2);
+        builder.namespaceUri(null, Xmlns.tr2);
 
         ReferenceToken(referenceToken).buildXml(builder, tag: 'Token');
       },
@@ -57,7 +57,7 @@ class Media2Request {
     builder.element(
       'GetSnapshotUri',
       nest: () {
-        builder.namespace(Xmlns.tr2);
+        builder.namespaceUri(null, Xmlns.tr2);
 
         ReferenceToken(profileToken).buildXml(builder);
       },
@@ -74,14 +74,14 @@ class Media2Request {
     builder.element(
       'GetStreamUri',
       nest: () {
-        builder.namespace(Xmlns.tr2);
+        builder.namespaceUri(null, Xmlns.tr2);
 
         protocol.buildXml(builder, tag: 'Protocol');
 
         builder.element(
           'Protocol',
           nest: () {
-            builder.namespace(Xmlns.tt);
+            builder.namespaceUri(null, Xmlns.tt);
             builder.text(protocol);
           },
         );
@@ -101,7 +101,7 @@ class Media2Request {
     builder.element(
       'GetVideoEncoderConfigurations',
       nest: () {
-        builder.namespace(Xmlns.tr2);
+        builder.namespaceUri(null, Xmlns.tr2);
 
         if (configurationToken != null) {
           ReferenceToken(
@@ -125,7 +125,7 @@ class Media2Request {
     builder.element(
       'GetVideoEncoderInstances',
       nest: () {
-        builder.namespace(Xmlns.tr2);
+        builder.namespaceUri(null, Xmlns.tr2);
 
         ReferenceToken(
           configurationToken,
@@ -144,7 +144,7 @@ class Media2Request {
     builder.element(
       'GetVideoSourceConfigurationOptions',
       nest: () {
-        builder.namespace(Xmlns.tr2);
+        builder.namespaceUri(null, Xmlns.tr2);
 
         if (configurationToken != null) {
           ReferenceToken(
@@ -186,7 +186,7 @@ class Media2Request {
     builder.element(
       'SetWebRTCConfigurations',
       nest: () {
-        builder.namespace(Xmlns.tr2);
+        builder.namespaceUri(null, Xmlns.tr2);
 
         for (var configuration in configurations) {
           configuration.buildXml(builder);

@@ -32,8 +32,8 @@ class Envelope implements XmlSerializable {
     String? namespace = Xmlns.s,
   }) => builder.element(
     'Envelope',
-    namespace: namespace,
-    namespaces: {Xmlns.s: 's', 'http://www.w3.org/2005/08/addressing': 'a'},
+    namespaceUri: namespace,
+    namespaceUris: {'s': Xmlns.s, 'a': 'http://www.w3.org/2005/08/addressing'},
     nest: () {
       header?.buildXml(builder);
 

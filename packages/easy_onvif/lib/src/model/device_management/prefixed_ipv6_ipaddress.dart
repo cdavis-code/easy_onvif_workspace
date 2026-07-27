@@ -34,7 +34,7 @@ class PrefixedIpv6Address extends PrefixedIpAddress implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       address.buildXml(builder, tag: 'Address');
 

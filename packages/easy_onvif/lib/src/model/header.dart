@@ -66,7 +66,7 @@ class Header implements XmlSerializable {
   }) {
     builder.element(
       tag,
-      namespace: namespace,
+      namespaceUri: namespace,
       nest: () {
         security?.buildXml(builder);
 

@@ -15,7 +15,7 @@ class MediaCommon {
     builder.element(
       'GetMetadataConfigurationOptions',
       nest: () {
-        builder.namespace(namespace);
+        builder.namespaceUri(null, namespace);
 
         if (configurationToken != null) {
           ReferenceToken(
@@ -41,7 +41,7 @@ class MediaCommon {
     builder.element(
       'GetMetadataConfigurations',
       nest: () {
-        builder.namespace(namespace);
+        builder.namespaceUri(null, namespace);
 
         if (configurationToken != null) {
           ReferenceToken(
@@ -66,7 +66,7 @@ class MediaCommon {
     builder.element(
       'StartMulticastStreaming',
       nest: () {
-        builder.namespace(namespace);
+        builder.namespaceUri(null, namespace);
 
         ReferenceToken(profileToken).buildXml(builder);
       },
@@ -83,7 +83,7 @@ class MediaCommon {
     builder.element(
       'StopMulticastStreaming',
       nest: () {
-        builder.namespace(namespace);
+        builder.namespaceUri(null, namespace);
 
         ReferenceToken(profileToken).buildXml(builder);
       },

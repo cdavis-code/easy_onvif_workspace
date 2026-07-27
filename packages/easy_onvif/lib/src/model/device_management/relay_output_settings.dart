@@ -77,7 +77,7 @@ class RelayOutputSettings implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      if (namespace != null) builder.namespace(namespace);
+      if (namespace != null) builder.namespaceUri(null, namespace);
 
       mode.value.buildXml(builder, tag: 'Mode');
       (delayTime ?? 'PT0S').buildXml(builder, tag: 'DelayTime');

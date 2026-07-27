@@ -18,7 +18,7 @@ class OnvifUtil {
 
     final xmlEnvelope = XmlDocument.parse(soapResponse).getElement(
       'Envelope',
-      namespace: 'http://www.w3.org/2003/05/soap-envelope',
+      namespaceUri: 'http://www.w3.org/2003/05/soap-envelope',
     );
 
     if (xmlEnvelope == null) throw Exception();

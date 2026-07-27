@@ -44,7 +44,7 @@ class Vector2D implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       builder.attribute('x', x);
       builder.attribute('y', y);

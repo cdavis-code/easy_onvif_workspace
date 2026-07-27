@@ -13,7 +13,7 @@ class DeviceManagementRequest {
     builder.element(
       'CreateUsers',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         for (var user in users) {
           user.buildXml(builder);
@@ -29,7 +29,7 @@ class DeviceManagementRequest {
     builder.element(
       'DeleteUsers',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         for (var userName in userNames) {
           userName.buildXml(builder, tag: 'Username');
@@ -53,7 +53,7 @@ class DeviceManagementRequest {
     Transport.builder.element(
       'GetCapabilities',
       nest: () {
-        Transport.builder.namespace(Xmlns.tds);
+        Transport.builder.namespaceUri(null, Xmlns.tds);
         Transport.builder.element(
           'Category',
           nest: () {
@@ -71,7 +71,7 @@ class DeviceManagementRequest {
     Transport.builder.element(
       'GetServices',
       nest: () {
-        Transport.builder.namespace(Xmlns.tds);
+        Transport.builder.namespaceUri(null, Xmlns.tds);
 
         Transport.builder.element(
           'IncludeCapability',
@@ -90,7 +90,7 @@ class DeviceManagementRequest {
     Transport.builder.element(
       'GetStorageConfiguration',
       nest: () {
-        Transport.builder.namespace(Xmlns.tds);
+        Transport.builder.namespaceUri(null, Xmlns.tds);
 
         referenceToken.buildXml(builder, tag: 'Token');
       },
@@ -108,7 +108,7 @@ class DeviceManagementRequest {
     Transport.builder.element(
       'GetSystemLog',
       nest: () {
-        Transport.builder.namespace(Xmlns.tds);
+        Transport.builder.namespaceUri(null, Xmlns.tds);
 
         logType.buildXml(builder, tag: 'LogType', namespace: Xmlns.tds);
       },
@@ -122,7 +122,7 @@ class DeviceManagementRequest {
     Transport.builder.element(
       'GetSystemSupportInformation',
       nest: () {
-        Transport.builder.namespace(Xmlns.tds);
+        Transport.builder.namespaceUri(null, Xmlns.tds);
       },
     );
 
@@ -203,7 +203,7 @@ class DeviceManagementRequest {
     builder.element(
       operation,
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         ipAddressFilter.buildXml(builder, tag: 'IPAddressFilter');
       },
@@ -224,7 +224,7 @@ class DeviceManagementRequest {
     builder.element(
       'SetRelayOutputState',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         relayOutputToken.buildXml(builder, tag: 'RelayOutputToken');
         logicalState.value.buildXml(builder, tag: 'LogicalState');
@@ -242,7 +242,7 @@ class DeviceManagementRequest {
     builder.element(
       'SetRelayOutputSettings',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         relayOutputToken.buildXml(builder, tag: 'RelayOutputToken');
         properties.buildXml(builder, tag: 'Properties');
@@ -257,7 +257,7 @@ class DeviceManagementRequest {
     builder.element(
       'SetGeoLocation',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         for (var location in locations) {
           location.buildXml(builder);
@@ -273,7 +273,7 @@ class DeviceManagementRequest {
     builder.element(
       'DeleteGeoLocation',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         for (var location in locations) {
           location.buildXml(builder);
@@ -289,7 +289,7 @@ class DeviceManagementRequest {
     builder.element(
       'SetHostname',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         name.buildXml(builder, tag: 'Name');
       },
@@ -303,7 +303,7 @@ class DeviceManagementRequest {
     builder.element(
       'SetHostnameFromDHCP',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         fromDhcp.toString().buildXml(builder, tag: 'FromDHCP');
       },
@@ -317,7 +317,7 @@ class DeviceManagementRequest {
     builder.element(
       'SetDNS',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         (dnsInformation.fromDhcp ?? false).toString().buildXml(
           builder,
@@ -329,17 +329,20 @@ class DeviceManagementRequest {
         }
 
         for (var entry in dnsInformation.dnsManual ?? <DnsEntry>[]) {
-          builder.element('DNSManual', nest: () {
-            entry.type.buildXml(builder, tag: 'Type');
+          builder.element(
+            'DNSManual',
+            nest: () {
+              entry.type.buildXml(builder, tag: 'Type');
 
-            if (entry.ipv4Address != null) {
-              entry.ipv4Address!.buildXml(builder, tag: 'IPv4Address');
-            }
+              if (entry.ipv4Address != null) {
+                entry.ipv4Address!.buildXml(builder, tag: 'IPv4Address');
+              }
 
-            if (entry.ipv6Address != null) {
-              entry.ipv6Address!.buildXml(builder, tag: 'IPv6Address');
-            }
-          });
+              if (entry.ipv6Address != null) {
+                entry.ipv6Address!.buildXml(builder, tag: 'IPv6Address');
+              }
+            },
+          );
         }
       },
     );
@@ -352,26 +355,29 @@ class DeviceManagementRequest {
     builder.element(
       'SetNTP',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         ntpInformation.fromDhcp.toString().buildXml(builder, tag: 'FromDHCP');
 
         for (var ntp in ntpInformation.ntpManual ?? <Ntp>[]) {
-          builder.element('NTPManual', nest: () {
-            ntp.type.buildXml(builder, tag: 'Type');
+          builder.element(
+            'NTPManual',
+            nest: () {
+              ntp.type.buildXml(builder, tag: 'Type');
 
-            if (ntp.iPv4Address != null) {
-              ntp.iPv4Address!.buildXml(builder, tag: 'IPv4Address');
-            }
+              if (ntp.iPv4Address != null) {
+                ntp.iPv4Address!.buildXml(builder, tag: 'IPv4Address');
+              }
 
-            if (ntp.iPv6Address != null) {
-              ntp.iPv6Address!.buildXml(builder, tag: 'IPv6Address');
-            }
+              if (ntp.iPv6Address != null) {
+                ntp.iPv6Address!.buildXml(builder, tag: 'IPv6Address');
+              }
 
-            if (ntp.dnsName != null) {
-              ntp.dnsName!.buildXml(builder, tag: 'DNSname');
-            }
-          });
+              if (ntp.dnsName != null) {
+                ntp.dnsName!.buildXml(builder, tag: 'DNSname');
+              }
+            },
+          );
         }
       },
     );
@@ -386,7 +392,7 @@ class DeviceManagementRequest {
     builder.element(
       'SetDynamicDNS',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         dynamicDnsInformation.type.value.buildXml(builder, tag: 'Type');
 
@@ -410,14 +416,17 @@ class DeviceManagementRequest {
     builder.element(
       'SetNetworkProtocols',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         for (var protocol in networkProtocols) {
-          builder.element('NetworkProtocols', nest: () {
-            protocol.name.buildXml(builder, tag: 'Name');
-            protocol.enabled.toString().buildXml(builder, tag: 'Enabled');
-            protocol.port.toString().buildXml(builder, tag: 'Port');
-          });
+          builder.element(
+            'NetworkProtocols',
+            nest: () {
+              protocol.name.buildXml(builder, tag: 'Name');
+              protocol.enabled.toString().buildXml(builder, tag: 'Enabled');
+              protocol.port.toString().buildXml(builder, tag: 'Port');
+            },
+          );
         }
       },
     );
@@ -436,7 +445,7 @@ class DeviceManagementRequest {
     builder.element(
       'SetNetworkDefaultGateway',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         for (var address in networkGateway.ipv4Addresses) {
           address.buildXml(builder, tag: 'IPv4Address');
@@ -463,7 +472,7 @@ class DeviceManagementRequest {
     builder.element(
       'SetZeroConfiguration',
       nest: () {
-        builder.namespace(Xmlns.tds);
+        builder.namespaceUri(null, Xmlns.tds);
 
         interfaceToken.buildXml(builder, tag: 'InterfaceToken');
         enabled.toString().buildXml(builder, tag: 'Enabled');

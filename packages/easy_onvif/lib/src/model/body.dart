@@ -58,10 +58,10 @@ class Body implements XmlSerializable {
   }) {
     builder.element(
       tag,
-      namespace: namespace,
-      namespaces: {
-        'http://www.w3.org/2001/XMLSchema-instance': 'xsi',
-        Xmlns.xsd: 'xsd',
+      namespaceUri: namespace,
+      namespaceUris: {
+        'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+        'xsd': Xmlns.xsd,
       },
       nest: request,
     );

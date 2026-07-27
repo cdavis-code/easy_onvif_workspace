@@ -811,7 +811,9 @@ class DeviceManagement extends Operation with UiLoggy {
   /// This operation sets the dynamic DNS settings on a device.
   ///
   /// Access Class: WRITE_SYSTEM
-  Future<bool> setDynamicDns(DynamicDnsInformation dynamicDnsInformation) async {
+  Future<bool> setDynamicDns(
+    DynamicDnsInformation dynamicDnsInformation,
+  ) async {
     loggy.debug('setDynamicDns');
 
     final responseEnvelope = await transport.securedRequest(

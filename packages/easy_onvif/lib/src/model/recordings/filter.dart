@@ -38,7 +38,7 @@ class Filter implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       topic.buildXml(builder, tag: 'Topic', namespace: Xmlns.tt);
 

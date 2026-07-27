@@ -68,7 +68,7 @@ class RecordingJobSource implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       sourceToken?.buildXml(builder);
 
@@ -76,7 +76,7 @@ class RecordingJobSource implements XmlSerializable {
         builder.element(
           'AutoCreateReceiver',
           nest: () {
-            builder.namespace(Xmlns.trc);
+            builder.namespaceUri(null, Xmlns.trc);
             builder.text(autoCreateReceiver! ? 'true' : 'false');
           },
         );

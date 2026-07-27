@@ -50,7 +50,7 @@ class SearchScope implements XmlSerializable {
   }) => builder.element(
     tag,
     nest: () {
-      builder.namespace(namespace!);
+      builder.namespaceUri(null, namespace!);
 
       if (includedSources != null) {
         builder.element(

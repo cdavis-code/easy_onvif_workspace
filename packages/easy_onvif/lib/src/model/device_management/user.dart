@@ -52,7 +52,7 @@ class User implements XmlSerializable {
   void buildXml(XmlBuilder builder, {String tag = 'User', String? namespace}) =>
       builder.element(
         tag,
-        namespace: namespace,
+        namespaceUri: namespace,
         nest: () {
           username.buildXml(builder, tag: 'Username');
           password?.buildXml(builder, tag: 'Password');

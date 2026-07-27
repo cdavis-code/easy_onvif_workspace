@@ -18,7 +18,7 @@ class SearchRequest {
     builder.element(
       'FindRecordings',
       nest: () {
-        builder.namespace(Xmlns.tse);
+        builder.namespaceUri(null, Xmlns.tse);
 
         searchScope?.buildXml(builder);
 
@@ -40,7 +40,7 @@ class SearchRequest {
     builder.element(
       'GetRecordingInformation',
       nest: () {
-        builder.namespace(Xmlns.tse);
+        builder.namespaceUri(null, Xmlns.tse);
 
         ReferenceToken(recordingToken).buildXml(builder, tag: 'RecordingToken');
       },
@@ -59,7 +59,7 @@ class SearchRequest {
     builder.element(
       'GetRecordingSearchResults',
       nest: () {
-        builder.namespace(Xmlns.tse);
+        builder.namespaceUri(null, Xmlns.tse);
 
         ReferenceToken(searchToken).buildXml(builder, tag: 'SearchToken');
 

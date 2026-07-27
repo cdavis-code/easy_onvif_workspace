@@ -61,7 +61,7 @@ class RecordingSourceInformation implements XmlSerializable {
   }) => Transport.builder.element(
     tag,
     nest: () {
-      Transport.builder.namespace(namespace!);
+      Transport.builder.namespaceUri(null, namespace!);
 
       sourceId.buildXml(Transport.builder, tag: 'SourceId');
 
