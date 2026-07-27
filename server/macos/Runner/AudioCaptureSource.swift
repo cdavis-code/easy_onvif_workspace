@@ -58,6 +58,77 @@ final class AudioCaptureSource {
     running = false
   }
 
+  /// Enumerates input-capable CoreAudio devices as `{uid, name}` pairs, for
+  /// the settings UI's audio device picker.
+  static func listInputDevices() -> [[String: String]] {
+    var address = AudioObjectPropertyAddress(
+      mSelector: kAudioHardwarePropertyDevices,
+      mScope: kAudioObjectPropertyScopeGlobal,
+      mElement: AudioObjectPropertyElement(0))
+    var size: UInt32 = 0
+
+    guard AudioObjectGetPropertyDataSize(
+      AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size) == noErr else { return [] }
+
+    let count = Int(size) / MemoryLayout<AudioDeviceID>.size
+    var devices = [AudioDeviceID](repeating: 0, count: count)
+
+    guard AudioObjectGetPropertyData(
+      AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &devices) == noErr else { return [] }
+
+    var result: [[String: String]] = []
+
+    for device in devices {
+      // Input-capable = has at least one input stream buffer.
+      var inputAddress = AudioObjectPropertyAddress(
+        mSelector: kAudioDevicePropertyStreamConfiguration,
+        mScope: kAudioDevicePropertyScopeInput,
+        mElement: AudioObjectPropertyElement(0))
+      var configSize: UInt32 = 0
+
+      guard AudioObjectGetPropertyDataSize(device, &inputAddress, 0, nil, &configSize) == noErr,
+            configSize > 0 else { continue }
+
+      let bufferList = UnsafeMutableRawPointer.allocate(
+        byteCount: Int(configSize), alignment: MemoryLayout<AudioBufferList>.alignment)
+      defer { bufferList.deallocate() }
+
+      guard AudioObjectGetPropertyData(
+        device, &inputAddress, 0, nil, &configSize,
+        bufferList.assumingMemoryBound(to: AudioBufferList.self)) == noErr else { continue }
+
+      let buffers = UnsafeMutableAudioBufferListPointer(
+        bufferList.assumingMemoryBound(to: AudioBufferList.self))
+
+      guard buffers.reduce(0, { $0 + Int($1.mNumberChannels) }) > 0 else { continue }
+
+      guard let uid = stringProperty(device, selector: kAudioDevicePropertyDeviceUID) else { continue }
+
+      let name = stringProperty(device, selector: kAudioObjectPropertyName) ?? uid
+
+      result.append(["uid": uid, "name": name])
+    }
+
+    return result
+  }
+
+  private static func stringProperty(
+    _ device: AudioDeviceID, selector: AudioObjectPropertySelector
+  ) -> String? {
+    var address = AudioObjectPropertyAddress(
+      mSelector: selector,
+      mScope: kAudioObjectPropertyScopeGlobal,
+      mElement: AudioObjectPropertyElement(0))
+    var value: CFString = "" as CFString
+    var size = UInt32(MemoryLayout<CFString>.size)
+
+    let status = withUnsafeMutablePointer(to: &value) { pointer in
+      AudioObjectGetPropertyData(device, &address, 0, nil, &size, pointer)
+    }
+
+    return status == noErr ? (value as String) : nil
+  }
+
   /// Points the input audio unit at the CoreAudio device with the given UID.
   /// Unknown UIDs silently keep the system default input.
   private func selectInput(uid: String) {

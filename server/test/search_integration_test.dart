@@ -52,11 +52,11 @@ void main() {
         frameRate: 15,
         inputArgs: ['-f', 'lavfi', '-i', 'testsrc=size=640x480:rate=15'],
       ),
-      settings: ServerSettings.parse('''
-recording:
-  directory: ${recordingsDir.path}
-  segmentSeconds: 2
-''', base: config),
+      settings: ServerSettings(
+        config: config,
+        recordingDirectory: recordingsDir.path,
+        segmentSeconds: 2,
+      ),
     );
 
     await device.start();

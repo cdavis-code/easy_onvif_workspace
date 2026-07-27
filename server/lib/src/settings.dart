@@ -1,7 +1,3 @@
-import 'dart:io';
-
-import 'package:yaml/yaml.dart';
-
 import 'config.dart';
 import 'hardware/hardware_adapter.dart';
 
@@ -18,6 +14,20 @@ class ServiceFlags {
     this.search = true,
     this.imaging = true,
   });
+
+  ServiceFlags copyWith({
+    bool? recording,
+    bool? replay,
+    bool? search,
+    bool? imaging,
+  }) {
+    return ServiceFlags(
+      recording: recording ?? this.recording,
+      replay: replay ?? this.replay,
+      search: search ?? this.search,
+      imaging: imaging ?? this.imaging,
+    );
+  }
 }
 
 /// A simulated imaging preset seeded from settings.
@@ -57,14 +67,28 @@ class MediaSettings {
     this.audioEnabled = false,
     this.audioDevice = '',
   });
+
+  MediaSettings copyWith({
+    VideoSourceKind? videoSource,
+    String? videoDevice,
+    bool? audioEnabled,
+    String? audioDevice,
+  }) {
+    return MediaSettings(
+      videoSource: videoSource ?? this.videoSource,
+      videoDevice: videoDevice ?? this.videoDevice,
+      audioEnabled: audioEnabled ?? this.audioEnabled,
+      audioDevice: audioDevice ?? this.audioDevice,
+    );
+  }
 }
 
-/// Runtime settings for the ONVIF server, loaded from YAML.
+/// Runtime settings for the ONVIF server, edited in the app's settings screen
+/// and persisted as JSON by `SettingsStore`.
 ///
-/// Search order for [load]: explicit `path` argument, then
-/// `~/.easy_onvif_server/settings.yaml`, then a caller-supplied fallback
-/// (e.g. a bundled asset). Missing files and missing keys fall back to the
-/// defaults baked into [ServerConfig].
+/// The JSON schema mirrors the class structure (nested `device`, `network`,
+/// `auth`, `services`, `recording`, `imaging`, `geolocation` and `media`
+/// sections); missing keys fall back to the defaults baked into [ServerConfig].
 class ServerSettings {
   final ServerConfig config;
   final ServiceFlags services;
@@ -112,26 +136,48 @@ class ServerSettings {
     this.media = const MediaSettings(),
   });
 
-  /// Parses [yamlText]; empty/blank text yields all defaults. Throws
-  /// [FormatException] on malformed YAML.
-  factory ServerSettings.parse(
-    String yamlText, {
+  /// Sentinel distinguishing "not passed" from an explicit `null` for the
+  /// nullable fields in [copyWith].
+  static const _unset = Object();
+
+  ServerSettings copyWith({
+    ServerConfig? config,
+    ServiceFlags? services,
+    Object? recordingDirectory = _unset,
+    int? segmentSeconds,
+    Object? maxRetentionMinutes = _unset,
+    List<ImagingPresetSetting>? imagingPresets,
+    Object? geoFallback = _unset,
+    MediaSettings? media,
+  }) {
+    return ServerSettings(
+      config: config ?? this.config,
+      services: services ?? this.services,
+      recordingDirectory: identical(recordingDirectory, _unset)
+          ? this.recordingDirectory
+          : recordingDirectory as String?,
+      segmentSeconds: segmentSeconds ?? this.segmentSeconds,
+      maxRetentionMinutes: identical(maxRetentionMinutes, _unset)
+          ? this.maxRetentionMinutes
+          : maxRetentionMinutes as int?,
+      imagingPresets: imagingPresets ?? this.imagingPresets,
+      geoFallback: identical(geoFallback, _unset)
+          ? this.geoFallback
+          : geoFallback as GeoLocation?,
+      media: media ?? this.media,
+    );
+  }
+
+  /// Builds settings from decoded JSON; an empty map yields all defaults.
+  /// Unknown keys are ignored; malformed values throw [FormatException].
+  factory ServerSettings.fromJson(
+    Map<String, Object?> json, {
     ServerConfig base = const ServerConfig(),
   }) {
-    final Object? doc;
+    Map<String, Object?> section(String key) {
+      final value = json[key];
 
-    try {
-      doc = yamlText.trim().isEmpty ? null : loadYaml(yamlText);
-    } on YamlException catch (error) {
-      throw FormatException('Invalid settings YAML: $error');
-    }
-
-    final map = doc is YamlMap ? doc : const <Object?, Object?>{};
-
-    Map<Object?, Object?> section(String key) {
-      final value = map[key];
-
-      return value is YamlMap ? value : const {};
+      return value is Map ? value.cast<String, Object?>() : const {};
     }
 
     final device = section('device');
@@ -142,44 +188,47 @@ class ServerSettings {
     final imaging = section('imaging');
     final geo = section('geolocation');
     final mediaMap = section('media');
-    final videoMap = mediaMap['video'] is YamlMap
-        ? mediaMap['video'] as YamlMap
-        : const <Object?, Object?>{};
-    final audioMap = mediaMap['audio'] is YamlMap
-        ? mediaMap['audio'] as YamlMap
-        : const <Object?, Object?>{};
+    final videoMap = mediaMap['video'] is Map
+        ? (mediaMap['video'] as Map).cast<String, Object?>()
+        : const <String, Object?>{};
+    final audioMap = mediaMap['audio'] is Map
+        ? (mediaMap['audio'] as Map).cast<String, Object?>()
+        : const <String, Object?>{};
 
-    // A bare scalar like `firmware: 1` parses as int; coerce to String where
-    // the target field is a String. Conversely `httpPort: "9080"` parses as
-    // String; coerce numerics/bools too so quoting never crashes with a
-    // TypeError — a bad value is a FormatException like any other parse error.
-    String? text(Map<Object?, Object?> node, String key) {
+    // Hand-edited JSON may quote numbers or booleans; coerce rather than
+    // crashing with a TypeError — a bad value is a FormatException like any
+    // other parse error.
+    String? text(Map<String, Object?> node, String key) {
       final value = node[key];
 
       return value == null ? null : '$value';
     }
 
-    int? integer(Map<Object?, Object?> node, String key) {
+    int? integer(Map<String, Object?> node, String key) {
       final value = node[key];
 
       if (value == null) return null;
       if (value is int) return value;
 
       return int.tryParse('$value') ??
-          (throw FormatException('Settings key "$key" is not an integer: $value'));
+          (throw FormatException(
+            'Settings key "$key" is not an integer: $value',
+          ));
     }
 
-    double? decimal(Map<Object?, Object?> node, String key) {
+    double? decimal(Map<String, Object?> node, String key) {
       final value = node[key];
 
       if (value == null) return null;
       if (value is num) return value.toDouble();
 
       return double.tryParse('$value') ??
-          (throw FormatException('Settings key "$key" is not a number: $value'));
+          (throw FormatException(
+            'Settings key "$key" is not a number: $value',
+          ));
     }
 
-    bool flag(Map<Object?, Object?> node, String key, {required bool orElse}) {
+    bool flag(Map<String, Object?> node, String key, {required bool orElse}) {
       final value = node[key];
 
       if (value == null) return orElse;
@@ -188,21 +237,27 @@ class ServerSettings {
       return switch ('$value'.toLowerCase()) {
         'true' => true,
         'false' => false,
-        _ => throw FormatException('Settings key "$key" is not a boolean: $value'),
+        _ => throw FormatException(
+          'Settings key "$key" is not a boolean: $value',
+        ),
       };
     }
 
     final presets = <ImagingPresetSetting>[];
     final presetList = imaging['presets'];
 
-    if (presetList is YamlList) {
+    if (presetList is List) {
       for (final entry in presetList) {
-        if (entry is YamlMap) {
+        if (entry is Map) {
+          final preset = entry.cast<String, Object?>();
+
           presets.add(
             ImagingPresetSetting(
-              token: text(entry, 'token') ?? 'ImagingPreset_${presets.length + 1}',
-              name: text(entry, 'name') ?? 'Preset ${presets.length + 1}',
-              type: text(entry, 'type') ?? 'Auto',
+              token:
+                  text(preset, 'token') ??
+                  'ImagingPreset_${presets.length + 1}',
+              name: text(preset, 'name') ?? 'Preset ${presets.length + 1}',
+              type: text(preset, 'type') ?? 'Auto',
             ),
           );
         }
@@ -262,31 +317,52 @@ class ServerSettings {
     );
   }
 
-  /// Loads settings from disk. Tries [path] first (if given), then
-  /// `~/.easy_onvif_server/settings.yaml`, then [fallbackYaml] (e.g. a bundled
-  /// asset), then pure defaults.
-  static Future<ServerSettings> load({
-    String? path,
-    String? fallbackYaml,
-  }) async {
-    final home =
-        Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
-
-    final candidates = [
-      ?path,
-      if (home != null) '$home/.easy_onvif_server/settings.yaml',
-    ];
-
-    for (final candidate in candidates) {
-      final file = File(candidate);
-
-      if (file.existsSync()) {
-        return ServerSettings.parse(await file.readAsString());
-      }
-    }
-
-    if (fallbackYaml != null) return ServerSettings.parse(fallbackYaml);
-
-    return const ServerSettings();
+  /// Serializes to the same nested-section shape [fromJson] reads, keeping
+  /// the persisted file readable if opened by hand.
+  Map<String, Object?> toJson() {
+    return {
+      'device': {
+        'manufacturer': config.manufacturer,
+        'model': config.model,
+        'firmware': config.firmwareVersion,
+        'serial': config.serialNumber,
+        'hardwareId': config.hardwareId,
+        'hostname': config.hostname,
+      },
+      'network': {'httpPort': config.httpPort, 'rtspPort': config.rtspPort},
+      'auth': {'username': config.username, 'password': config.password},
+      'services': {
+        'recording': services.recording,
+        'replay': services.replay,
+        'search': services.search,
+        'imaging': services.imaging,
+      },
+      'recording': {
+        if (recordingDirectory != null) 'directory': recordingDirectory,
+        'segmentSeconds': segmentSeconds,
+        if (maxRetentionMinutes != null)
+          'maxRetentionMinutes': maxRetentionMinutes,
+      },
+      'imaging': {
+        'presets': [
+          for (final preset in imagingPresets)
+            {'token': preset.token, 'name': preset.name, 'type': preset.type},
+        ],
+      },
+      if (geoFallback != null)
+        'geolocation': {
+          'lat': geoFallback!.latitude,
+          'lon': geoFallback!.longitude,
+          if (geoFallback!.elevation != null)
+            'elevation': geoFallback!.elevation,
+        },
+      'media': {
+        'video': {
+          'source': media.videoSource.name,
+          'device': media.videoDevice,
+        },
+        'audio': {'enabled': media.audioEnabled, 'device': media.audioDevice},
+      },
+    };
   }
 }

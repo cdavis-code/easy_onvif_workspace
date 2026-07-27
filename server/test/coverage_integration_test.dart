@@ -23,7 +23,9 @@ void main() {
       config: config,
       hardware: StubHardwareAdapter(),
       streamBackend: StubStreamBackend(urlFor: config.rtspUrl),
-      settings: ServerSettings.parse('media:\n  audio:\n    enabled: true'),
+      settings: const ServerSettings(
+        media: MediaSettings(audioEnabled: true),
+      ),
     );
 
     await device.start();

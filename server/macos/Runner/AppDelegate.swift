@@ -148,6 +148,9 @@ class AppDelegate: FlutterAppDelegate {
         self.audioCapture.stop()
         result(nil)
 
+      case "listDevices":
+        result(AudioCaptureSource.listInputDevices())
+
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -173,6 +176,14 @@ class AppDelegate: FlutterAppDelegate {
 
     channel.setMethodCallHandler { [weak self] call, result in
       guard let self = self else { return }
+
+      // Display enumeration is plain CoreGraphics; it must work even where
+      // ScreenCaptureKit itself is unavailable, so handle it before the guard.
+      if call.method == "listDisplays" {
+        result(AppDelegate.listDisplays())
+        return
+      }
+
       guard #available(macOS 12.3, *) else {
         result(FlutterError(
           code: "unavailable", message: "ScreenCaptureKit requires macOS 12.3+", details: nil))
@@ -206,6 +217,34 @@ class AppDelegate: FlutterAppDelegate {
       default:
         result(FlutterMethodNotImplemented)
       }
+    }
+  }
+
+  /// Active displays as `{id, name}` pairs for the settings UI's display
+  /// picker. Names come from NSScreen when a match exists (localizedName,
+  /// macOS 10.15+); otherwise a generic label with the CGDirectDisplayID.
+  private static func listDisplays() -> [[String: Any]] {
+    var displayCount: UInt32 = 0
+
+    guard CGGetActiveDisplayList(0, nil, &displayCount) == .success, displayCount > 0 else {
+      return []
+    }
+
+    var displays = [CGDirectDisplayID](repeating: 0, count: Int(displayCount))
+
+    guard CGGetActiveDisplayList(displayCount, &displays, &displayCount) == .success else {
+      return []
+    }
+
+    return displays.map { displayId in
+      let screen = NSScreen.screens.first {
+        ($0.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value
+          == displayId
+      }
+      let main = CGDisplayIsMain(displayId) != 0
+      let fallback = main ? "Main Display" : "Display \(displayId)"
+
+      return ["id": Int(displayId), "name": screen?.localizedName ?? fallback]
     }
   }
 

@@ -11,6 +11,7 @@ import 'package:easy_onvif_server/src/config.dart';
 import 'package:easy_onvif_server/src/hardware/flutter_adapter.dart';
 import 'package:easy_onvif_server/src/onvif_device.dart';
 import 'package:easy_onvif_server/src/settings.dart';
+import 'package:easy_onvif_server/src/settings_store.dart';
 import 'package:easy_onvif_server/src/streaming/audio_source.dart';
 import 'package:easy_onvif_server/src/streaming/camera_stream_backend.dart';
 import 'package:easy_onvif_server/src/streaming/ffmpeg_audio_source.dart';
@@ -18,6 +19,7 @@ import 'package:easy_onvif_server/src/streaming/ffmpeg_backend.dart';
 import 'package:easy_onvif_server/src/streaming/native_audio_source.dart';
 import 'package:easy_onvif_server/src/streaming/screen_capture_backend.dart';
 import 'package:easy_onvif_server/src/streaming/stream_backend.dart';
+import 'package:easy_onvif_server/src/ui/settings_screen.dart';
 
 void main() {
   runApp(const OnvifServerApp());
@@ -50,8 +52,11 @@ class ServerHomePage extends StatefulWidget {
 class _ServerHomePageState extends State<ServerHomePage> {
   final ServerConfig _config = const ServerConfig();
 
-  /// Settings loaded at start (runtime override file or the bundled asset);
-  /// null until the server has been started at least once.
+  /// Persists settings as JSON in the app's own storage (sandbox-friendly).
+  final SettingsStore _store = const SettingsStore();
+
+  /// Settings loaded from the store at startup and updated whenever the
+  /// settings screen saves; null only until the initial load completes.
   ServerSettings? _settings;
 
   OnvifDevice? _device;
@@ -91,6 +96,13 @@ class _ServerHomePageState extends State<ServerHomePage> {
   void initState() {
     super.initState();
     _resolveHost();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final settings = await _store.load();
+
+    if (mounted) setState(() => _settings = settings);
   }
 
   @override
@@ -277,11 +289,10 @@ class _ServerHomePageState extends State<ServerHomePage> {
     setState(() => _busy = true);
 
     try {
-      // Runtime settings override the compiled-in defaults; the bundled asset
-      // documents the schema and yields defaults when no override exists.
-      // Loaded first so the permission prompts match the configured sources.
-      final bundled = await rootBundle.loadString('assets/settings.yaml');
-      final settings = await ServerSettings.load(fallbackYaml: bundled);
+      // Settings come from the store (loaded at startup, updated by the
+      // settings screen). The fallback covers a start racing the initial
+      // load, and the permission prompts match the configured sources.
+      final settings = _settings ?? await _store.load();
 
       // macOS attributes capture access to the host app; request the grants up
       // front so in-process capture works without a prompt racing the encoder.
@@ -412,6 +423,41 @@ class _ServerHomePageState extends State<ServerHomePage> {
     if (mounted) setState(() => _busy = false);
   }
 
+  /// Opens the settings screen. Saving persists immediately; if the server is
+  /// running it restarts with the new settings so save always means applied.
+  Future<void> _openSettings() async {
+    final current = _settings ?? await _store.load();
+
+    if (!mounted) return;
+
+    final updated = await Navigator.of(context).push<ServerSettings>(
+      MaterialPageRoute(
+        builder: (_) => SettingsScreen(settings: current, store: _store),
+      ),
+    );
+
+    if (updated == null || !mounted) return;
+
+    setState(() => _settings = updated);
+
+    final wasRunning = _running;
+
+    if (wasRunning) {
+      await _stop();
+      await _start();
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            wasRunning ? 'Settings saved — server restarted' : 'Settings saved',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Before the first start, show the compiled-in defaults; afterwards show
@@ -433,7 +479,16 @@ class _ServerHomePageState extends State<ServerHomePage> {
     final sourceLabel = media.audioEnabled ? '$source + audio' : source;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('ONVIF Server')),
+      appBar: AppBar(
+        title: const Text('ONVIF Server'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: _busy ? null : _openSettings,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),

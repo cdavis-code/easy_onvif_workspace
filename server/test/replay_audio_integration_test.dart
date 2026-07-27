@@ -55,14 +55,12 @@ void main() {
         inputArgs: ['-f', 'lavfi', '-i', 'testsrc=size=640x480:rate=15'],
         audioSource: FfmpegAudioSource(),
       ),
-      settings: ServerSettings.parse('''
-recording:
-  directory: ${recordingsDir.path}
-  segmentSeconds: 2
-media:
-  audio:
-    enabled: true
-''', base: config),
+      settings: ServerSettings(
+        config: config,
+        recordingDirectory: recordingsDir.path,
+        segmentSeconds: 2,
+        media: const MediaSettings(audioEnabled: true),
+      ),
     );
 
     await device.start();

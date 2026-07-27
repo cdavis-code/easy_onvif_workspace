@@ -47,6 +47,36 @@ class ServerConfig {
     this.endpointUuid = '3fa1fe68-b915-4053-a3e1-a8294933d5b2',
   });
 
+  ServerConfig copyWith({
+    int? httpPort,
+    int? rtspPort,
+    int? discoveryPort,
+    String? username,
+    String? password,
+    String? manufacturer,
+    String? model,
+    String? firmwareVersion,
+    String? serialNumber,
+    String? hardwareId,
+    String? hostname,
+    String? endpointUuid,
+  }) {
+    return ServerConfig(
+      httpPort: httpPort ?? this.httpPort,
+      rtspPort: rtspPort ?? this.rtspPort,
+      discoveryPort: discoveryPort ?? this.discoveryPort,
+      username: username ?? this.username,
+      password: password ?? this.password,
+      manufacturer: manufacturer ?? this.manufacturer,
+      model: model ?? this.model,
+      firmwareVersion: firmwareVersion ?? this.firmwareVersion,
+      serialNumber: serialNumber ?? this.serialNumber,
+      hardwareId: hardwareId ?? this.hardwareId,
+      hostname: hostname ?? this.hostname,
+      endpointUuid: endpointUuid ?? this.endpointUuid,
+    );
+  }
+
   /// The base URL for this device given the advertised [host] (IP or name).
   String baseUrl(String host) => 'http://$host:$httpPort';
 
