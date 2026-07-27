@@ -71,8 +71,8 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
   String url = '';
 
   /// HTTP Basic `Authorization` header for the snapshot endpoint (the server
-  /// requires authentication; `Image.network` does not derive it from the
-  /// URL's embedded credentials).
+  /// requires authentication). The snapshot URL itself is kept free of
+  /// embedded credentials — see `_update()`.
   Map<String, String> _snapshotHeaders = const {};
 
   String videoUrl = '';
@@ -159,11 +159,12 @@ class _MyHomePageState extends State<MyHomePage> with UiLoggy {
       firmwareVersion = deviceInfo.firmwareVersion;
 
       if (snapshotUri != null) {
-        url = OnvifUtil.authenticatingUri(
-          snapshotUri!,
-          config['username']!,
-          config['password']!,
-        );
+        // The snapshot URL must NOT embed credentials: Dart's HttpClient
+        // already sends Basic auth derived from a `user:pass@` URL, and a
+        // second explicit Authorization header makes the server reject the
+        // request (duplicate header -> 401 -> black snapshot). The plain URL
+        // plus the header below is the working combination.
+        url = snapshotUri!;
 
         final credentials = base64.encode(
           utf8.encode('${config['username']}:${config['password']}'),
