@@ -222,6 +222,15 @@ The example app uses this automatically when run on Flutter web
 (`flutter run -d chrome`): its **Live Video** mode connects over WebRTC, while
 native platforms keep using RTSP.
 
+The server also implements the standardized ONVIF Media2 WebRTC configuration
+operations (`GetWebRTCConfigurations` / `SetWebRTCConfigurations`). The reported
+configuration describes this built-in signaling endpoint (`SignalingServer` =
+`ws://<host>:<httpPort>/onvif/webrtc`), with `Enabled`/`Connected` reflecting
+live state. `SetWebRTCConfigurations` stores the mutable fields
+(`Enabled`/`DefaultProfile`) but never connects to an external signaling server
+— the full ONVIF signaling model (external signaling server + OAuth2) is not
+implemented.
+
 Notes:
 
 - The signaling WebSocket is authenticated with the ONVIF credentials (sent as
