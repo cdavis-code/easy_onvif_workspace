@@ -311,6 +311,8 @@ Please see the cli documentation [README.md](https://github.com/faithoflifedev/e
 | GetVideoEncoderInstances           | getVideoEncoderInstances           | `Future<Info>`                             | [ \] |
 | GetVideoSourceConfigurationOptions | getVideoSourceConfigurationOptions | `Future<VideoSourceConfigurationOptions>`  | [x\] |
 | GetVideoEncoderConfigurations      | getVideoEncoderConfigurations      | `Future<List<VideoEncoder2Configuration>>` | [ \] |
+| GetWebRTCConfigurations            | getWebRTCConfigurations            | `Future<List<WebrtcConfiguration>>`        | [x\] |
+| SetWebRTCConfigurations            | setWebRTCConfigurations            | `Future<bool>`                             | [x\] |
 | StartMulticastStreaming            | startMulticastStreaming            | `Future<bool>`                             | [x\] |
 | StopMulticastStreaming             | stopMulticastStreaming             | `Future<bool>`                             | [x\] |
 
