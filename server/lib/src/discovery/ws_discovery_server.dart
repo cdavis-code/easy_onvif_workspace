@@ -149,7 +149,8 @@ class WsDiscoveryServer with UiLoggy {
               nest: () {
                 builder.element(
                   'ProbeMatch',
-                  namespaceUri: 'http://schemas.xmlsoap.org/ws/2005/04/discovery',
+                  namespaceUri:
+                      'http://schemas.xmlsoap.org/ws/2005/04/discovery',
                   nest: () {
                     builder.element(
                       'EndpointReference',

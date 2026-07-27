@@ -80,7 +80,11 @@ class SoapEnvelopeBuilder {
                   'Code',
                   namespaceUri: Xmlns.s,
                   nest: () {
-                    builder.element('Value', namespaceUri: Xmlns.s, nest: topCode);
+                    builder.element(
+                      'Value',
+                      namespaceUri: Xmlns.s,
+                      nest: topCode,
+                    );
                     builder.element(
                       'Subcode',
                       namespaceUri: Xmlns.s,
