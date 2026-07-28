@@ -1,7 +1,7 @@
 # Dart Implementation of ONVIF IP Camera Client
 
 <p align="center" width="100%">
-<img src="https://github.com/faithoflifedev/easy_onvif/blob/main/logo/easy_onvif_logo_640.png?raw=true" width="200" />
+<img src="https://raw.githubusercontent.com/cdavis-code/easy_onvif_workspace/refs/heads/main/logo/easy_onvif_logo_640.png" width="200" />
 </p>
 
 [![Pub Package](https://img.shields.io/pub/v/easy_onvif.svg)](https://pub.dev/packages/easy_onvif)
@@ -49,7 +49,7 @@ This package works with a variety of ONVIF compatible devices allowing for IP Ca
 
 [![Build Status](https://github.com/faithoflifedev/easy_onvif/workflows/Dart/badge.svg)](https://github.com/faithoflifedev/easy_onvif/actions) [![github last commit](https://shields.io/github/last-commit/faithoflifedev/easy_onvif)](https://shields.io/github/last-commit/faithoflifedev/easy_onvif) [![github build](https://img.shields.io/github/actions/workflow/status/faithoflifedev/easy_onvif/dart.yml?branch=main)](https://shields.io/github/workflow/status/faithoflifedev/easy_onvif/Dart) [![github issues](https://shields.io/github/issues/faithoflifedev/easy_onvif)](https://shields.io/github/issues/faithoflifedev/easy_onvif)
 
-[![Buy me a coffee](https://github.com/faithoflifedev/easy_onvif/blob/main/logo/buy_me_a_coffee.svg?raw=true)](https://www.buymeacoffee.com/faithoflif2)
+[![Buy me a coffee](https://github.com/cdavis-code/easy_onvif_workspace/blob/main/logo/buy_me_a_coffee.svg?raw=true)](https://www.buymeacoffee.com/cdavis)
 
 ## Getting Started
 
@@ -274,7 +274,7 @@ Please see the cli documentation [README.md](https://github.com/faithoflifedev/e
 | GetCurrentPreset                | getCurrentPreset                | `Future<ImagingPreset>`                | [ \] |
 | GetPresets                      | getPresets                      | `Future<List<ImagingPreset>>`          | [ \] |
 | GetServiceCapabilities          | getServiceCapabilities          | `Future<Capabilities>`                 | [ \] |
-| GetStatus                       | getStatus                       | `Future<Status>`                       | [ \] |
+| GetStatus                       | getStatus                       | `Future<ImagingStatus20>`                | [ \] |
 | SetCurrentPreset                | setCurrentPreset                | `Future<bool>`                         | [ \] |
 
 ### Media 10
@@ -303,6 +303,7 @@ Please see the cli documentation [README.md](https://github.com/faithoflifedev/e
 
 | Onvif Operation                    | Dart Method                        | Dart Return Type                           | Test |
 | ---------------------------------- | ---------------------------------- | ------------------------------------------ | ---- |
+| DeleteProfile                      | deleteProfile                      | `Future<bool>`                             | [x\] |
 | GetMetadataConfigurationOptions    | getMetadataConfigurationOptions    | `Future<MetadataConfigurationOptions>`     | [x\] |
 | GetMetadataConfigurations          | getMetadataConfigurations          | `Future<List<MetadataConfiguration>>`      | [x\] |
 | GetProfiles                        | getProfiles                        | `Future<List<MediaProfile>?>`              | [x\] |
@@ -352,9 +353,11 @@ Please see the cli documentation [README.md](https://github.com/faithoflifedev/e
 | N/A             | moveLeft         | `Future<void>`    |
 | N/A             | moveRight        | `Future<void>`    |
 | N/A             | moveUp           | `Future<void>`    |
+| N/A             | zoom             | `Future<void>`    |
 | N/A             | zoomIn           | `Future<void>`    |
 | N/A             | zoomOut          | `Future<void>`    |
 | N/A             | getCurrentPreset | `Future<Preset?>` |
+| N/A             | getPresetsMap    | `Future<Map<String, Preset>>` |
 
 ### Recording
 
@@ -366,10 +369,10 @@ Please see the cli documentation [README.md](https://github.com/faithoflifedev/e
 | CreateRecording             | createRecording             | `Future<String>`                             | [ \] |
 | CreateRecordingJob          | createRecordingJob          | `Future<CreateRecordingJobResponse>`         | [ \] |
 | DeleteRecording             | deleteRecording             | `Future<bool>`                               | [ \] |
-| DeleteRecordingJob          | deleteRecordingJo           | `Future<bool>`                               | [ \] |
+| DeleteRecordingJob          | deleteRecordingJob          | `Future<bool>`                               | [ \] |
 | GetRecordingJobs            | getRecordingJobs            | `Future<List<GetRecordingJobsResponseItem>>` | [ \] |
-| GetRecordingJobState        | getRecordingJobState        | `Future<List<RecordingJobStateInformation>>` | [ \] |
-| GetRecordingOptions         | getRecordingOptions         | `Future<List<RecordingOptions>>`             | [ \] |
+| GetRecordingJobState        | getRecordingJobState        | `Future<RecordingJobStateInformation>`       | [ \] |
+| GetRecordingOptions         | getRecordingOptions         | `Future<RecordingOptions>`                   | [ \] |
 | GetRecordings               | getRecordings               | `Future<List<GetRecordingsResponseItem>>`    | [ \] |
 | GetServiceCapabilities      | getServiceCapabilities      | `Future<Capabilities>`                       | [ \] |
 | setRecordingJobMode         | setRecordingJobMode         | `Future<bool>`                               | [ \] |
