@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.5
+
+* Upgraded the `xml` dependency to `^7.0.1`
+* Migrated internal XML construction to the `xml` 7.x API (`namespaceUri` / `namespaceUris`); generated SOAP requests are byte-identical, no public API changes
+* Resolved the `deprecated_member_use` analyzer warnings introduced by `xml` 7.x
+
 ## 3.1.4
 
 * Added `topics` to pubspec.yaml for improved discoverability

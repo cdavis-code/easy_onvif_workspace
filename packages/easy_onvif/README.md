@@ -30,6 +30,7 @@ This package works with a variety of ONVIF compatible devices allowing for IP Ca
     - [Search](#search)
   - [Onvif Probe](#onvif-probe)
   - [Tested Onvif Devices](#tested-onvif-devices)
+  - [New for version 3.1.5](#new-for-version-315)
   - [New for version 3.1.3](#new-for-version-313)
   - [New for version 3.1.0](#new-for-version-310)
   - [New for version 3.0.0-dev.0](#new-for-version-300-dev0)
@@ -59,7 +60,7 @@ To use this package in your code, first add the dependency to your project:
 ```yml
 dependencies:
   ...
-  easy_onvif: ^3.1.3+1
+  easy_onvif: ^3.1.5
 ```
 
 If you need additional help getting started with dart, check out these [guides](https://dart.dev/guides).
@@ -528,6 +529,10 @@ The values returned by the Onvif API `GetDeviceInformation` call.
   * `RemovePreset` - supported but not functional
   * `SetHomePosition` - supported but not functional
   
+## New for version 3.1.5
+
+The package now builds its SOAP/XML requests against version 7.x of the `xml` package.  This is an internal change — the generated requests are byte-for-byte identical to previous releases and there are no changes to the public API.  It resolves the deprecation warnings that `xml` 7.x introduced for earlier versions of this package and keeps `easy_onvif` compatible with projects that already depend on `xml` 7.x.
+
 ## New for version 3.1.3
 The Onvif spec supports an alternative to the `Stop` command that instead uses the `ContinuousMove` command with velocity settings to zero.  This alternative appears to be compatible with more devices.  As such, the `Stop` API call has been replaces with a zero velocity `ContinuousMove` command as of the v3.1.3 release.
 
