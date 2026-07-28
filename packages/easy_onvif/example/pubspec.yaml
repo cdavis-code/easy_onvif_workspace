@@ -22,7 +22,7 @@ dependencies:
   loggy: ^2.0.3
   media_kit: ^1.1.10
   media_kit_libs_video: ^1.0.4
-  media_kit_video: ^1.2.4
+  media_kit_video: ^2.0.1
   path: ^1.9.0
   shared_preferences: ^2.2.2
   universal_io: ^2.2.2
@@ -36,7 +36,7 @@ dependencies:
 dev_dependencies:
   custom_lint: ^0.8.1
   flutter_lints: ^6.0.0
-  solidart_lint: ^2.0.3
+  solidart_lint: ^3.0.1
 
 flutter:
   uses-material-design: true

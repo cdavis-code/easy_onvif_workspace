@@ -808,10 +808,7 @@ void main() {
     });
 
     test('getWebRTCConfigurations', () {
-      builder.element(
-        'Test',
-        nest: Media2Request.getWebRTCConfigurations(),
-      );
+      builder.element('Test', nest: Media2Request.getWebRTCConfigurations());
 
       expect(
         builder.buildDocument().toXmlString(),

@@ -63,12 +63,14 @@ class _WebrtcPlayerState extends State<WebrtcPlayer> {
       };
 
       pc.onIceCandidate = (candidate) {
-        _channel?.sink.add(jsonEncode({
-          'type': 'candidate',
-          'candidate': candidate.candidate,
-          'sdpMid': candidate.sdpMid,
-          'sdpMLineIndex': candidate.sdpMLineIndex,
-        }));
+        _channel?.sink.add(
+          jsonEncode({
+            'type': 'candidate',
+            'candidate': candidate.candidate,
+            'sdpMid': candidate.sdpMid,
+            'sdpMLineIndex': candidate.sdpMLineIndex,
+          }),
+        );
       };
 
       // Receive-only transceivers: the server sends, the browser only receives.
@@ -94,11 +96,13 @@ class _WebrtcPlayerState extends State<WebrtcPlayer> {
                 RTCSessionDescription(message['sdp'] as String?, 'answer'),
               );
             case 'candidate':
-              await pc.addCandidate(RTCIceCandidate(
-                message['candidate'] as String?,
-                message['sdpMid'] as String?,
-                (message['sdpMLineIndex'] as num?)?.toInt(),
-              ));
+              await pc.addCandidate(
+                RTCIceCandidate(
+                  message['candidate'] as String?,
+                  message['sdpMid'] as String?,
+                  (message['sdpMLineIndex'] as num?)?.toInt(),
+                ),
+              );
             case 'error':
               if (!_disposed) {
                 setState(() => _error ??= message['message'] as String?);
