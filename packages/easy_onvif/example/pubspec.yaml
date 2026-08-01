@@ -32,7 +32,7 @@ dependencies:
 dev_dependencies:
   custom_lint: ^0.8.1
   flutter_lints: ^6.0.0
-  solidart_lint: ^2.0.3
+  solidart_lint: ^3.0.1
 
 flutter:
   uses-material-design: true
