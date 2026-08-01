@@ -9,8 +9,7 @@ workspace:
   - packages/easy_onvif_js
 
 dev_dependencies:
-  melos: ^7.5.1
-  publish_tools: ^1.0.0+11
+  melos: ^8.2.2
 
 melos:
   packages:
@@ -62,11 +61,6 @@ melos:
       steps:
         - melos exec --scope="activation_config" -- "dart run build_runner build --delete-conflicting-outputs"
         - melos exec --ignore="activation_config" -- "dart run build_runner build --delete-conflicting-outputs"
-
-    prep:lib:
-      # run: melos run build && melos run meta && melos run markdown && melos run format && melos run analyze
-      run: melos run meta && melos run markdown && melos run format && melos run analyze
-      description: Run prep steps for dart and flutter.
 
     # prep:flutter:
     #   run: melos run build && melos run meta && melos run markdown && melos run analyze && melos run format

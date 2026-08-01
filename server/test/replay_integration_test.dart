@@ -75,56 +75,80 @@ void main() {
     if (recordingsDir.existsSync()) recordingsDir.deleteSync(recursive: true);
   });
 
-  test('replay serves recorded footage as decodable H.264', () async {
-    // Record ~5 seconds of the live test pattern.
-    final recordingToken = await onvif.recordings.createRecording(
-      buildTestRecordingConfiguration(),
-    );
-    final job = await onvif.recordings.createRecordingJob(
-      buildTestJobConfiguration(recordingToken),
-    );
+  test(
+    'replay serves recorded footage as decodable H.264',
+    () async {
+      // Record ~5 seconds of the live test pattern.
+      final recordingToken = await onvif.recordings.createRecording(
+        buildTestRecordingConfiguration(),
+      );
+      final job = await onvif.recordings.createRecordingJob(
+        buildTestJobConfiguration(recordingToken),
+      );
 
-    await Future<void>.delayed(const Duration(seconds: 5));
+      await Future<void>.delayed(const Duration(seconds: 5));
 
-    await onvif.recordings.setRecordingJobMode(
-      jobToken: job.token,
-      mode: RecordingJobConfigurationMode.idle,
-    );
+      await onvif.recordings.setRecordingJobMode(
+        jobToken: job.token,
+        mode: RecordingJobConfigurationMode.idle,
+      );
 
-    final replayUri = await onvif.replay.getReplayUri(
-      recordingToken,
-      streamSetup: StreamSetup(
-        stream: 'RTP-Unicast',
-        transport: Transport(protocol: 'RTSP'),
-      ),
-    );
+      final replayUri = await onvif.replay.getReplayUri(
+        recordingToken,
+        streamSetup: StreamSetup(
+          stream: 'RTP-Unicast',
+          transport: Transport(protocol: 'RTSP'),
+        ),
+      );
 
-    expect(replayUri, startsWith('rtsp://'));
-    expect(replayUri, contains('/onvif/replay/$recordingToken'));
+      expect(replayUri, startsWith('rtsp://'));
+      expect(replayUri, contains('/onvif/replay/$recordingToken'));
 
-    // Re-encode 2s from the replay endpoint — proves it serves real video.
-    final capture = '${recordingsDir.path}/replay_capture.mp4';
-    final record = await Process.run('ffmpeg', [
-      '-hide_banner', '-loglevel', 'error', '-y',
-      '-rtsp_transport', 'tcp', '-i', replayUri,
-      '-t', '2', '-c:v', 'libx264', '-preset', 'ultrafast', '-f', 'mp4',
-      capture,
-    ]);
+      // Re-encode 2s from the replay endpoint — proves it serves real video.
+      final capture = '${recordingsDir.path}/replay_capture.mp4';
+      final record = await Process.run('ffmpeg', [
+        '-hide_banner',
+        '-loglevel',
+        'error',
+        '-y',
+        '-rtsp_transport',
+        'tcp',
+        '-i',
+        replayUri,
+        '-t',
+        '2',
+        '-c:v',
+        'libx264',
+        '-preset',
+        'ultrafast',
+        '-f',
+        'mp4',
+        capture,
+      ]);
 
-    expect(record.exitCode, 0, reason: 'ffmpeg: ${record.stderr}');
+      expect(record.exitCode, 0, reason: 'ffmpeg: ${record.stderr}');
 
-    final probe = await Process.run('ffprobe', [
-      '-hide_banner', '-loglevel', 'error', '-i', capture,
-      '-show_entries', 'stream=codec_name,width,height', '-of', 'csv=p=0',
-    ]);
+      final probe = await Process.run('ffprobe', [
+        '-hide_banner',
+        '-loglevel',
+        'error',
+        '-i',
+        capture,
+        '-show_entries',
+        'stream=codec_name,width,height',
+        '-of',
+        'csv=p=0',
+      ]);
 
-    expect(probe.exitCode, 0, reason: 'ffprobe: ${probe.stderr}');
-    expect(probe.stdout.toString(), contains('h264'));
-    expect(probe.stdout.toString(), contains('640'));
+      expect(probe.exitCode, 0, reason: 'ffprobe: ${probe.stderr}');
+      expect(probe.stdout.toString(), contains('h264'));
+      expect(probe.stdout.toString(), contains('640'));
 
-    // Replay configuration round-trip.
-    final replayConfig = await onvif.replay.getReplayConfiguration();
+      // Replay configuration round-trip.
+      final replayConfig = await onvif.replay.getReplayConfiguration();
 
-    expect(replayConfig.sessionTimeout, 'PT60S');
-  }, timeout: const Timeout(Duration(seconds: 120)));
+      expect(replayConfig.sessionTimeout, 'PT60S');
+    },
+    timeout: const Timeout(Duration(seconds: 120)),
+  );
 }

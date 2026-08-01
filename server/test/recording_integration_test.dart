@@ -75,53 +75,57 @@ void main() {
     if (recordingsDir.existsSync()) recordingsDir.deleteSync(recursive: true);
   });
 
-  test('recording lifecycle produces real segments on disk', () async {
-    final capabilities = await onvif.recordings.getServiceCapabilities();
+  test(
+    'recording lifecycle produces real segments on disk',
+    () async {
+      final capabilities = await onvif.recordings.getServiceCapabilities();
 
-    expect(capabilities.dynamicRecordings, isTrue);
+      expect(capabilities.dynamicRecordings, isTrue);
 
-    final recordings = await onvif.recordings.getRecordings();
+      final recordings = await onvif.recordings.getRecordings();
 
-    expect(recordings, isEmpty);
+      expect(recordings, isEmpty);
 
-    final recordingToken = await onvif.recordings.createRecording(
-      buildTestRecordingConfiguration(),
-    );
+      final recordingToken = await onvif.recordings.createRecording(
+        buildTestRecordingConfiguration(),
+      );
 
-    expect(recordingToken, isNotEmpty);
+      expect(recordingToken, isNotEmpty);
 
-    final job = await onvif.recordings.createRecordingJob(
-      buildTestJobConfiguration(recordingToken),
-    );
+      final job = await onvif.recordings.createRecordingJob(
+        buildTestJobConfiguration(recordingToken),
+      );
 
-    // Let it capture ~5s of live stream (segmentSeconds: 2 → >=2 segments).
-    await Future<void>.delayed(const Duration(seconds: 5));
+      // Let it capture ~5s of live stream (segmentSeconds: 2 → >=2 segments).
+      await Future<void>.delayed(const Duration(seconds: 5));
 
-    final state = await onvif.recordings.getRecordingJobState(job.token);
+      final state = await onvif.recordings.getRecordingJobState(job.token);
 
-    expect(state.state, 'Active');
+      expect(state.state, 'Active');
 
-    await onvif.recordings.setRecordingJobMode(
-      jobToken: job.token,
-      mode: RecordingJobConfigurationMode.idle,
-    );
+      await onvif.recordings.setRecordingJobMode(
+        jobToken: job.token,
+        mode: RecordingJobConfigurationMode.idle,
+      );
 
-    final segDir = Directory('${recordingsDir.path}/$recordingToken');
-    final segments = segDir
-        .listSync()
-        .whereType<File>()
-        .where((f) => f.path.endsWith('.h264'))
-        .toList();
+      final segDir = Directory('${recordingsDir.path}/$recordingToken');
+      final segments = segDir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.h264'))
+          .toList();
 
-    expect(segments.length, greaterThanOrEqualTo(2));
-    expect(segments.first.lengthSync(), greaterThan(1000));
+      expect(segments.length, greaterThanOrEqualTo(2));
+      expect(segments.first.lengthSync(), greaterThan(1000));
 
-    final listed = await onvif.recordings.getRecordings();
+      final listed = await onvif.recordings.getRecordings();
 
-    expect(listed.single.recordingToken, recordingToken);
+      expect(listed.single.recordingToken, recordingToken);
 
-    await onvif.recordings.deleteRecording(recordingToken);
+      await onvif.recordings.deleteRecording(recordingToken);
 
-    expect(segDir.existsSync(), isFalse);
-  }, timeout: const Timeout(Duration(seconds: 90)));
+      expect(segDir.existsSync(), isFalse);
+    },
+    timeout: const Timeout(Duration(seconds: 90)),
+  );
 }

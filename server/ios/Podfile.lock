@@ -1,0 +1,35 @@
+PODS:
+  - camera_avfoundation (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - geolocator_apple (1.2.0):
+    - Flutter
+    - FlutterMacOS
+  - package_info_plus (0.4.5):
+    - Flutter
+
+DEPENDENCIES:
+  - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
+  - Flutter (from `Flutter`)
+  - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+
+EXTERNAL SOURCES:
+  camera_avfoundation:
+    :path: ".symlinks/plugins/camera_avfoundation/ios"
+  Flutter:
+    :path: Flutter
+  geolocator_apple:
+    :path: ".symlinks/plugins/geolocator_apple/darwin"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
+
+SPEC CHECKSUMS:
+  camera_avfoundation: 968a9a5323c79a99c166ad9d7866bfd2047b5a9b
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
+  package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+
+PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+
+COCOAPODS: 1.17.0

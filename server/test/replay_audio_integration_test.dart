@@ -78,63 +78,70 @@ void main() {
     if (recordingsDir.existsSync()) recordingsDir.deleteSync(recursive: true);
   });
 
-  test('replay serves recorded audio alongside video', () async {
-    final recordingToken = await onvif.recordings.createRecording(
-      buildTestRecordingConfiguration(),
-    );
-    final job = await onvif.recordings.createRecordingJob(
-      buildTestJobConfiguration(recordingToken),
-    );
+  test(
+    'replay serves recorded audio alongside video',
+    () async {
+      final recordingToken = await onvif.recordings.createRecording(
+        buildTestRecordingConfiguration(),
+      );
+      final job = await onvif.recordings.createRecordingJob(
+        buildTestJobConfiguration(recordingToken),
+      );
 
-    await Future<void>.delayed(const Duration(seconds: 5));
+      await Future<void>.delayed(const Duration(seconds: 5));
 
-    await onvif.recordings.setRecordingJobMode(
-      jobToken: job.token,
-      mode: RecordingJobConfigurationMode.idle,
-    );
+      await onvif.recordings.setRecordingJobMode(
+        jobToken: job.token,
+        mode: RecordingJobConfigurationMode.idle,
+      );
 
-    // Sidecars exist on disk with a plausible byte rate (~8000 B/s).
-    final index = device.recordingStore!.byToken(recordingToken)!;
+      // Sidecars exist on disk with a plausible byte rate (~8000 B/s).
+      final index = device.recordingStore!.byToken(recordingToken)!;
 
-    expect(index.segments, isNotEmpty);
+      expect(index.segments, isNotEmpty);
 
-    for (final segment in index.segments) {
-      final sidecar = index.audioFile(segment)!;
-      final seconds =
-          segment.endUtc.difference(segment.startUtc).inMilliseconds / 1000.0;
+      for (final segment in index.segments) {
+        final sidecar = index.audioFile(segment)!;
+        final seconds =
+            segment.endUtc.difference(segment.startUtc).inMilliseconds / 1000.0;
 
-      expect(sidecar.existsSync(), isTrue);
+        expect(sidecar.existsSync(), isTrue);
 
-      if (seconds > 0.5) {
-        expect(
-          sidecar.lengthSync(),
-          greaterThan((seconds * 8000 * 0.3).round()),
-        );
-        expect(sidecar.lengthSync(), lessThan((seconds * 8000 * 2.0).round()));
+        if (seconds > 0.5) {
+          expect(
+            sidecar.lengthSync(),
+            greaterThan((seconds * 8000 * 0.3).round()),
+          );
+          expect(
+            sidecar.lengthSync(),
+            lessThan((seconds * 8000 * 2.0).round()),
+          );
+        }
       }
-    }
 
-    final replayUri = await onvif.replay.getReplayUri(
-      recordingToken,
-      streamSetup: StreamSetup(
-        stream: 'RTP-Unicast',
-        transport: Transport(protocol: 'RTSP'),
-      ),
-    );
+      final replayUri = await onvif.replay.getReplayUri(
+        recordingToken,
+        streamSetup: StreamSetup(
+          stream: 'RTP-Unicast',
+          transport: Transport(protocol: 'RTSP'),
+        ),
+      );
 
-    final probe = await Process.run('ffprobe', [
-      '-v',
-      'error',
-      '-rtsp_transport',
-      'tcp',
-      '-show_entries',
-      'stream=codec_name',
-      '-of',
-      'csv=p=0',
-      replayUri,
-    ]);
+      final probe = await Process.run('ffprobe', [
+        '-v',
+        'error',
+        '-rtsp_transport',
+        'tcp',
+        '-show_entries',
+        'stream=codec_name',
+        '-of',
+        'csv=p=0',
+        replayUri,
+      ]);
 
-    expect(probe.stdout.toString(), contains('h264'));
-    expect(probe.stdout.toString(), contains('pcm_alaw'));
-  }, timeout: const Timeout(Duration(seconds: 120)));
+      expect(probe.stdout.toString(), contains('h264'));
+      expect(probe.stdout.toString(), contains('pcm_alaw'));
+    },
+    timeout: const Timeout(Duration(seconds: 120)),
+  );
 }

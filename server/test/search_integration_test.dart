@@ -74,51 +74,57 @@ void main() {
     if (recordingsDir.existsSync()) recordingsDir.deleteSync(recursive: true);
   });
 
-  test('search returns real recording time ranges', () async {
-    // Produce one real recording (~4s).
-    final recordingToken = await onvif.recordings.createRecording(
-      buildTestRecordingConfiguration(),
-    );
-    final job = await onvif.recordings.createRecordingJob(
-      buildTestJobConfiguration(recordingToken),
-    );
+  test(
+    'search returns real recording time ranges',
+    () async {
+      // Produce one real recording (~4s).
+      final recordingToken = await onvif.recordings.createRecording(
+        buildTestRecordingConfiguration(),
+      );
+      final job = await onvif.recordings.createRecordingJob(
+        buildTestJobConfiguration(recordingToken),
+      );
 
-    await Future<void>.delayed(const Duration(seconds: 4));
+      await Future<void>.delayed(const Duration(seconds: 4));
 
-    await onvif.recordings.setRecordingJobMode(
-      jobToken: job.token,
-      mode: RecordingJobConfigurationMode.idle,
-    );
+      await onvif.recordings.setRecordingJobMode(
+        jobToken: job.token,
+        mode: RecordingJobConfigurationMode.idle,
+      );
 
-    final before = DateTime.now().toUtc();
+      final before = DateTime.now().toUtc();
 
-    // FindRecordings → search token; results reference the real recording.
-    final searchToken = await onvif.search.findRecordings(keepAliveTime: 60);
+      // FindRecordings → search token; results reference the real recording.
+      final searchToken = await onvif.search.findRecordings(keepAliveTime: 60);
 
-    expect(searchToken, isNotEmpty);
+      expect(searchToken, isNotEmpty);
 
-    final results = await onvif.search.getRecordingSearchResults(searchToken);
+      final results = await onvif.search.getRecordingSearchResults(searchToken);
 
-    expect(results, hasLength(1));
-    expect(results.single.searchState, SearchState.completed);
-    expect(
-      results.single.recordingInformation?.single.recordingToken,
-      recordingToken,
-    );
+      expect(results, hasLength(1));
+      expect(results.single.searchState, SearchState.completed);
+      expect(
+        results.single.recordingInformation?.single.recordingToken,
+        recordingToken,
+      );
 
-    final info = await onvif.search.getRecordingInformation(recordingToken);
+      final info = await onvif.search.getRecordingInformation(recordingToken);
 
-    expect(info.recordingToken, recordingToken);
-    expect(info.earliestRecording, isNotNull);
-    expect(info.latestRecording, isNotNull);
-    // The recorded range is real: it ends near "now".
-    expect(before.difference(info.latestRecording!).inSeconds.abs(),
-        lessThan(30));
+      expect(info.recordingToken, recordingToken);
+      expect(info.earliestRecording, isNotNull);
+      expect(info.latestRecording, isNotNull);
+      // The recorded range is real: it ends near "now".
+      expect(
+        before.difference(info.latestRecording!).inSeconds.abs(),
+        lessThan(30),
+      );
 
-    final summary = await onvif.search.getRecordingSummary();
+      final summary = await onvif.search.getRecordingSummary();
 
-    expect(summary.numberRecordings, 1);
-    expect(summary.dataFrom, isNotNull);
-    expect(summary.dataUntil, isNotNull);
-  }, timeout: const Timeout(Duration(seconds: 90)));
+      expect(summary.numberRecordings, 1);
+      expect(summary.dataFrom, isNotNull);
+      expect(summary.dataUntil, isNotNull);
+    },
+    timeout: const Timeout(Duration(seconds: 90)),
+  );
 }
