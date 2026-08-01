@@ -1,8 +1,8 @@
 name: examples
 version: 0.0.1
-homepage: https://github.com/faithoflifedev/easy_onvif_workspace
+homepage: https://github.com/cdavis-code/easy_onvif_workspace
 description: An example
-repository: https://github.com/faithoflifedev/easy_onvif_workspace/packages/easy_onvif_cli/example
+repository: https://github.com/cdavis-code/easy_onvif_workspace/packages/easy_onvif_cli/example
 
 publish_to: none
 # resolution: workspace

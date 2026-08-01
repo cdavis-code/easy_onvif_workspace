@@ -41,6 +41,7 @@ class OnvifPtzCommand extends Command {
     addSubcommand(OnvifZoomPtzCommand());
     addSubcommand(OnvifZoomInPtzCommand());
     addSubcommand(OnvifZoomOutPtzCommand());
+    addSubcommand(OnvifGetPresetsMapPtzCommand());
   }
 }
 
@@ -1357,5 +1358,38 @@ class OnvifGetCurrentPresetPtzCommand extends OnvifHelperCommand {
     final preset = await ptz.getCurrentPreset(argResults!['profile-token']);
 
     print(preset);
+  }
+}
+
+/// Helper method to get presets as a map keyed by token.
+class OnvifGetPresetsMapPtzCommand extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'Helper method to get presets as a map keyed by token.';
+
+  @override
+  String get name => 'get-presets-map';
+
+  OnvifGetPresetsMapPtzCommand() {
+    argParser.addOption(
+      'profile-token',
+      abbr: 't',
+      valueHelp: 'token',
+      mandatory: true,
+      help:
+          'The ProfileToken element indicates the media profile to use and will define the source and dimensions of the snapshot.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final presetsMap = await ptz.getPresetsMap(argResults!['profile-token']);
+      print(presetsMap);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
   }
 }

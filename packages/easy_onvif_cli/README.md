@@ -6,13 +6,15 @@
 
 A command line interface application for controlling an Onvif device through terminal commands.  This tool allows you to use O/S features like `cron` to automate Onvif device functionality.
 
-<!-- [![Build Status](https://img.shields.io/github/actions/workflow/status/faithoflifedev/easy_onvif_cli/dart.yml?branch=main&logo=github-actions&logoColor=white&style=for-the-badge)](https://github.com/faithoflifedev/easy_onvif_cli/actions) -->
-[![Pull Requests](https://img.shields.io/github/issues-pr/faithoflifedev/easy_onvif_workspace?logo=github&logoColor=white&style=for-the-badge)](https://github.com/faithoflifedev/easy_onvif_workspace/pulls)
-[![Issues](https://img.shields.io/github/issues/faithoflifedev/easy_onvif_workspace?logo=github&logoColor=white&style=for-the-badge)](https://github.com/faithoflifedev/easy_onvif_workspace/issues)
-[![github last commit](https://shields.io/github/last-commit/faithoflifedev/easy_onvif_workspace?logo=github&logoColor=white&style=for-the-badge)](https://shields.io/github/last-commit/faithoflifedev/easy_onvif_workspace)
+<!-- [![Build Status](https://img.shields.io/github/actions/workflow/status/cdavis-code/easy_onvif_cli/dart.yml?branch=main&logo=github-actions&logoColor=white&style=for-the-badge)](https://github.com/cdavis-code/easy_onvif_cli/actions) -->
+[![Pull Requests](https://img.shields.io/github/issues-pr/cdavis-code/easy_onvif_workspace?logo=github&logoColor=white&style=for-the-badge)](https://github.com/cdavis-code/easy_onvif_workspace/pulls)
+[![Issues](https://img.shields.io/github/issues/cdavis-code/easy_onvif_workspace?logo=github&logoColor=white&style=for-the-badge)](https://github.com/cdavis-code/easy_onvif_workspace/issues)
+[![github last commit](https://shields.io/github/last-commit/cdavis-code/easy_onvif_workspace?logo=github&logoColor=white&style=for-the-badge)](https://shields.io/github/last-commit/cdavis-code/easy_onvif_workspace)
 [![Pub Score](https://img.shields.io/pub/points/easy_onvif_cli?logo=dart&logoColor=00b9fc&style=for-the-badge)](https://pub.dev/packages/easy_onvif_cli/score)
 
 ## Table of Contents
+- [Easy Onvif Command Line Interface (CLI)](#easy-onvif-command-line-interface-cli)
+  - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Quick start](#quick-start)
   - [Commands](#commands)
@@ -37,7 +39,28 @@ A command line interface application for controlling an Onvif device through ter
       - [device-management get-system-support-information](#device-management-get-system-support-information)
       - [device-management get-system-uris](#device-management-get-system-uris)
       - [device-management get-users](#device-management-get-users)
+      - [device-management get-dynamic-dns](#device-management-get-dynamic-dns)
+      - [device-management get-geolocation](#device-management-get-geolocation)
+      - [device-management get-ipaddress-filter](#device-management-get-ipaddress-filter)
       - [device-management system-reboot](#device-management-system-reboot)
+      - [device-management add-ip-address-filter](#device-management-add-ip-address-filter)
+      - [device-management delete-geolocation](#device-management-delete-geolocation)
+      - [device-management get-network-default-gateway](#device-management-get-network-default-gateway)
+      - [device-management get-relay-outputs](#device-management-get-relay-outputs)
+      - [device-management get-zero-configuration](#device-management-get-zero-configuration)
+      - [device-management remove-ip-address-filter](#device-management-remove-ip-address-filter)
+      - [device-management set-dns](#device-management-set-dns)
+      - [device-management set-dynamic-dns](#device-management-set-dynamic-dns)
+      - [device-management set-geolocation](#device-management-set-geolocation)
+      - [device-management set-hostname](#device-management-set-hostname)
+      - [device-management set-hostname-from-dhcp](#device-management-set-hostname-from-dhcp)
+      - [device-management set-ipaddress-filter](#device-management-set-ipaddress-filter)
+      - [device-management set-network-default-gateway](#device-management-set-network-default-gateway)
+      - [device-management set-network-protocols](#device-management-set-network-protocols)
+      - [device-management set-ntp](#device-management-set-ntp)
+      - [device-management set-relay-output-settings](#device-management-set-relay-output-settings)
+      - [device-management set-relay-output-state](#device-management-set-relay-output-state)
+      - [device-management set-zero-configuration](#device-management-set-zero-configuration)
     - [debug](#debug)
     - [media1](#media1)
       - [media1 get-audio-sources](#media1-get-audio-sources)
@@ -59,6 +82,9 @@ A command line interface application for controlling an Onvif device through ter
       - [media2 get-snapshot-uri](#media2-get-snapshot-uri)
       - [media2 get-stream-uri](#media2-get-stream-uri)
       - [media2 get-video-encoder-instances](#media2-get-video-encoder-instances)
+      - [media2 delete-profile](#media2-delete-profile)
+      - [media2 get-webrtc-configurations](#media2-get-webrtc-configurations)
+      - [media2 set-webrtc-configurations](#media2-set-webrtc-configurations)
       - [media2 start-multicast-streaming](#media2-start-multicast-streaming)
       - [media2 stop-multicast-streaming](#media2-stop-multicast-streaming)
     - [probe](#probe)
@@ -73,6 +99,7 @@ A command line interface application for controlling an Onvif device through ter
       - [ptz get-preset-tour](#ptz-get-preset-tour)
       - [ptz get-preset-tours](#ptz-get-preset-tours)
       - [ptz get-presets](#ptz-get-presets)
+      - [ptz get-presets-map](#ptz-get-presets-map)
       - [ptz get-service-capabilities](#ptz-get-service-capabilities)
       - [ptz get-status](#ptz-get-status)
       - [ptz goto-preset](#ptz-goto-preset)
@@ -124,7 +151,7 @@ dart pub global activate easy_onvif_cli
 <!-- Install using `brew`:
 
 ```sh
-brew tap faithoflifedev/easy_onvif
+brew tap cdavis-code/easy_onvif
 brew install onvif
 ``` -->
 
@@ -227,16 +254,23 @@ Usage: onvif device-management <subcommand> [arguments]
 -h, --help    Print this usage information.
 
 Available subcommands:
+  add-ip-address-filter            This operation adds an IP address filter entry on a device.
   create-users                     This operation creates new device users and corresponding credentials on a device for authentication purposes. The device shall support creation of device users and their credentials through the CreateUsers command. Either all users are created successfully or a fault message shall be returned without creating any user.
+  delete-geolocation               This operation deletes the geo location on the device.
   delete-users                     This operation deletes the given storage configuration and configuration change shall always be persistent.
   get-capabilities                 This method has been replaced by the more generic GetServices method. For capabilities of individual services refer to the GetServiceCapabilities methods.
   get-device-information           This operation gets basic device information from the device.
   get-discovery-mode               This operation gets the discovery mode of a device. See Section 7.2 for the definition of the different device discovery modes. The device shall support retrieval of the discovery mode setting through the GetDiscoveryMode command.
   get-dns                          This operation gets the DNS settings from a device. The device shall return its DNS configurations through the GetDNS command.
+  get-dynamic-dns                  This operation gets the dynamic DNS settings from a device. If the device supports dynamic DNS as specified in [RFC 2136] and [RFC 4702], it shall be possible to get the type, name and TTL through the GetDynamicDNS command.
   get-endpoint-reference           A client can ask for the device service endpoint reference address property that can be used to derive the password equivalent for remote user operation.
+  get-geolocation                  This operation lists all existing geo location configurations for the device.
   get-hostname                     This operation is used by an endpoint to get the hostname from a device. The device shall return its hostname configurations through the GetHostname command.
+  get-ipaddress-filter             This operation gets the IP address filter settings from a device. If the device supports device access control based on IP filtering rules (denied or accepted ranges of IP addresses), the device shall support the GetIPAddressFilter command.
+  get-network-default-gateway      This operation gets the default gateway settings from a device.
   get-network-protocols            This operation gets defined network protocols from a device. The device shall support the GetNetworkProtocols command returning configured network protocols.
   get-ntp                          This operation gets defined network protocols from a device. The device shall support This operation gets the NTP settings from a device. If the device supports NTP, it shall be possible to get the NTP server settings through the GetNTP command.
+  get-relay-outputs                This operation gets a list of all available relay outputs and their settings.
   get-service-capabilities         Returns the capabilities of the device service. The result is returned in a typed answer.
   get-services                     Returns information about services on the device.
   get-storage-configuration        This operation retrieves the Storage configuration associated with the given storage configuration token.
@@ -246,6 +280,20 @@ Available subcommands:
   get-system-support-information   This operation gets arbitrary device diagnostics information from the device.
   get-system-uris                  This operation is used to retrieve URIs from which system information may be downloaded using HTTP
   get-users                        This operation lists the registered users and corresponding credentials on a device. The device shall support retrieval of registered device users and their credentials for the user token through the GetUsers command.
+  get-zero-configuration           This operation gets the zero-configuration settings from a device.
+  remove-ip-address-filter         This operation removes an IP address filter entry on a device.
+  set-dns                          This operation sets the DNS settings on a device.
+  set-dynamic-dns                  This operation sets the dynamic DNS settings on a device.
+  set-geolocation                  This operation sets the geo location on the device.
+  set-hostname                     This operation sets the hostname on a device.
+  set-hostname-from-dhcp           This operation controls whether the hostname shall be obtained via DHCP.
+  set-ipaddress-filter             This operation sets the IP address filter settings on a device. If the device supports device access control based on IP filtering rules (denied or accepted ranges of IP addresses), the device shall support configuration of IP filtering rules through the SetIPAddressFilter command.
+  set-network-default-gateway      This operation sets the default gateway settings on a device.
+  set-network-protocols            This operation configures one or more defined network protocols supported by the device.
+  set-ntp                          This operation sets the NTP settings on a device.
+  set-relay-output-settings        This operation sets the settings of a relay output.
+  set-relay-output-state           This operation sets the state of a relay output.
+  set-zero-configuration           This operation sets the zero-configuration settings on a device.
   system-reboot                    This operation reboots the device.
 ```
 
@@ -514,6 +562,45 @@ Usage: onvif device-management get-users [arguments]
 -h, --help    Print this usage information.
 ```
 
+#### device-management get-dynamic-dns
+
+```sh
+onvif device-management get-dynamic-dns --help
+```
+
+```text
+This operation gets the dynamic DNS settings from a device. If the device supports dynamic DNS as specified in [RFC 2136] and [RFC 4702], it shall be possible to get the type, name and TTL through the GetDynamicDNS command.
+
+Usage: onvif device-management get-dynamic-dns [arguments]
+-h, --help    Print this usage information.
+```
+
+#### device-management get-geolocation
+
+```sh
+onvif device-management get-geolocation --help
+```
+
+```text
+This operation lists all existing geo location configurations for the device.
+
+Usage: onvif device-management get-geolocation [arguments]
+-h, --help    Print this usage information.
+```
+
+#### device-management get-ipaddress-filter
+
+```sh
+onvif device-management get-ipaddress-filter --help
+```
+
+```text
+This operation gets the IP address filter settings from a device. If the device supports device access control based on IP filtering rules (denied or accepted ranges of IP addresses), the device shall support the GetIPAddressFilter command.
+
+Usage: onvif device-management get-ipaddress-filter [arguments]
+-h, --help    Print this usage information.
+```
+
 #### device-management system-reboot
 
 ```sh
@@ -525,6 +612,260 @@ This operation reboots the device.
 
 Usage: onvif device-management system-reboot [arguments]
 -h, --help    Print this usage information.
+```
+
+#### device-management add-ip-address-filter
+
+```sh
+onvif device-management add-ip-address-filter --help
+```
+
+```text
+This operation adds an IP address filter entry on a device.
+
+Usage: onvif device-management add-ip-address-filter [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing the IpAddressFilter configuration.
+```
+
+#### device-management delete-geolocation
+
+```sh
+onvif device-management delete-geolocation --help
+```
+
+```text
+This operation deletes the geo location on the device.
+
+Usage: onvif device-management delete-geolocation [arguments]
+-h, --help    Print this usage information.
+```
+
+#### device-management get-network-default-gateway
+
+```sh
+onvif device-management get-network-default-gateway --help
+```
+
+```text
+This operation gets the default gateway settings from a device.
+
+Usage: onvif device-management get-network-default-gateway [arguments]
+-h, --help    Print this usage information.
+```
+
+#### device-management get-relay-outputs
+
+```sh
+onvif device-management get-relay-outputs --help
+```
+
+```text
+This operation gets a list of all available relay outputs and their settings.
+
+Usage: onvif device-management get-relay-outputs [arguments]
+-h, --help    Print this usage information.
+```
+
+#### device-management get-zero-configuration
+
+```sh
+onvif device-management get-zero-configuration --help
+```
+
+```text
+This operation gets the zero-configuration settings from a device.
+
+Usage: onvif device-management get-zero-configuration [arguments]
+-h, --help    Print this usage information.
+```
+
+#### device-management remove-ip-address-filter
+
+```sh
+onvif device-management remove-ip-address-filter --help
+```
+
+```text
+This operation removes an IP address filter entry on a device.
+
+Usage: onvif device-management remove-ip-address-filter [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing the IpAddressFilter configuration.
+```
+
+#### device-management set-dns
+
+```sh
+onvif device-management set-dns --help
+```
+
+```text
+This operation sets the DNS settings on a device.
+
+Usage: onvif device-management set-dns [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing the DnsInformation configuration.
+```
+
+#### device-management set-dynamic-dns
+
+```sh
+onvif device-management set-dynamic-dns --help
+```
+
+```text
+This operation sets the dynamic DNS settings on a device.
+
+Usage: onvif device-management set-dynamic-dns [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing the DynamicDnsInformation configuration.
+```
+
+#### device-management set-geolocation
+
+```sh
+onvif device-management set-geolocation --help
+```
+
+```text
+This operation sets the geo location on the device.
+
+Usage: onvif device-management set-geolocation [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing a list of LocationEntity objects.
+```
+
+#### device-management set-hostname
+
+```sh
+onvif device-management set-hostname --help
+```
+
+```text
+This operation sets the hostname on a device.
+
+Usage: onvif device-management set-hostname [arguments]
+-h, --help                Print this usage information.
+-n, --name (mandatory)    The hostname to set.
+```
+
+#### device-management set-hostname-from-dhcp
+
+```sh
+onvif device-management set-hostname-from-dhcp --help
+```
+
+```text
+This operation controls whether the hostname shall be obtained via DHCP.
+
+Usage: onvif device-management set-hostname-from-dhcp [arguments]
+-h, --help              Print this usage information.
+    --[no-]from-dhcp    Set to true to obtain hostname via DHCP.
+                        (defaults to on)
+```
+
+#### device-management set-ipaddress-filter
+
+```sh
+onvif device-management set-ipaddress-filter --help
+```
+
+```text
+This operation sets the IP address filter settings on a device. If the device supports device access control based on IP filtering rules (denied or accepted ranges of IP addresses), the device shall support configuration of IP filtering rules through the SetIPAddressFilter command.
+
+Usage: onvif device-management set-ipaddress-filter [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing the IpAddressFilter configuration.
+```
+
+#### device-management set-network-default-gateway
+
+```sh
+onvif device-management set-network-default-gateway --help
+```
+
+```text
+This operation sets the default gateway settings on a device.
+
+Usage: onvif device-management set-network-default-gateway [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing the NetworkGateway configuration.
+```
+
+#### device-management set-network-protocols
+
+```sh
+onvif device-management set-network-protocols --help
+```
+
+```text
+This operation configures one or more defined network protocols supported by the device.
+
+Usage: onvif device-management set-network-protocols [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing a list of NetworkProtocol objects.
+```
+
+#### device-management set-ntp
+
+```sh
+onvif device-management set-ntp --help
+```
+
+```text
+This operation sets the NTP settings on a device.
+
+Usage: onvif device-management set-ntp [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing the NtpInformation configuration.
+```
+
+#### device-management set-relay-output-settings
+
+```sh
+onvif device-management set-relay-output-settings --help
+```
+
+```text
+This operation sets the settings of a relay output.
+
+Usage: onvif device-management set-relay-output-settings [arguments]
+-h, --help                              Print this usage information.
+-t, --relay-output-token (mandatory)    The relay output token.
+-f, --json-file                         Path to a JSON file containing the RelayOutputSettings (Mode, DelayTime, IdleState).
+```
+
+#### device-management set-relay-output-state
+
+```sh
+onvif device-management set-relay-output-state --help
+```
+
+```text
+This operation sets the state of a relay output.
+
+Usage: onvif device-management set-relay-output-state [arguments]
+-h, --help                              Print this usage information.
+-t, --relay-output-token (mandatory)    The relay output token.
+-s, --logical-state (mandatory)         The logical state of the relay.
+                                        [active, inactive]
+```
+
+#### device-management set-zero-configuration
+
+```sh
+onvif device-management set-zero-configuration --help
+```
+
+```text
+This operation sets the zero-configuration settings on a device.
+
+Usage: onvif device-management set-zero-configuration [arguments]
+-h, --help                           Print this usage information.
+-t, --interface-token (mandatory)    The interface token.
+    --[no-]enabled                   Enable or disable zero-configuration.
+                                     (defaults to on)
 ```
 
 ###  debug
@@ -735,6 +1076,7 @@ Usage: onvif media2 <subcommand> [arguments]
 -h, --help    Print this usage information.
 
 Available subcommands:
+  delete-profile                   This operation deletes a profile. Deletion of a profile is only possible for non-fixed profiles.
   get-metadata-configuration-options   This operation returns the available options (supported values and ranges for metadata configuration parameters) for changing the metadata configuration.
   get-metadata-configurations          By default this operation lists all existing metadata configurations for a device. Provide a profile token to list only configurations that are compatible with the profile. If a configuration token is provided only a single configuration will be returned.
   get-profiles                         Retrieve the profile with the specified token or all defined media profiles.
@@ -742,6 +1084,8 @@ Available subcommands:
   get-snapshot-uri                     A client uses the GetSnapshotUri command to obtain a JPEG snapshot from the device.
   get-stream-uri                       This operation requests a URI that can be used to initiate a live media stream using RTSP as the control protocol
   get-video-encoder-instances          The GetVideoEncoderInstances command can be used to request the minimum number of guaranteed video encoder instances (applications) per Video Source Configuration.
+  get-webrtc-configurations            This operation retrieves the WebRTC signaling configurations of a device.
+  set-webrtc-configurations            This operation configures the WebRTC signaling configurations of a device. Passing an empty list deletes the existing configurations.
   start-multicast-streaming            This command starts multicast streaming using a specified media profile of a device.
   stop-multicast-streaming             This command stop multicast streaming using a specified media profile of a device.
   ```
@@ -850,6 +1194,47 @@ Usage: onvif media2 get-video-encoder-instances [arguments]
     --configuration-token=<string> (mandatory)    Token of the video source configuration
 ```
 
+#### media2 delete-profile
+
+```sh
+onvif media2 delete-profile --help
+```
+
+```text
+This operation deletes a profile. Deletion of a profile is only possible for non-fixed profiles.
+
+Usage: onvif media2 delete-profile [arguments]
+-h, --help                                   Print this usage information.
+-t, --reference-token=<token> (mandatory)    The token of the profile to delete.
+```
+
+#### media2 get-webrtc-configurations
+
+```sh
+onvif media2 get-webrtc-configurations --help
+```
+
+```text
+This operation retrieves the WebRTC signaling configurations of a device.
+
+Usage: onvif media2 get-webrtc-configurations [arguments]
+-h, --help    Print this usage information.
+```
+
+#### media2 set-webrtc-configurations
+
+```sh
+onvif media2 set-webrtc-configurations --help
+```
+
+```text
+This operation configures the WebRTC signaling configurations of a device. Passing an empty list deletes the existing configurations.
+
+Usage: onvif media2 set-webrtc-configurations [arguments]
+-h, --help         Print this usage information.
+-f, --json-file    Path to a JSON file containing a list of WebrtcConfiguration objects.
+```
+
 #### media2 start-multicast-streaming
 
 ```sh
@@ -914,6 +1299,7 @@ Available subcommands:
   get-preset-tour                 Operation to request a specific PTZ preset tour in the selected media profile.
   get-preset-tours                Operation to request PTZ preset tours in the selected media profiles.
   get-presets                     Operation to request all PTZ presets for the PTZNode in the selected profile.
+  get-presets-map                 Helper method to get presets as a map keyed by token.
   get-service-capabilities        Returns the capabilities of the PTZ service. The result is returned in a typed answer.
   get-status                      Operation to request PTZ status for the Node in the selected profile.
   goto-home-position              Operation to move the PTZ device to it's "home" position. The operation is supported if the HomeSupported element in the PTZNode is true.
@@ -1078,6 +1464,20 @@ Usage: onvif ptz get-presets [arguments]
 -h, --help                                 Print this usage information.
 -t, --profile-token=<token> (mandatory)    A reference to the MediaProfile where the operation should take place.
     --limit=<int>                          Limit the number of presets returned
+```
+
+#### ptz get-presets-map
+
+```sh
+onvif ptz get-presets-map --help
+```
+
+```text
+Helper method to get presets as a map keyed by token.
+
+Usage: onvif ptz get-presets-map [arguments]
+-h, --help                                 Print this usage information.
+-t, --profile-token=<token> (mandatory)    The ProfileToken element indicates the media profile to use and will define the source and dimensions of the snapshot.
 ```
 
 #### ptz get-service-capabilities

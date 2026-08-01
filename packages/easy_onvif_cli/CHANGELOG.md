@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.1.5] - 2026-07-28
+
+### Added
+- 18 new `device-management` subcommands covering relay I/O, geo-location, hostname, DNS, NTP, dynamic DNS, network protocols, default gateway, zero-configuration, and IP address filter add/remove
+- `ptz get-presets-map` helper command
+- `media2 delete-profile` command
+- `media2 get-webrtc-configurations` command
+- `media2 set-webrtc-configurations` command
+
+### Fixed
+- `device-management set-ipaddress-filter` now correctly calls `setIpAddressFilter()` instead of `getUsers()`
+
 ## [3.1.4] - 2025-04-28
 
 ### Added

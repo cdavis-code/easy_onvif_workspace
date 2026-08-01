@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="easy_onvif_js API docs, for the Dart programming language.">
+  <title>easy_onvif_js - Dart API docs</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="static-assets/github.css?v1">
+  <link rel="stylesheet" href="static-assets/styles.css?v1">
+  <link rel="icon" href="static-assets/favicon.png?v1">
+  
+</head>
+
+<body data-base-href="" data-using-base-href="false" class="light-theme">
+<div id="overlay-under-drawer"></div>
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_js">easy_onvif_js package</a></li>
+  </ol>
+  <div class="self-name">easy_onvif_js</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <button class="toggle" id="theme-button" title="Toggle between light and dark mode" aria-label="Light and dark mode toggle">
+    <span id="dark-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      dark_mode
+    </span>
+    <span id="light-theme-button" class="material-symbols-outlined" aria-hidden="true">
+      light_mode
+    </span>
+  </button>
+</header>
+<main>
+  <div id="dartdoc-main-content" class="main-content">
+      
+<section class="desc markdown">
+  <h1 id="javascript-bindings-for-easy_onvif">JavaScript Bindings for easy_onvif</h1>
+<p align="center" width="100%">
+<img src="https://github.com/faithoflifedev/easy_onvif/blob/main/logo/easy_onvif_logo_640.png?raw=true" width="200">
+</p>
+<p><a href="https://github.com/faithoflifedev/easy_onvif/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a></p>
+<p>This package is the JavaScript interop layer for the pure-Dart
+<a href="https://pub.dev/packages/easy_onvif"><code>easy_onvif</code></a> ONVIF client. It compiles
+with <strong><code>dart compile js</code> (dart2js)</strong> to produce two npm artifacts that expose
+the same operations — device management, media streaming, PTZ control, imaging,
+recording, replay and search — to Node.js and browser applications.</p>
+<table>
+<thead>
+<tr>
+<th>npm package</th>
+<th>Target</th>
+<th>Discovery</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://www.npmjs.com/package/easy-onvif-node"><code>easy-onvif-node</code></a></td>
+<td>Node.js ≥ 20</td>
+<td>✅ WS-Discovery via <code>node:dgram</code></td>
+<td>CLI / server workloads</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/package/easy-onvif-web"><code>easy-onvif-web</code></a></td>
+<td>Browsers (modern ESM)</td>
+<td>❌ <code>UnsupportedError</code></td>
+<td>SOAP-over-<code>fetch</code> only; CORS proxy required</td>
+</tr>
+</tbody>
+</table>
+<p>This package is <strong>not published to pub.dev</strong>. It is a build harness that
+consumes the pure-Dart <code>easy_onvif</code> package and emits a JavaScript bundle
+wrapped with hand-written ESM loaders and TypeScript declarations.</p>
+<h2 id="table-of-contents">Table of contents</h2>
+<ul>
+<li><a href="#javascript-bindings-for-easy_onvif">JavaScript Bindings for easy_onvif</a>
+<ul>
+<li><a href="#table-of-contents">Table of contents</a></li>
+<li><a href="#getting-started">Getting Started</a>
+<ul>
+<li><a href="#dependency">Dependency</a></li>
+<li><a href="#usage-example">Usage Example</a></li>
+<li><a href="#interacting-with-a-device-through-onvif-operations">Interacting with a device through Onvif operations</a></li>
+</ul>
+</li>
+<li><a href="#build">Build</a></li>
+<li><a href="#smoke-test-node">Smoke test (Node)</a></li>
+<li><a href="#supported-onvif-operations">Supported Onvif Operations</a>
+<ul>
+<li><a href="#device-management">Device Management</a></li>
+<li><a href="#media">Media</a></li>
+<li><a href="#ptz">PTZ</a></li>
+<li><a href="#imaging">Imaging</a></li>
+<li><a href="#recordings">Recordings</a></li>
+<li><a href="#replay">Replay</a></li>
+<li><a href="#search">Search</a></li>
+</ul>
+</li>
+<li><a href="#onvif-probe">Onvif Probe</a></li>
+<li><a href="#known-limitations">Known limitations</a></li>
+<li><a href="#features-and-bugs">Features and bugs</a></li>
+<li><a href="#contributing">Contributing</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="dependency">Dependency</h3>
+<p>Install the appropriate npm package depending on your target:</p>
+<pre class="language-sh"><code class="language-sh"># Node.js
+npm install easy-onvif-node
+
+# Browser (bundled with webpack / vite / rollup)
+npm install easy-onvif-web
+</code></pre>
+<h3 id="usage-example">Usage Example</h3>
+<p>Import the loader, connect to a device, and grab service proxies through the
+returned handle.</p>
+<pre class="language-js"><code class="language-js">import { loadEasyOnvif } from 'easy-onvif-node';
+
+const onvif = await loadEasyOnvif();
+
+const handle = await onvif.connect({
+  host: '192.168.1.100',
+  username: 'admin',
+  password: 'password',
+});
+
+const deviceManagement = onvif.getDeviceManagement(handle);
+const media            = onvif.getMedia(handle);
+const ptz              = onvif.getPtz(handle);
+const imaging          = onvif.getImaging(handle);
+const search           = onvif.getSearch(handle);
+const recordings       = onvif.getRecordings(handle);
+const replay           = onvif.getReplay(handle);
+</code></pre>
+<h3 id="interacting-with-a-device-through-onvif-operations">Interacting with a device through Onvif operations</h3>
+<p>Like the underlying Dart package, every Onvif command has an associated
+<code>Access Policy</code>. Authenticate as <code>Administrator</code> to avoid permission errors.
+See the <a href="https://github.com/faithoflifedev/easy_onvif/blob/main/packages/easy_onvif/README.md#interacting-with-a-device-through-onvif-operations">access-policy table in the Dart README</a>.</p>
+<p>Through the <code>deviceManagement</code> proxy you can get information about the
+connected device.</p>
+<pre class="language-js"><code class="language-js">const info = await deviceManagement.getDeviceInformation(); // READ_SYSTEM
+console.log(info.model);
+</code></pre>
+<p>Many operations require a <code>profileToken</code>, retrievable through <code>media</code>.</p>
+<pre class="language-js"><code class="language-js">const profiles = await media.getProfiles(); // READ_MEDIA
+profiles.forEach(p =&gt; console.log(`${p.name}  ${p.token}`));
+
+const profileToken = profiles[0].token;
+</code></pre>
+<p>The <code>ptz</code> proxy controls camera movement.</p>
+<pre class="language-js"><code class="language-js">const presets = await ptz.getPresets(profileToken); // READ_MEDIA
+console.log(presets[0]);
+
+// Get live PTZ status
+const status = await ptz.getStatus(profileToken);
+console.log(status.position.panTilt);
+</code></pre>
+<p>Always release the handle when finished:</p>
+<pre class="language-js"><code class="language-js">onvif.disconnect(handle);
+</code></pre>
+<h2 id="build">Build</h2>
+<pre class="language-sh"><code class="language-sh"># One-time
+dart pub get
+
+# Produce build/node/easy_onvif.js (staged into npm/easy-onvif-node/dist/)
+./tool/build_node.sh
+
+# Produce build/web/easy_onvif.js  (staged into npm/easy-onvif-web/dist/)
+./tool/build_web.sh
+</code></pre>
+<p>Outputs are staged into <code>npm/easy-onvif-node/dist/</code> and
+<code>npm/easy-onvif-web/dist/</code> ready for <code>npm publish</code>.</p>
+<h2 id="smoke-test-node">Smoke test (Node)</h2>
+<pre class="language-sh"><code class="language-sh">node tool/smoke_test_node.mjs
+</code></pre>
+<h2 id="supported-onvif-operations">Supported Onvif Operations</h2>
+<p>The following tables list every operation that is currently wired up in the
+JS surface. The <strong>Onvif Operation</strong> column matches the spec, the <strong>JS Method</strong>
+column is the exact property name on the service proxy, and the <strong>Return
+Type</strong> column describes the JSON-serialisable shape returned from the
+underlying Dart call.</p>
+<h3 id="device-management">Device Management</h3>
+<ul>
+<li><a href="https://www.onvif.org/specs/core/ONVIF-Core-Specification.pdf">Specification PDF</a></li>
+<li><a href="https://www.onvif.org/onvif/ver10/device/wsdl/devicemgmt.wsdl">wsdl</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Onvif Operation</th>
+<th>JS Method</th>
+<th>JS Return Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GetCapabilities</td>
+<td><code>getCapabilities</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetDeviceInformation</td>
+<td><code>getDeviceInformation</code></td>
+<td><code>Promise&lt;DeviceInformation&gt;</code></td>
+</tr>
+<tr>
+<td>GetDiscoveryMode</td>
+<td><code>getDiscoveryMode</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+<tr>
+<td>GetDNS</td>
+<td><code>getDNS</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetHostname</td>
+<td><code>getHostname</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetNTP</td>
+<td><code>getNTP</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetServiceCapabilities</td>
+<td><code>getServiceCapabilities</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetServices</td>
+<td><code>getServices</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;[]&gt;</code></td>
+</tr>
+<tr>
+<td>GetSystemDateAndTime</td>
+<td><code>getSystemDateAndTime</code></td>
+<td><code>Promise&lt;SystemDateAndTime&gt;</code></td>
+</tr>
+<tr>
+<td>GetUsers</td>
+<td><code>getUsers</code></td>
+<td><code>Promise&lt;User[]&gt;</code></td>
+</tr>
+<tr>
+<td>SystemReboot</td>
+<td><code>systemReboot</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="media">Media</h3>
+<ul>
+<li><a href="https://www.onvif.org/specs/srv/media/ONVIF-Media-Service-Spec.pdf">Media ver10 PDF</a> / <a href="https://www.onvif.org/ver10/media/wsdl/media.wsdl">wsdl</a></li>
+<li><a href="https://www.onvif.org/specs/srv/media/ONVIF-Media2-Service-Spec.pdf">Media ver20 PDF</a> / <a href="https://www.onvif.org/ver20/media/wsdl/media.wsdl">wsdl</a></li>
+</ul>
+<p>The Media proxy exposes both Media1 and Media2 operations. Methods suffixed
+with <code>2</code> delegate to the Media2 service when the device advertises it.</p>
+<table>
+<thead>
+<tr>
+<th>Onvif Operation</th>
+<th>JS Method</th>
+<th>JS Return Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GetServiceCapabilities</td>
+<td><code>getServiceCapabilities</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetProfiles</td>
+<td><code>getProfiles</code></td>
+<td><code>Promise&lt;Profile[]&gt;</code></td>
+</tr>
+<tr>
+<td>GetProfile</td>
+<td><code>getProfile</code></td>
+<td><code>Promise&lt;Profile&gt;</code></td>
+</tr>
+<tr>
+<td>GetStreamUri (Media1)</td>
+<td><code>getStreamUri</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+<tr>
+<td>GetStreamUri (Media2)</td>
+<td><code>getStreamUri2</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+<tr>
+<td>GetSnapshotUri (Media1)</td>
+<td><code>getSnapshotUri</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+<tr>
+<td>GetSnapshotUri (Media2)</td>
+<td><code>getSnapshotUri2</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+<tr>
+<td>GetMetadataConfiguration</td>
+<td><code>getMetadataConfiguration</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetMetadataConfigurations</td>
+<td><code>getMetadataConfigurations</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;[]&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="ptz">PTZ</h3>
+<ul>
+<li><a href="https://www.onvif.org/specs/srv/ptz/ONVIF-PTZ-Service-Spec.pdf">Specification PDF</a></li>
+<li><a href="https://www.onvif.org/ver20/ptz/wsdl/ptz.wsdl">wsdl</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Onvif Operation</th>
+<th>JS Method</th>
+<th>JS Return Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GetServiceCapabilities</td>
+<td><code>getServiceCapabilities</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetConfigurations</td>
+<td><code>getConfigurations</code></td>
+<td><code>Promise&lt;PtzConfiguration[]&gt;</code></td>
+</tr>
+<tr>
+<td>GetConfiguration</td>
+<td><code>getConfiguration</code></td>
+<td><code>Promise&lt;PtzConfiguration&gt;</code></td>
+</tr>
+<tr>
+<td>GetConfigurationOptions</td>
+<td><code>getConfigurationOptions</code></td>
+<td><code>Promise&lt;PtzConfigurationOptions&gt;</code></td>
+</tr>
+<tr>
+<td>GetPresets</td>
+<td><code>getPresets</code></td>
+<td><code>Promise&lt;Preset[]&gt;</code></td>
+</tr>
+<tr>
+<td>GetStatus</td>
+<td><code>getStatus</code></td>
+<td><code>Promise&lt;PtzStatus&gt;</code></td>
+</tr>
+<tr>
+<td>SetHomePosition</td>
+<td><code>setHomePosition</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+<tr>
+<td>Stop</td>
+<td><code>stop</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="imaging">Imaging</h3>
+<ul>
+<li><a href="https://www.onvif.org/specs/srv/img/ONVIF-Imaging-Service-Spec.pdf">Specification PDF</a></li>
+<li><a href="https://www.onvif.org/ver20/imaging/wsdl/imaging.wsdl">wsdl</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Onvif Operation</th>
+<th>JS Method</th>
+<th>JS Return Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GetServiceCapabilities</td>
+<td><code>getServiceCapabilities</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetImagingSettings</td>
+<td><code>getImagingSettings</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>SetImagingSettings</td>
+<td><code>setImagingSettings</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+<tr>
+<td>GetOptions</td>
+<td><code>getOptions</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetStatus</td>
+<td><code>getStatus</code></td>
+<td><code>Promise&lt;ImagingStatus&gt;</code></td>
+</tr>
+<tr>
+<td>Move</td>
+<td><code>move</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+<tr>
+<td>Stop</td>
+<td><code>stop</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="recordings">Recordings</h3>
+<ul>
+<li><a href="https://www.onvif.org/specs/srv/rec/ONVIF-RecordingControl-Service-Spec.pdf">Specification PDF</a></li>
+<li><a href="https://www.onvif.org/ver10/recording.wsdl">wsdl</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Onvif Operation</th>
+<th>JS Method</th>
+<th>JS Return Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GetServiceCapabilities</td>
+<td><code>getServiceCapabilities</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetRecordings</td>
+<td><code>getRecordings</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;[]&gt;</code></td>
+</tr>
+<tr>
+<td>GetRecordingConfiguration</td>
+<td><code>getRecordingConfiguration</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>SetRecordingConfiguration</td>
+<td><code>setRecordingConfiguration</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+<tr>
+<td>CreateRecording</td>
+<td><code>createRecording</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+<tr>
+<td>DeleteRecording</td>
+<td><code>deleteRecording</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+<tr>
+<td>GetRecordingJobs</td>
+<td><code>getRecordingJobs</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;[]&gt;</code></td>
+</tr>
+<tr>
+<td>GetRecordingJobConfiguration</td>
+<td><code>getRecordingJobConfiguration</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>SetRecordingJobConfiguration</td>
+<td><code>setRecordingJobConfiguration</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+<tr>
+<td>CreateRecordingJob</td>
+<td><code>createRecordingJob</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>DeleteRecordingJob</td>
+<td><code>deleteRecordingJob</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="replay">Replay</h3>
+<ul>
+<li><a href="https://www.onvif.org/specs/srv/replay/ONVIF-ReplayControl-Service-Spec.pdf">Specification PDF</a></li>
+<li><a href="https://www.onvif.org/ver10/replay.wsdl">wsdl</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Onvif Operation</th>
+<th>JS Method</th>
+<th>JS Return Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GetServiceCapabilities</td>
+<td><code>getServiceCapabilities</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetReplayUri</td>
+<td><code>getReplayUri</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+<tr>
+<td>GetReplayConfiguration</td>
+<td><code>getReplayConfiguration</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>SetReplayConfiguration</td>
+<td><code>setReplayConfiguration</code></td>
+<td><code>Promise&lt;boolean&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="search">Search</h3>
+<ul>
+<li><a href="https://www.onvif.org/specs/srv/rsrch/ONVIF-RecordingSearch-Service-Spec.pdf">Specification PDF</a></li>
+<li><a href="https://www.onvif.org/ver10/search.wsdl">wsdl</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Onvif Operation</th>
+<th>JS Method</th>
+<th>JS Return Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GetSearchCapabilities</td>
+<td><code>getSearchCapabilities</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>GetRecordingSummary</td>
+<td><code>getRecordingSummary</code></td>
+<td><code>Promise&lt;Record&lt;string, unknown&gt;&gt;</code></td>
+</tr>
+<tr>
+<td>FindRecordings</td>
+<td><code>findRecordings</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+<tr>
+<td>FindEvents</td>
+<td><code>findEvents</code></td>
+<td><code>Promise&lt;string&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="onvif-probe">Onvif Probe</h2>
+<p>The <code>easy-onvif-node</code> artifact ships a top-level <code>probe()</code> method that
+executes WS-Discovery over UDP multicast (239.255.255.250:3702) using
+<code>node:dgram</code> and returns the raw probe matches.</p>
+<pre class="language-js"><code class="language-js">import { loadEasyOnvif } from 'easy-onvif-node';
+
+const onvif   = await loadEasyOnvif();
+const matches = await onvif.probe(3); // seconds
+
+for (const m of matches) {
+  console.log(m.endpointReference.address, m.xAddrs);
+}
+</code></pre>
+<p>WS-Discovery is <strong>not</strong> available in the browser build — calling <code>probe()</code> on
+<code>easy-onvif-web</code> throws <code>UnsupportedError</code>.</p>
+<h2 id="known-limitations">Known limitations</h2>
+<ul>
+<li><strong>Browser build</strong>: all HTTP is performed via <code>fetch</code>, so ONVIF endpoints
+must be reachable without a CORS preflight rejection. A reverse proxy is
+typically required for production use.</li>
+<li><strong>Node 25+ <code>dgram</code></strong>: newer Node builds have stricter multicast interface
+binding. If <code>probe()</code> returns no matches, verify that the network
+interface has an IPv4 address bound.</li>
+<li><strong>Handle lifecycle</strong>: every <code>connect()</code> allocates a Dart-side handle; call
+<code>disconnect(handle)</code> when you are finished to release the SOAP transport.</li>
+</ul>
+<h2 id="features-and-bugs">Features and bugs</h2>
+<p>Please file feature requests and bugs with
+<a href="https://github.com/faithoflifedev/easy_onvif/issues">the issue tracker</a>.</p>
+<h2 id="contributing">Contributing</h2>
+<p>Any help from the open-source community is always welcome and needed. See
+the contributor list and workflow in the
+<a href="https://github.com/faithoflifedev/easy_onvif/blob/main/README.md#contributing">parent project README</a>.</p>
+</section>
+
+
+      <section class="summary">
+          <h2>Libraries</h2>
+        <dl>
+          <dt id="node">
+  <span class="name"><a href="entry_node/">entry/node</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+          <dt id="web">
+  <span class="name"><a href="entry_web/">entry/web</a></span> 
+
+</dt>
+<dd>
+</dd>
+
+        </dl>
+      </section>
+  </div> <!-- /.main-content -->
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_js">easy_onvif_js package</a></li>
+</ol>
+
+    <h5 class="hidden-xs"><span class="package-name">easy_onvif_js</span> <span class="package-kind">package</span></h5>
+    <ol>
+      <li class="section-title">Libraries</li>
+      <li><a href="entry_node/">entry/node</a></li>
+      <li><a href="entry_web/">entry/web</a></li>
+</ol>
+
+  </div>
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div>
+</main>
+<footer>
+  <span class="no-break">
+    easy_onvif_js
+      0.1.0
+  </span>
+  
+</footer>
+
+
+<script src="static-assets/highlight.pack.js?v1"></script>
+<script src="static-assets/docs.dart.js"></script>
+
+</body>
+</html>
+

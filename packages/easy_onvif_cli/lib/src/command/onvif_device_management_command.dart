@@ -42,9 +42,25 @@ class OnvifDeviceManagementCommand extends Command {
     addSubcommand(OnvifGetSystemUrisDeviceManagementCommand());
     addSubcommand(OnvifGetUsersDeviceManagementCommand());
     addSubcommand(OnvifSetIPAddressFilterDeviceManagementCommand());
+    addSubcommand(OnvifAddIpAddressFilterDeviceManagementCommand());
+    addSubcommand(OnvifRemoveIpAddressFilterDeviceManagementCommand());
     addSubcommand(OnvifSystemRebootDeviceManagementCommand());
-    // addSubcommand(OnvifGetGeoLocationDeviceManagementCommand());
     addSubcommand(OnvifGetEndpointReferenceDeviceManagementCommand());
+    addSubcommand(OnvifGetRelayOutputsDeviceManagementCommand());
+    addSubcommand(OnvifSetRelayOutputStateDeviceManagementCommand());
+    addSubcommand(OnvifSetRelayOutputSettingsDeviceManagementCommand());
+    addSubcommand(OnvifSetGeoLocationDeviceManagementCommand());
+    addSubcommand(OnvifDeleteGeoLocationDeviceManagementCommand());
+    addSubcommand(OnvifSetHostnameDeviceManagementCommand());
+    addSubcommand(OnvifSetHostnameFromDhcpDeviceManagementCommand());
+    addSubcommand(OnvifSetDnsDeviceManagementCommand());
+    addSubcommand(OnvifSetNtpDeviceManagementCommand());
+    addSubcommand(OnvifSetDynamicDnsDeviceManagementCommand());
+    addSubcommand(OnvifSetNetworkProtocolsDeviceManagementCommand());
+    addSubcommand(OnvifGetNetworkDefaultGatewayDeviceManagementCommand());
+    addSubcommand(OnvifSetNetworkDefaultGatewayDeviceManagementCommand());
+    addSubcommand(OnvifGetZeroConfigurationDeviceManagementCommand());
+    addSubcommand(OnvifSetZeroConfigurationDeviceManagementCommand());
   }
 }
 
@@ -798,25 +814,11 @@ class OnvifSetIPAddressFilterDeviceManagementCommand
   String get name => 'set-ipaddress-filter';
 
   OnvifSetIPAddressFilterDeviceManagementCommand() {
-    argParser
-      ..addOption(
-        'type',
-        abbr: 't',
-        defaultsTo: 'allow',
-        allowed: ['allow', 'deny'],
-      )
-      ..addOption(
-        'ipv4-address',
-        abbr: '4',
-        help: 'The IPv4 address to allow or deny',
-      )
-      ..addOption(
-        'ipv6-address',
-        abbr: '6',
-        help: 'The IPv6 address to allow or deny',
-      )
-      ..addOption('ipv4-prefix', defaultsTo: '3')
-      ..addOption('ipv6-prefix', defaultsTo: '3');
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help: 'Path to a JSON file containing the IpAddressFilter configuration.',
+    );
   }
 
   @override
@@ -824,9 +826,16 @@ class OnvifSetIPAddressFilterDeviceManagementCommand
     await initializeOnvif();
 
     try {
-      final users = await deviceManagement.getUsers();
+      final file = File(argResults!['json-file'] as String);
+      final jsonMap =
+          json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+      final ipAddressFilter = IpAddressFilter.fromJson(jsonMap);
 
-      print(users);
+      final result = await deviceManagement.setIpAddressFilter(
+        ipAddressFilter: ipAddressFilter,
+      );
+
+      print(result);
     } on DioException catch (err) {
       throw UsageException('API usage error:', err.usage);
     }
@@ -855,30 +864,6 @@ class OnvifSystemRebootDeviceManagementCommand extends OnvifHelperCommand {
   }
 }
 
-/// This operation lists all existing geo location configurations for the
-/// device.
-// class OnvifGetGeoLocationDeviceManagementCommand extends OnvifHelperCommand {
-//   @override
-//   String get description =>
-//       'This operation lists all existing geo location configurations for the device.';
-
-//   @override
-//   String get name => 'get-geolocation';
-
-//   @override
-//   void run() async {
-//     await initializeOnvif();
-
-//     try {
-//       final message = await deviceManagement.getGeoLocation();
-
-//       print(message);
-//     } on DioException catch (err) {
-//       throw UsageException('API usage error:', err.usage);
-//     }
-//   }
-// }
-
 class OnvifGetEndpointReferenceDeviceManagementCommand
     extends OnvifHelperCommand {
   @override
@@ -896,6 +881,608 @@ class OnvifGetEndpointReferenceDeviceManagementCommand
       final message = await deviceManagement.getEndpointReference();
 
       print(message);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation gets a list of all available relay outputs and their settings.
+class OnvifGetRelayOutputsDeviceManagementCommand extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation gets a list of all available relay outputs and their settings.';
+
+  @override
+  String get name => 'get-relay-outputs';
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final result = await deviceManagement.getRelayOutputs();
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation sets the state of a relay output.
+class OnvifSetRelayOutputStateDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description => 'This operation sets the state of a relay output.';
+
+  @override
+  String get name => 'set-relay-output-state';
+
+  OnvifSetRelayOutputStateDeviceManagementCommand() {
+    argParser
+      ..addOption(
+        'relay-output-token',
+        abbr: 't',
+        help: 'The relay output token.',
+        mandatory: true,
+      )
+      ..addOption(
+        'logical-state',
+        abbr: 's',
+        help: 'The logical state of the relay.',
+        allowed: ['active', 'inactive'],
+        mandatory: true,
+      );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final token = argResults!['relay-output-token'] as String;
+      final state = RelayLogicalState.values.firstWhere(
+        (e) => e.value == argResults!['logical-state'],
+      );
+
+      final result = await deviceManagement.setRelayOutputState(
+        relayOutputToken: token,
+        logicalState: state,
+      );
+
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation sets the settings of a relay output.
+class OnvifSetRelayOutputSettingsDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation sets the settings of a relay output.';
+
+  @override
+  String get name => 'set-relay-output-settings';
+
+  OnvifSetRelayOutputSettingsDeviceManagementCommand() {
+    argParser
+      ..addOption(
+        'relay-output-token',
+        abbr: 't',
+        help: 'The relay output token.',
+        mandatory: true,
+      )
+      ..addOption(
+        'json-file',
+        abbr: 'f',
+        help:
+            'Path to a JSON file containing the RelayOutputSettings (Mode, DelayTime, IdleState).',
+      );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final token = argResults!['relay-output-token'] as String;
+      final file = File(argResults!['json-file'] as String);
+      final jsonMap =
+          json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+      final settings = RelayOutputSettings.fromJson(jsonMap);
+
+      final result = await deviceManagement.setRelayOutputSettings(
+        relayOutputToken: token,
+        properties: settings,
+      );
+
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation sets the geo location on the device.
+class OnvifSetGeoLocationDeviceManagementCommand extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation sets the geo location on the device.';
+
+  @override
+  String get name => 'set-geolocation';
+
+  OnvifSetGeoLocationDeviceManagementCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help: 'Path to a JSON file containing a list of LocationEntity objects.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonList = json.decode(file.readAsStringSync()) as List;
+      final locations = jsonList
+          .map((e) => LocationEntity.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      final result = await deviceManagement.setGeoLocation(locations);
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation deletes the geo location on the device.
+class OnvifDeleteGeoLocationDeviceManagementCommand extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation deletes the geo location on the device.';
+
+  @override
+  String get name => 'delete-geolocation';
+
+  OnvifDeleteGeoLocationDeviceManagementCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help:
+          'Path to a JSON file containing a list of LocationEntity objects to delete.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonList = json.decode(file.readAsStringSync()) as List;
+      final locations = jsonList
+          .map((e) => LocationEntity.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      final result = await deviceManagement.deleteGeoLocation(locations);
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation sets the hostname on a device.
+class OnvifSetHostnameDeviceManagementCommand extends OnvifHelperCommand {
+  @override
+  String get description => 'This operation sets the hostname on a device.';
+
+  @override
+  String get name => 'set-hostname';
+
+  OnvifSetHostnameDeviceManagementCommand() {
+    argParser.addOption(
+      'name',
+      abbr: 'n',
+      help: 'The hostname to set.',
+      mandatory: true,
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final name = argResults!['name'] as String;
+      final result = await deviceManagement.setHostname(name);
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation controls whether the hostname shall be obtained via DHCP.
+class OnvifSetHostnameFromDhcpDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation controls whether the hostname shall be obtained via DHCP.';
+
+  @override
+  String get name => 'set-hostname-from-dhcp';
+
+  OnvifSetHostnameFromDhcpDeviceManagementCommand() {
+    argParser.addFlag(
+      'from-dhcp',
+      help: 'Set to true to obtain hostname via DHCP.',
+      defaultsTo: true,
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final fromDhcp = argResults!['from-dhcp'] as bool;
+      final result = await deviceManagement.setHostnameFromDhcp(fromDhcp);
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation sets the DNS settings on a device.
+class OnvifSetDnsDeviceManagementCommand extends OnvifHelperCommand {
+  @override
+  String get description => 'This operation sets the DNS settings on a device.';
+
+  @override
+  String get name => 'set-dns';
+
+  OnvifSetDnsDeviceManagementCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help: 'Path to a JSON file containing the DnsInformation configuration.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonMap =
+          json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+      final dnsInfo = DnsInformation.fromJson(jsonMap);
+
+      final result = await deviceManagement.setDns(dnsInfo);
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation sets the NTP settings on a device.
+class OnvifSetNtpDeviceManagementCommand extends OnvifHelperCommand {
+  @override
+  String get description => 'This operation sets the NTP settings on a device.';
+
+  @override
+  String get name => 'set-ntp';
+
+  OnvifSetNtpDeviceManagementCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help: 'Path to a JSON file containing the NtpInformation configuration.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonMap =
+          json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+      final ntpInfo = NtpInformation.fromJson(jsonMap);
+
+      final result = await deviceManagement.setNtp(ntpInfo);
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation sets the dynamic DNS settings on a device.
+class OnvifSetDynamicDnsDeviceManagementCommand extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation sets the dynamic DNS settings on a device.';
+
+  @override
+  String get name => 'set-dynamic-dns';
+
+  OnvifSetDynamicDnsDeviceManagementCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help:
+          'Path to a JSON file containing the DynamicDnsInformation configuration.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonMap =
+          json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+      final dnsInfo = DynamicDnsInformation.fromJson(jsonMap);
+
+      final result = await deviceManagement.setDynamicDns(dnsInfo);
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation configures one or more defined network protocols supported
+/// by the device.
+class OnvifSetNetworkProtocolsDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation configures one or more defined network protocols supported by the device.';
+
+  @override
+  String get name => 'set-network-protocols';
+
+  OnvifSetNetworkProtocolsDeviceManagementCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help: 'Path to a JSON file containing a list of NetworkProtocol objects.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonList = json.decode(file.readAsStringSync()) as List;
+      final protocols = jsonList
+          .map((e) => NetworkProtocol.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      final result = await deviceManagement.setNetworkProtocols(protocols);
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation gets the default gateway settings from a device.
+class OnvifGetNetworkDefaultGatewayDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation gets the default gateway settings from a device.';
+
+  @override
+  String get name => 'get-network-default-gateway';
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final result = await deviceManagement.getNetworkDefaultGateway();
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation sets the default gateway settings on a device.
+class OnvifSetNetworkDefaultGatewayDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation sets the default gateway settings on a device.';
+
+  @override
+  String get name => 'set-network-default-gateway';
+
+  OnvifSetNetworkDefaultGatewayDeviceManagementCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help: 'Path to a JSON file containing the NetworkGateway configuration.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonMap =
+          json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+      final gateway = NetworkGateway.fromJson(jsonMap);
+
+      final result = await deviceManagement.setNetworkDefaultGateway(gateway);
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation gets the zero-configuration settings from a device.
+class OnvifGetZeroConfigurationDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation gets the zero-configuration settings from a device.';
+
+  @override
+  String get name => 'get-zero-configuration';
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final result = await deviceManagement.getZeroConfiguration();
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation sets the zero-configuration settings on a device.
+class OnvifSetZeroConfigurationDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation sets the zero-configuration settings on a device.';
+
+  @override
+  String get name => 'set-zero-configuration';
+
+  OnvifSetZeroConfigurationDeviceManagementCommand() {
+    argParser
+      ..addOption(
+        'interface-token',
+        abbr: 't',
+        help: 'The interface token.',
+        mandatory: true,
+      )
+      ..addFlag(
+        'enabled',
+        help: 'Enable or disable zero-configuration.',
+        defaultsTo: true,
+      );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final token = argResults!['interface-token'] as String;
+      final enabled = argResults!['enabled'] as bool;
+
+      final result = await deviceManagement.setZeroConfiguration(
+        interfaceToken: token,
+        enabled: enabled,
+      );
+
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation adds an IP address filter entry on a device.
+class OnvifAddIpAddressFilterDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation adds an IP address filter entry on a device.';
+
+  @override
+  String get name => 'add-ip-address-filter';
+
+  OnvifAddIpAddressFilterDeviceManagementCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help: 'Path to a JSON file containing the IpAddressFilter configuration.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonMap =
+          json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+      final ipAddressFilter = IpAddressFilter.fromJson(jsonMap);
+
+      final result = await deviceManagement.addIpAddressFilter(
+        ipAddressFilter: ipAddressFilter,
+      );
+
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation removes an IP address filter entry on a device.
+class OnvifRemoveIpAddressFilterDeviceManagementCommand
+    extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation removes an IP address filter entry on a device.';
+
+  @override
+  String get name => 'remove-ip-address-filter';
+
+  OnvifRemoveIpAddressFilterDeviceManagementCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help: 'Path to a JSON file containing the IpAddressFilter configuration.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonMap =
+          json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+      final ipAddressFilter = IpAddressFilter.fromJson(jsonMap);
+
+      final result = await deviceManagement.removeIpAddressFilter(
+        ipAddressFilter: ipAddressFilter,
+      );
+
+      print(result);
     } on DioException catch (err) {
       throw UsageException('API usage error:', err.usage);
     }

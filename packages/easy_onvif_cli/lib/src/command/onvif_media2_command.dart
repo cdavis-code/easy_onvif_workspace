@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:args/command_runner.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_onvif/media2.dart';
 import 'package:easy_onvif/util.dart';
 
 import 'onvif_helper_command.dart';
@@ -21,9 +25,11 @@ class OnvifMedia2Command extends Command {
     addSubcommand(OnvifGetVideoEncoderInstancesMediaCommand());
     addSubcommand(OnvifGetVideoEncoderConfigurationsMediaCommand());
     addSubcommand(OnvifGetVideoSourceConfigurationOptionsMediaCommand());
-    // addSubcommand(OnvifDeleteProfileMediaCommand());
+    addSubcommand(OnvifDeleteProfileMediaCommand());
     addSubcommand(OnvifStartMulticastStreaming2MediaCommand());
     addSubcommand(OnvifStopMulticastStreaming2MediaCommand());
+    addSubcommand(OnvifGetWebRTCConfigurationsMediaCommand());
+    addSubcommand(OnvifSetWebRTCConfigurationsMediaCommand());
   }
 }
 
@@ -511,6 +517,102 @@ class OnvifStopMulticastStreaming2MediaCommand extends OnvifHelperCommand {
 
     try {
       await media.media2.stopMulticastStreaming(argResults!['profile-token']);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation deletes a profile. Deletion of a profile is only possible
+/// for non-fixed profiles.
+class OnvifDeleteProfileMediaCommand extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation deletes a profile. Deletion of a profile is only possible for non-fixed profiles.';
+
+  @override
+  String get name => 'delete-profile';
+
+  OnvifDeleteProfileMediaCommand() {
+    argParser.addOption(
+      'reference-token',
+      abbr: 't',
+      valueHelp: 'token',
+      mandatory: true,
+      help: 'The token of the profile to delete.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final result = await media.media2.deleteProfile(
+        argResults!['reference-token'],
+      );
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation returns the configured WebRTC signaling configurations of a
+/// device.
+class OnvifGetWebRTCConfigurationsMediaCommand extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation returns the configured WebRTC signaling configurations of a device.';
+
+  @override
+  String get name => 'get-webrtc-configurations';
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final result = await media.media2.getWebRTCConfigurations();
+      print(result);
+    } on DioException catch (err) {
+      throw UsageException('API usage error:', err.usage);
+    }
+  }
+}
+
+/// This operation configures the WebRTC signaling configurations of a device.
+/// Passing an empty list deletes the existing configurations.
+class OnvifSetWebRTCConfigurationsMediaCommand extends OnvifHelperCommand {
+  @override
+  String get description =>
+      'This operation configures the WebRTC signaling configurations of a device. Passing an empty list deletes the existing configurations.';
+
+  @override
+  String get name => 'set-webrtc-configurations';
+
+  OnvifSetWebRTCConfigurationsMediaCommand() {
+    argParser.addOption(
+      'json-file',
+      abbr: 'f',
+      help:
+          'Path to a JSON file containing a list of WebrtcConfiguration objects.',
+    );
+  }
+
+  @override
+  void run() async {
+    await initializeOnvif();
+
+    try {
+      final file = File(argResults!['json-file'] as String);
+      final jsonList = json.decode(file.readAsStringSync()) as List;
+      final configurations = jsonList
+          .map((e) => WebrtcConfiguration.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      final result = await media.media2.setWebRTCConfigurations(configurations);
+      print(result);
     } on DioException catch (err) {
       throw UsageException('API usage error:', err.usage);
     }
