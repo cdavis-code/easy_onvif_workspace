@@ -29,7 +29,11 @@ name: Publish to pub.dev
 on:
   push:
     tags:
+      # pub.dev's automated-publishing config holds a tag pattern containing
+      # {{version}}. Both spellings are accepted here so either configured
+      # pattern ('v{{version}}' or '{{version}}') can trigger the release.
       - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - '[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch:
     inputs:
       package:
