@@ -151,7 +151,7 @@ jobs:
         # Bounded and non-interactive on purpose: an unconfigured package would
         # otherwise park the job until the job timeout.
         run: |
-          if ! timeout 240s dart pub --verbosity=all publish --force < /dev/null; then
+          if ! timeout 240s dart pub publish --force < /dev/null; then
             echo "::error::Publish failed. If the log shows 'Waiting for your authorization', this package has no trusted publisher: open https://pub.dev/${PKG}/admin and add a GitHub trusted publisher for owner=cdavis-code, repository=easy_onvif_workspace, workflow=publish-pub-dev.yaml"
             exit 1
           fi
