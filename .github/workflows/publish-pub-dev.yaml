@@ -13,6 +13,13 @@ name: Publish to pub.dev
 #     workflow publish-pub-dev.yaml, environment (leave empty unless the job
 #     uses one)
 #
+# Until that exists for a package, publishing it from CI has no credential to
+# use, and the Dart CLI waits on an interactive browser sign-in - the job then
+# ends at timeout-minutes below rather than failing fast (observed on
+# easy_onvif_mcp before its trusted publisher was configured). Configure the
+# trusted publisher first, or switch this step to a PUB_TOKEN secret from
+# pub.dev/account/publishing.
+#
 # `easy_onvif` and `easy_onvif_cli` are version-locked, so one tag can legitimately
 # match more than one package; every match is published, not just the first.
 #
