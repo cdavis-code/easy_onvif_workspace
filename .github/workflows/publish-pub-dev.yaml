@@ -122,7 +122,15 @@ jobs:
 
       - name: Publish
         working-directory: ${{ matrix.package.dir }}
-        # Closed stdin, so a missing trusted publisher fails immediately instead
-        # of blocking on the interactive browser authorization fallback. Do not
-        # set PUB_ENVIRONMENT here: the SDK derives it for trusted publishing.
-        run: dart pub publish --force < /dev/null
+        # Bounded and non-interactive on purpose. With no trusted publisher on
+        # pub.dev the CLI starts a Google OAuth loopback flow and waits on a
+        # browser callback CI can never serve, so an unbounded run just hangs
+        # (run 40214623087 and 40216128200 both parked the full job timeout).
+        # Failing here with the exact remedy beats a cancellation notice.
+        run: |
+          if ! timeout 240s dart pub publish --force < /dev/null; then
+            echo "::error::Publish failed. If the log shows 'Waiting for your authorization', this package has no trusted publisher: open https://pub.dev/${PKG}/admin and add a GitHub trusted publisher for owner=cdavis-code, repository=easy_onvif_workspace, workflow=publish-pub-dev.yaml"
+            exit 1
+          fi
+        env:
+          PKG: ${{ matrix.package.name }}
