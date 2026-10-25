@@ -1,0 +1,11 @@
+name: easy_onvif_mcp_example
+version: 0.0.1
+description: Runnable examples for the easy_onvif_mcp MCP server.
+publish_to: none
+
+environment:
+  sdk: ^3.10.3
+
+dependencies:
+  easy_onvif_mcp:
+    path: ../

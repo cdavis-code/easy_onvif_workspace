@@ -7,6 +7,8 @@ workspace:
   - packages/easy_onvif
   - packages/easy_onvif_cli
   - packages/easy_onvif_js
+  - packages/easy_onvif_mcp
+  - packages/easy_onvif_mcp_js
 
 dev_dependencies:
   melos: ^8.2.2
@@ -52,6 +54,22 @@ melos:
       description: Build the `easy-onvif-web` npm artifact via dart2wasm.
       run: bash packages/easy_onvif_js/tool/build_web.sh
 
+    build:npm:mcp:
+      description: Build the `easy-onvif-mcp` npm artifact (the ONVIF MCP server) via dart2js.
+      run: bash packages/easy_onvif_mcp_js/tool/build_mcp_node.sh
+
+    publish:npm:
+      description: Bump, build, commit and tag the `easy-onvif-node` / `easy-onvif-web` npm artifacts.
+      run: bash packages/easy_onvif_js/tool/publish_npm.sh
+
+    publish:npm:mcp:
+      description: Bump, build, commit and tag the `easy-onvif-mcp` npm artifact.
+      run: bash packages/easy_onvif_mcp_js/tool/publish_npm.sh
+
+    smoke:npm:mcp:
+      description: Smoke-test the compiled `easy-onvif-mcp` bundle over a real MCP handshake.
+      run: node --test npm/easy-onvif-mcp/test/smoke.mjs
+
     smoke:npm:node:
       description: Smoke-test the compiled `easy-onvif-node` bundle.
       run: node packages/easy_onvif_js/tool/smoke_test_node.mjs
@@ -89,12 +107,16 @@ melos:
     #   description: Run `dart publish` for all packages.melos
 
     dryrun:lib:
-      run: melos exec --ignore="easy_onvif_cli" dart pub publish --dry-run
+      run: melos exec --scope="easy_onvif" dart pub publish --dry-run
       description: Run `dart pub publish --dry-run` for lib package.
 
     dryrun:cli:
-      run: melos exec --ignore="easy_onvif" dart pub publish --dry-run
+      run: melos exec --scope="easy_onvif_cli" dart pub publish --dry-run
       description: Run `dart pub publish --dry-run` for cli package.
+
+    dryrun:mcp:
+      run: melos exec --scope="easy_onvif_mcp" dart pub publish --dry-run
+      description: Run `dart pub publish --dry-run` for the MCP server package.
 
     # build:
     #   run: melos exec --ignore="packages/easy_onvif_cli" dart run build_runner build --delete-conflicting-outputs

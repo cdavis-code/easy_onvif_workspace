@@ -1,0 +1,13 @@
+# Dart build artifacts
+.dart_tool/
+pubspec.lock
+build/
+
+# OS / editor noise
+.DS_Store
+.idea/
+.vscode/
+
+# npm artifact: the compiled runtime staged into ../../npm/easy-onvif-mcp/dist/
+# is tracked from the repo root (see the root .gitignore negation).
+# node_modules/ and stray dist/ output are ignored there too.

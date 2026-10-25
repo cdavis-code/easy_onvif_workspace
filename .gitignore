@@ -22,6 +22,12 @@ build/
 *.js.map
 *.wasm
 
+# JS/npm build output. The published artifacts under npm/*/dist are deliberately
+# tracked (they are what `npm publish` ships), so re-include exactly those.
+dist/
+node_modules/
+!/npm/**/dist/
+
 # Logs
 *.log
 

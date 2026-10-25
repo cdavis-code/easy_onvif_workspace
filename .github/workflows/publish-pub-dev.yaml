@@ -1,0 +1,86 @@
+name: Publish to pub.dev
+
+# Publishes whichever package(s) declare the version of the pushed tag, using
+# OIDC trusted publishing — no pub.dev token secret is required.
+#
+# Prerequisites, per package, at
+# https://pub.dev/packages/<name>/admin :
+#   - enable "Publishing from GitHub Actions" for this repository and workflow
+#
+# `easy_onvif` and `easy_onvif_cli` are version-locked, so one tag can legitimately
+# match more than one package; every match is published, not just the first.
+#
+# npm artifacts publish from a different tag scheme (see dart.yml) so a single
+# tag can never trigger both paths.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish'
+        required: true
+        type: choice
+        options:
+          - easy_onvif
+          - easy_onvif_cli
+          - easy_onvif_mcp
+
+jobs:
+  detect:
+    name: Match tag to package version
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.match.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Collect every package whose version equals the tag
+        id: match
+        env:
+          # Passed through the environment rather than interpolated into the
+          # shell, so event payload text can never become script.
+          SELECTED: ${{ github.event.inputs.package }}
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          MATCHES='[]'
+
+          for PKG in easy_onvif easy_onvif_cli easy_onvif_mcp; do
+            if [ -n "$SELECTED" ] && [ "$PKG" != "$SELECTED" ]; then
+              continue
+            fi
+
+            PKG_VERSION="$(grep '^version: ' "packages/$PKG/pubspec.yaml" | awk '{print $2}')"
+            echo "  $PKG: $PKG_VERSION"
+
+            # A manual dispatch publishes the chosen package as-is; a tag push
+            # must name a version some package actually declares.
+            if [ -n "$SELECTED" ] || [ "$TAG_VERSION" = "$PKG_VERSION" ]; then
+              MATCHES="$(jq -c --arg name "$PKG" --arg dir "packages/$PKG" \
+                '. + [{name: $name, dir: $dir}]' <<< "$MATCHES")"
+            fi
+          done
+
+          if [ "$MATCHES" = '[]' ]; then
+            echo "::error::No package declares version $TAG_VERSION"
+            echo "Checked: easy_onvif, easy_onvif_cli, easy_onvif_mcp"
+            exit 1
+          fi
+
+          echo "packages=$MATCHES" >> "$GITHUB_OUTPUT"
+          echo "Publishing: $(jq -c 'map(.name)' <<< "$MATCHES")"
+
+  publish:
+    name: Publish ${{ matrix.package.name }}
+    needs: detect
+    permissions:
+      id-token: write # OIDC authentication with pub.dev
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.detect.outputs.packages) }}
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: ${{ matrix.package.dir }}

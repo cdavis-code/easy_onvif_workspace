@@ -3,16 +3,34 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
+# Publishing prerequisites (one-time, outside the repo). A missing secret fails
+# the publish job loudly *after* the build, so confirm these before pushing a
+# release tag — npm versions cannot be overwritten without penalty:
+#   - repository secret NPM_TOKEN, with publish rights on the npm account
+#   - the npm names easy-onvif-node / easy-onvif-web / easy-onvif-mcp claimed
+#   - the version in each npm/*/package.json equals the tag it publishes
+
 name: Dart
 
 on:
   push:
     branches: [main]
+    # npm releases are tagged per artifact, e.g. `easy_onvif_js-v3.1.5` or
+    # `easy_onvif_mcp_js-v0.1.0`. Bare `v*` tags belong to pub.dev publishing
+    # (see publish-pub-dev.yaml) and are deliberately NOT matched here, so a
+    # single tag can never trigger two publishing paths.
+    tags:
+      - 'easy_onvif_js-v*'
+      - 'easy_onvif_mcp_js-v*'
   pull_request:
     branches: [main]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   pana:
@@ -38,16 +56,154 @@ jobs:
       - name: Install dependencies
         run: dart run melos bootstrap
 
-      # Uncomment this step to verify the use of 'dart format' on each commit.
-      # - name: Verify formatting
-      #   run: dart format --output=none --set-exit-if-changed .
+      - name: Verify formatting
+        run: dart run melos run format-check
 
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
-      # - name: Analyze project source
-      #   run: dart analyze
+      - name: Analyze project source
+        run: dart run melos run analyze
 
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
-      # - name: Run tests
-      #   run: dart test
+      # Only the packages with hermetic tests. `easy_onvif`'s fixture-based
+      # tests read XML from a test_data checkout that is not part of this
+      # repository, so they are not runnable here.
+      - name: Run MCP server tests
+        working-directory: packages/easy_onvif_mcp
+        run: dart test
+
+  # Compiles every npm artifact once. Publishing jobs reuse this output so a
+  # release tag never pays for `dart compile js` / `dart compile wasm` twice.
+  build-npm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: dart run melos bootstrap
+
+      - name: Build npm artifacts
+        run: |
+          dart run melos run build:npm
+          dart run melos run build:npm:mcp
+
+      - name: Smoke-test the node library bundle
+        run: dart run melos run smoke:npm:node
+
+      - name: Smoke-test the MCP bundle over a real handshake
+        run: dart run melos run smoke:npm:mcp
+
+      - name: Upload npm packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-packages
+          path: npm/
+          if-no-files-found: error
+
+  publish-easy-onvif-node:
+    name: Publish easy-onvif-node
+    needs: [build, build-npm]
+    if: startsWith(github.ref, 'refs/tags/easy_onvif_js-v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+          path: npm
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Check the tag matches the package version
+        working-directory: npm/easy-onvif-node
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#easy_onvif_js-v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          echo "tag=$TAG_VERSION package=$PKG_VERSION"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag says $TAG_VERSION but package.json says $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Publish to npm
+        working-directory: npm/easy-onvif-node
+        run: npm publish --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-easy-onvif-web:
+    name: Publish easy-onvif-web
+    needs: [build, build-npm]
+    if: startsWith(github.ref, 'refs/tags/easy_onvif_js-v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+          path: npm
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Check the tag matches the package version
+        working-directory: npm/easy-onvif-web
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#easy_onvif_js-v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          echo "tag=$TAG_VERSION package=$PKG_VERSION"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag says $TAG_VERSION but package.json says $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Publish to npm
+        working-directory: npm/easy-onvif-web
+        run: npm publish --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-easy-onvif-mcp:
+    name: Publish easy-onvif-mcp
+    needs: [build, build-npm]
+    if: startsWith(github.ref, 'refs/tags/easy_onvif_mcp_js-v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+          path: npm
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Check the tag matches the package version
+        working-directory: npm/easy-onvif-mcp
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#easy_onvif_mcp_js-v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          echo "tag=$TAG_VERSION package=$PKG_VERSION"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag says $TAG_VERSION but package.json says $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Publish to npm
+        working-directory: npm/easy-onvif-mcp
+        run: npm publish --access=public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

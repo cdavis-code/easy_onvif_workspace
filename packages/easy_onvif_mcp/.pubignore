@@ -1,0 +1,15 @@
+# Development-only files
+.dart_tool/
+test/
+analysis_options.yaml
+pubspec.lock
+
+# IDE / editor files
+*.iml
+.idea/
+.vscode/
+.DS_Store
+
+# Local config (camera credentials must never ship)
+.env
+.env.*
