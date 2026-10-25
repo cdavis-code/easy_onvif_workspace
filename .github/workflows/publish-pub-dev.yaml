@@ -1,11 +1,17 @@
 name: Publish to pub.dev
 
 # Publishes whichever package(s) declare the version of the pushed tag, using
-# OIDC trusted publishing — no pub.dev token secret is required.
+# pub.dev trusted publishing (OIDC) - no long-lived credential in the repo.
 #
-# Prerequisites, per package, at
-# https://pub.dev/packages/<name>/admin :
-#   - enable "Publishing from GitHub Actions" for this repository and workflow
+# Note: `dart-lang/setup-dart/.github/workflows/publish.yml@v1` is NOT OIDC - it
+# injects a `PUB_TOKEN` secret and fails immediately when that is absent (seen
+# in run 40212827989). Publishing directly is what actually uses the OIDC token.
+#
+# Prerequisites, per package, at https://pub.dev/packages/<name>/admin:
+#   - add a "Trusted publisher": provider GitHub,
+#     owner cdavis-code, repository easy_onvif_workspace,
+#     workflow publish-pub-dev.yaml, environment (leave empty unless the job
+#     uses one)
 #
 # `easy_onvif` and `easy_onvif_cli` are version-locked, so one tag can legitimately
 # match more than one package; every match is published, not just the first.
@@ -76,11 +82,27 @@ jobs:
     name: Publish ${{ matrix.package.name }}
     needs: detect
     permissions:
-      id-token: write # OIDC authentication with pub.dev
+      id-token: write # OIDC token for pub.dev trusted publishing
+      contents: read
     strategy:
       fail-fast: false
       matrix:
         package: ${{ fromJson(needs.detect.outputs.packages) }}
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    with:
-      working-directory: ${{ matrix.package.dir }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dart-lang/setup-dart@v1
+
+      # The workspace has to resolve before a member can be packaged.
+      - name: Resolve dependencies
+        run: dart pub get
+
+      - name: Verify the package
+        working-directory: ${{ matrix.package.dir }}
+        run: dart pub publish --dry-run
+
+      - name: Publish
+        working-directory: ${{ matrix.package.dir }}
+        run: dart pub publish --force
