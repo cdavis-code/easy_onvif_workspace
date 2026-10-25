@@ -111,6 +111,15 @@ so are absent: `GetScopes`, and imaging options/settings beyond
 `ImagingStatus20` (`onvif_imaging_get_status` is the closest available).
 Add them once the core exposes those requests — one `ToolDef` entry each.
 
+### Credentials are never echoed back
+
+`onvif_connect` deliberately skips `dart_mcp`'s automatic argument validation
+and validates in-handler. The library's validation failure message quotes the
+rejected value — ``Value `12345` is not of type `String` at
+path #root["password"]`` — and numeric default passwords are common on ONVIF
+cameras, so a mistyped credential would otherwise be written into the model's
+transcript. Errors name the offending field only.
+
 ### One device at a time
 
 Tool calls are serialized. `easy_onvif`'s SOAP layer keeps its clock offset and

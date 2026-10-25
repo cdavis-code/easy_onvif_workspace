@@ -34,6 +34,9 @@ List<ToolDef> buildOnvifTools() => [
         '~/.onvif/credentials.json) are set, in which case the first call '
         'connects automatically.',
     inputSchema: deviceArgs,
+    // Carries a credential: validate in the handler (requiredString) rather
+    // than letting dart_mcp echo a rejected value back into the transcript.
+    validateArguments: false,
     dispatch: (args, server) async {
       final onvif = await server.connectTo(
         host: requiredString(args, 'host'),

@@ -45,6 +45,38 @@ void main() {
     });
   });
 
+  group('credentials are never echoed', () {
+    // dart_mcp's schema-validation failure quotes the rejected value
+    // (``Value `12345` is not of type `String` at path #root["password"]``).
+    // Numeric default passwords are common on ONVIF devices, so a mistyped
+    // credential must not be able to reach the model transcript.
+    test('requiredString omits the rejected value', () {
+      expect(
+        () => requiredString({'password': 12345}, 'password'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            isNot(contains('12345')),
+          ),
+        ),
+      );
+    });
+
+    test('any tool accepting a password opts out of schema validation', () {
+      for (final tool in buildOnvifTools()) {
+        final properties = tool.inputSchema.properties ?? const {};
+        if (properties.containsKey('password')) {
+          expect(
+            tool.validateArguments,
+            isFalse,
+            reason: '${tool.name} would echo a credential on a type error',
+          );
+        }
+      }
+    });
+  });
+
   group('jsonSafe', () {
     test('keeps @-prefixed attribute keys, which carry the tokens', () {
       final encoded = jsonSafe(Preset.fromToken('4', name: 'Doorway'));

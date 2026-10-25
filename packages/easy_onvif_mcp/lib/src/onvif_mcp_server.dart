@@ -68,6 +68,9 @@ base class OnvifMcpServer extends MCPServer with ToolsSupport {
           inputSchema: tool.inputSchema,
         ),
         (request) => _invoke(tool, request),
+        // Tools carrying a credential opt out: dart_mcp's validation failure
+        // message quotes the rejected value verbatim.
+        validateArguments: tool.validateArguments,
       );
     }
   }

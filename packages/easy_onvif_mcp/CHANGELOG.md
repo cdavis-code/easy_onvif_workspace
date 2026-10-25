@@ -17,5 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   tools, and the PTZ movement/preset set.
 - Credentials from `ONVIF_HOST` / `ONVIF_USERNAME` / `ONVIF_PASSWORD` or the
   `easy_onvif_cli` `~/.onvif/credentials.json`.
+- Credentials are never echoed back: `onvif_connect` opts out of `dart_mcp`
+  argument validation, whose failure message quotes the rejected value, and
+  validates in-handler instead (a numeric default password would otherwise be
+  disclosed in the error text).
 - Device-mutating operations (reboot, user management, network writes) are
   intentionally not exposed.
