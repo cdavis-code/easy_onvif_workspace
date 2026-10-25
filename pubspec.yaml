@@ -58,13 +58,17 @@ melos:
       description: Build the `easy-onvif-mcp` npm artifact (the ONVIF MCP server) via dart2js.
       run: bash packages/easy_onvif_mcp_js/tool/build_mcp_node.sh
 
-    publish:npm:
-      description: Bump, build, commit and tag the `easy-onvif-node` / `easy-onvif-web` npm artifacts.
+    release:npm:
+      description: Bump, build, commit and tag the `easy-onvif-node` / `easy-onvif-web` npm artifacts. Does not publish - pushing the tag triggers CI publish.
       run: bash packages/easy_onvif_js/tool/publish_npm.sh
 
-    publish:npm:mcp:
-      description: Bump, build, commit and tag the `easy-onvif-mcp` npm artifact.
+    release:npm:mcp:
+      description: Bump, build, commit and tag the `easy-onvif-mcp` npm artifact. Does not publish - pushing the tag triggers CI publish.
       run: bash packages/easy_onvif_mcp_js/tool/publish_npm.sh
+
+    publish:npm:
+      description: Publish all three npm artifacts to the registry immediately, from the current working tree.
+      run: bash tool/publish_npm_now.sh
 
     smoke:npm:mcp:
       description: Smoke-test the compiled `easy-onvif-mcp` bundle over a real MCP handshake.

@@ -127,9 +127,35 @@ jobs:
           path: npm/
           if-no-files-found: error
 
+  # Publishes the built artifacts to a throwaway registry, installs them back
+  # and runs them. This is the only way to catch packaging defects (missing
+  # files, broken bin wiring, stale staged output) before an irreversible
+  # publish, since the real registry needs a credential CI cannot use to create
+  # a new package anyway.
+  publish-rehearsal:
+    name: Rehearse npm publish
+    needs: build-npm
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Download the artifacts the release jobs would ship
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-packages
+          path: npm
+
+      - name: Publish, install and run against an ephemeral registry
+        run: bash tool/rehearse_npm_publish.sh "$GITHUB_WORKSPACE/npm"
+
   publish-easy-onvif-node:
     name: Publish easy-onvif-node
-    needs: [build, build-npm]
+    needs: [build, build-npm, publish-rehearsal]
     if: startsWith(github.ref, 'refs/tags/easy_onvif_js-v')
     runs-on: ubuntu-latest
 
@@ -163,7 +189,7 @@ jobs:
 
   publish-easy-onvif-web:
     name: Publish easy-onvif-web
-    needs: [build, build-npm]
+    needs: [build, build-npm, publish-rehearsal]
     if: startsWith(github.ref, 'refs/tags/easy_onvif_js-v')
     runs-on: ubuntu-latest
 
@@ -197,7 +223,7 @@ jobs:
 
   publish-easy-onvif-mcp:
     name: Publish easy-onvif-mcp
-    needs: [build, build-npm]
+    needs: [build, build-npm, publish-rehearsal]
     if: startsWith(github.ref, 'refs/tags/easy_onvif_mcp_js-v')
     runs-on: ubuntu-latest
 
