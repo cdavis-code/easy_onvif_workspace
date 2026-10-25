@@ -93,7 +93,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: dart-lang/setup-dart@v1
+      # Flutter, not setup-dart: root `dart pub get` also resolves
+      # packages/easy_onvif/example, a Flutter app, and fails with
+      # "depends on flutter from sdk which doesn't exist" on a Dart-only runner
+      # (seen in run 40213338946).
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
 
       # The workspace has to resolve before a member can be packaged.
       - name: Resolve dependencies
