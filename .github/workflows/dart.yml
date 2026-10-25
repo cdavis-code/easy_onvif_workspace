@@ -53,14 +53,23 @@ jobs:
           channel: 'stable'
       # - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
 
+      # Melos scripts call other Melos scripts by bare name (`melos run x &&
+      # melos run y`, `melos exec ...`), so the global binary has to exist and
+      # be on PATH. Without this every nested script dies with
+      # `/bin/sh: 1: eval: melos: not found`.
+      - name: Install Melos on PATH
+        run: |
+          dart pub global activate melos
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
       - name: Install dependencies
-        run: dart run melos bootstrap
+        run: melos bootstrap
 
       - name: Verify formatting
-        run: dart run melos run format-check
+        run: melos run format-check
 
       - name: Analyze project source
-        run: dart run melos run analyze
+        run: melos run analyze
 
       # Only the packages with hermetic tests. `easy_onvif`'s fixture-based
       # tests read XML from a test_data checkout that is not part of this
@@ -85,19 +94,24 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Install Melos on PATH
+        run: |
+          dart pub global activate melos
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
       - name: Install dependencies
-        run: dart run melos bootstrap
+        run: melos bootstrap
 
       - name: Build npm artifacts
         run: |
-          dart run melos run build:npm
-          dart run melos run build:npm:mcp
+          melos run build:npm
+          melos run build:npm:mcp
 
       - name: Smoke-test the node library bundle
-        run: dart run melos run smoke:npm:node
+        run: melos run smoke:npm:node
 
       - name: Smoke-test the MCP bundle over a real handshake
-        run: dart run melos run smoke:npm:mcp
+        run: melos run smoke:npm:mcp
 
       - name: Upload npm packages
         uses: actions/upload-artifact@v4
