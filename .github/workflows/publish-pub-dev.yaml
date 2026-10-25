@@ -81,6 +81,10 @@ jobs:
   publish:
     name: Publish ${{ matrix.package.name }}
     needs: detect
+    # Without a trusted publisher on pub.dev, `dart pub publish` falls back to
+    # interactive browser auth and waits on stdin forever (seen hanging in run
+    # 40213634157). Fail the job instead of parking a runner for six hours.
+    timeout-minutes: 15
     permissions:
       id-token: write # OIDC token for pub.dev trusted publishing
       contents: read
@@ -111,4 +115,7 @@ jobs:
 
       - name: Publish
         working-directory: ${{ matrix.package.dir }}
-        run: dart pub publish --force
+        # Closed stdin, so a missing trusted publisher fails immediately instead
+        # of blocking on the interactive browser authorization fallback. Do not
+        # set PUB_ENVIRONMENT here: the SDK derives it for trusted publishing.
+        run: dart pub publish --force < /dev/null
