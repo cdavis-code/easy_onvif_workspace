@@ -1,30 +1,20 @@
 name: Publish to pub.dev
 
-# Publishes whichever package(s) declare the version of the pushed tag, using
+# Publishes whichever package(s) declare the version of the pushed tag, over
 # pub.dev trusted publishing (OIDC) - no long-lived credential in the repo.
 #
-# Note: `dart-lang/setup-dart/.github/workflows/publish.yml@v1` is NOT OIDC - it
-# injects a `PUB_TOKEN` secret and fails immediately when that is absent (seen
-# in run 40212827989). Publishing directly is what actually uses the OIDC token.
-#
 # Prerequisites, per package, at https://pub.dev/packages/<name>/admin:
-#   - add a "Trusted publisher": provider GitHub,
-#     owner cdavis-code, repository easy_onvif_workspace,
-#     workflow publish-pub-dev.yaml, environment (leave empty unless the job
-#     uses one)
+#   - "Automated publishing" enabled with this repository
+#     (cdavis-code/easy_onvif_workspace) and a tag pattern that contains
+#     {{version}}; both 'v{{version}}' and '{{version}}' work with the trigger
+#     below. Only a tag push matching it may publish - a workflow_dispatch run
+#     can never authenticate, which makes dispatch useless as a check.
+#   - No environment name, unless the job is given the same one.
 #
-# Until that exists for a package, publishing it from CI has no credential to
-# use, and the Dart CLI waits on an interactive browser sign-in - the job then
-# ends at timeout-minutes below rather than failing fast (observed on
-# easy_onvif_mcp before its trusted publisher was configured). Configure the
-# trusted publisher first, or switch this step to a PUB_TOKEN secret from
-# pub.dev/account/publishing.
+# `easy_onvif` and `easy_onvif_cli` are version-locked, so one tag legitimately
+# matches more than one package; every match is published.
 #
-# `easy_onvif` and `easy_onvif_cli` are version-locked, so one tag can legitimately
-# match more than one package; every match is published, not just the first.
-#
-# npm artifacts publish from a different tag scheme (see dart.yml) so a single
-# tag can never trigger both paths.
+# npm artifacts publish from a different tag scheme (see dart.yml).
 
 on:
   push:
@@ -92,66 +82,16 @@ jobs:
   publish:
     name: Publish ${{ matrix.package.name }}
     needs: detect
-    # Without a trusted publisher on pub.dev, `dart pub publish` falls back to
-    # interactive browser auth and waits on stdin forever (seen hanging in run
-    # 40213634157). Fail the job instead of parking a runner for six hours.
-    timeout-minutes: 15
+    # Official OIDC path: the reusable workflow validates the package, builds an
+    # archive, then publishes it with `dart pub publish --from-archive` inside a
+    # job holding id-token: write. Publishing directly instead made the CLI fall
+    # back to interactive browser auth, so keep the documented mechanism.
     permissions:
-      id-token: write # OIDC token for pub.dev trusted publishing
-      contents: read
+      id-token: write # Required for OIDC token minting
     strategy:
       fail-fast: false
       matrix:
         package: ${{ fromJson(needs.detect.outputs.packages) }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-
-      # Flutter, not setup-dart: root `dart pub get` also resolves
-      # packages/easy_onvif/example, a Flutter app, and fails with
-      # "depends on flutter from sdk which doesn't exist" on a Dart-only runner
-      # (seen in run 40213338946).
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-
-      # The workspace has to resolve before a member can be packaged.
-      - name: Resolve dependencies
-        run: dart pub get
-
-      - name: Verify the package
-        working-directory: ${{ matrix.package.dir }}
-        run: dart pub publish --dry-run
-
-      # The Dart CLI only attempts OIDC when the runner exposes the token
-      # endpoint, which GitHub injects for jobs holding `id-token: write`. If
-      # these are empty, no pub.dev setting can help - the permission wiring is
-      # the problem. If they are present but publishing still falls back to
-      # interactive auth, the package's automated-publishing config is the
-      # problem (repository name, or a tag pattern that does not match).
-      - name: Check the OIDC endpoint is exposed
-        run: |
-          if [ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]; then
-            echo "OIDC endpoint present (id-token: write is in effect)"
-          else
-            echo "::error::ACTIONS_ID_TOKEN_REQUEST_URL is empty - id-token: write is not reaching this job"
-            exit 1
-          fi
-
-      - name: Publish
-        working-directory: ${{ matrix.package.dir }}
-        # PUB_ENVIRONMENT is pub's CI marker (convention: pub_ci/<provider>).
-        # Without it the client treats the run as interactive and never offers
-        # the OIDC token to pub.dev, which is why every attempt fell through to
-        # the browser sign-in even though ACTIONS_ID_TOKEN_REQUEST_URL was set.
-        env:
-          PUB_ENVIRONMENT: pub_ci/github_actions
-          PKG: ${{ matrix.package.name }}
-        # Bounded and non-interactive on purpose: an unconfigured package would
-        # otherwise park the job until the job timeout.
-        run: |
-          if ! timeout 240s dart pub publish --force < /dev/null; then
-            echo "::error::Publish failed. If the log shows 'Waiting for your authorization', this package has no trusted publisher: open https://pub.dev/${PKG}/admin and add a GitHub trusted publisher for owner=cdavis-code, repository=easy_onvif_workspace, workflow=publish-pub-dev.yaml"
-            exit 1
-          fi
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      working-directory: ${{ matrix.package.dir }}
