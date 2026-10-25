@@ -1,6 +1,6 @@
 {
   "name": "easy-onvif-web",
-  "version": "3.1.6",
+  "version": "3.1.7",
   "description": "Browser ONVIF client compiled from the Dart `easy_onvif` package with dart2wasm. Uses fetch + digest auth; WS-Discovery is unavailable because browsers cannot open UDP sockets.",
   "type": "module",
   "main": "./index.mjs",

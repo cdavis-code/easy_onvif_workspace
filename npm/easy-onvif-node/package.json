@@ -1,6 +1,6 @@
 {
   "name": "easy-onvif-node",
-  "version": "3.1.6",
+  "version": "3.1.7",
   "description": "ONVIF client for Node.js, compiled from the Dart `easy_onvif` package with dart2js. Supports WS-Discovery over UDP multicast and the Device / Media / PTZ SOAP surface.",
   "type": "module",
   "main": "./index.mjs",
