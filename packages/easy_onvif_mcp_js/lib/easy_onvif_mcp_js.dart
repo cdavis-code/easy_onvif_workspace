@@ -11,7 +11,7 @@ import 'src/runtime_node.dart';
 
 /// Reported to MCP clients as the server version. Keep in sync with
 /// `pubspec.yaml` and `npm/easy-onvif-mcp/package.json`.
-const String serverVersion = '0.1.0';
+const String serverVersion = '0.1.1';
 
 Future<void> main() async {
   final server = OnvifMcpServer(NodeMcpRuntime(), serverVersion);

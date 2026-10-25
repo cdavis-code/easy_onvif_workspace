@@ -1,6 +1,6 @@
 {
   "name": "easy-onvif-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for ONVIF IP cameras and NVRs, compiled from the Dart easy_onvif stack with dart2js. Runs over stdio: device information, media profiles, RTSP and snapshot URIs, PTZ control, and WS-Discovery.",
   "type": "module",
   "bin": {
