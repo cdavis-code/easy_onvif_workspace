@@ -120,6 +120,21 @@ jobs:
         working-directory: ${{ matrix.package.dir }}
         run: dart pub publish --dry-run
 
+      # The Dart CLI only attempts OIDC when the runner exposes the token
+      # endpoint, which GitHub injects for jobs holding `id-token: write`. If
+      # these are empty, no pub.dev setting can help - the permission wiring is
+      # the problem. If they are present but publishing still falls back to
+      # interactive auth, the package's automated-publishing config is the
+      # problem (repository name, or a tag pattern that does not match).
+      - name: Check the OIDC endpoint is exposed
+        run: |
+          if [ -n "$ACTIONS_ID_TOKEN_REQUEST_URL" ]; then
+            echo "OIDC endpoint present (id-token: write is in effect)"
+          else
+            echo "::error::ACTIONS_ID_TOKEN_REQUEST_URL is empty - id-token: write is not reaching this job"
+            exit 1
+          fi
+
       - name: Publish
         working-directory: ${{ matrix.package.dir }}
         # Bounded and non-interactive on purpose. With no trusted publisher on
