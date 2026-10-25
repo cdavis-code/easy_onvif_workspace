@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.6
+
+* Moved the package metadata to the `cdavis-code` GitHub organization (repository, homepage and issue-tracker URLs); no functional changes. This also clears the pub.dev repository-URL verification failure
+
 ## 3.1.5
 
 * Upgraded the `xml` dependency to `^7.0.1`

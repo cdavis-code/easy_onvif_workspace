@@ -2,8 +2,8 @@ name: easy_onvif_js
 description: JavaScript / WASM interop layer for `easy_onvif`, producing the `easy-onvif-node` and `easy-onvif-web` npm artifacts via `dart compile wasm`.
 version: 0.1.0
 publish_to: none
-homepage: https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_js
-repository: https://github.com/faithoflifedev/easy_onvif_workspace
+homepage: https://github.com/cdavis-code/easy_onvif_workspace/tree/main/packages/easy_onvif_js
+repository: https://github.com/cdavis-code/easy_onvif_workspace
 
 environment:
   sdk: ">=3.10.0 <4.0.0"

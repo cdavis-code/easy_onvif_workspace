@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.1.6] - 2026-10-25
+
+### Changed
+- Repository metadata now points at the `cdavis-code` GitHub organization, clearing the pub.dev repository-URL verification failure
+- Released in lock-step with `easy_onvif 3.1.6` (the two packages are version-locked); the dependency constraint stays `^3.1.5` so resolution works before 3.1.6 is on pub.dev
+
 ## [3.1.5] - 2026-07-28
 
 ### Added

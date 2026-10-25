@@ -1,18 +1,18 @@
 # Dart Implementation of ONVIF IP Camera Client
 
 <p align="center" width="100%">
-<img src="https://github.com/faithoflifedev/easy_onvif_workspace/blob/main/logo/easy_onvif_logo_640.png?raw=true" width="200" />
+<img src="https://github.com/cdavis-code/easy_onvif_workspace/blob/main/logo/easy_onvif_logo_640.png?raw=true" width="200" />
 </p>
 
 This is the repository for three related Dart packages and two companion npm packages compiled from them (`easy-onvif-node` via `dart2js`, `easy-onvif-web` via `dart2wasm`):
 
 ## Dart packages
 
-**[easy_onvif](https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif)** - This package works with a variety of ONVIF compatible devices allowing for IP Cameras and NVRs (network video recorders) to be integrated into Dart and Flutter applications.  The package includes the ability to control the PTZ (pan-tilt-zoom) movements of a device along with managing presets as well as controlling how video and audio is being streamed from the device.  Review the documentation below to get more details on available features.
+**[easy_onvif](https://github.com/cdavis-code/easy_onvif_workspace/tree/main/packages/easy_onvif)** - This package works with a variety of ONVIF compatible devices allowing for IP Cameras and NVRs (network video recorders) to be integrated into Dart and Flutter applications.  The package includes the ability to control the PTZ (pan-tilt-zoom) movements of a device along with managing presets as well as controlling how video and audio is being streamed from the device.  Review the documentation below to get more details on available features.
 
-**[easy_onvif_cli](https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_cli)** - A command line interface application (`onvif` executable) for controlling an Onvif device through terminal commands.  This tool allows you to use O/S features like `cron` to automate Onvif device functionality.
+**[easy_onvif_cli](https://github.com/cdavis-code/easy_onvif_workspace/tree/main/packages/easy_onvif_cli)** - A command line interface application (`onvif` executable) for controlling an Onvif device through terminal commands.  This tool allows you to use O/S features like `cron` to automate Onvif device functionality.
 
-**[easy_onvif_js](https://github.com/faithoflifedev/easy_onvif_workspace/tree/main/packages/easy_onvif_js)** - JavaScript / WASM interop layer for `easy_onvif`. Not published to pub.dev; it is the build harness that emits the two npm artifacts below — `easy-onvif-node` via `dart compile js` and `easy-onvif-web` via `dart compile wasm` — using `dart:js_interop` for Node-specific transports (`node:dgram` for WS-Discovery).
+**[easy_onvif_js](https://github.com/cdavis-code/easy_onvif_workspace/tree/main/packages/easy_onvif_js)** - JavaScript / WASM interop layer for `easy_onvif`. Not published to pub.dev; it is the build harness that emits the two npm artifacts below — `easy-onvif-node` via `dart compile js` and `easy-onvif-web` via `dart compile wasm` — using `dart:js_interop` for Node-specific transports (`node:dgram` for WS-Discovery).
 
 ## npm packages
 
