@@ -1,6 +1,6 @@
 {
   "name": "easy-onvif",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "ONVIF client for Node.js and browsers, compiled from the Dart `easy_onvif` package. One package, two runtimes: `easy-onvif/node` is a dart2js bundle for Node.js >= 20 with WS-Discovery over UDP multicast, `easy-onvif/web` is a dart2wasm (WasmGC) bundle for browsers.",
   "type": "module",
   "main": "./src/node/index.mjs",
