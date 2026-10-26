@@ -49,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.7"
+  cryptography:
+    dependency: transitive
+    description:
+      name: cryptography
+      sha256: "3eda3029d34ec9095a27a198ac9785630fe525c0eb6a49f3d575272f8e792ef0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.0"
   dart_mcp:
     dependency: "direct main"
     description:
@@ -82,20 +90,19 @@ packages:
     source: hosted
     version: "1.2.2"
   easy_onvif:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: easy_onvif
-      sha256: "812ecf83ab498a40675cd50c5ef63457e9e41e6c5283d3a6f6c73e77fb986e04"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.5"
+      path: "../../easy_onvif"
+      relative: true
+    source: path
+    version: "3.3.0"
   easy_onvif_mcp:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.2.0"
+    version: "0.3.0"
   ffi:
     dependency: transitive
     description:

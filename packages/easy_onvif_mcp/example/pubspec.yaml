@@ -10,3 +10,10 @@ dependencies:
   dart_mcp: ^0.5.1
   easy_onvif_mcp:
     path: ../
+
+# The example resolves outside the workspace, so easy_onvif_mcp's
+# `easy_onvif: ^3.3.0` would be looked up on pub.dev before 3.3.0 is released.
+# Pin the in-repo copy, exactly as packages/easy_onvif_cli/example does.
+dependency_overrides:
+  easy_onvif:
+    path: ../../easy_onvif
