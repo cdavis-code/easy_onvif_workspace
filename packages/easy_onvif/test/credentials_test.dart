@@ -400,24 +400,26 @@ Future<ProcessResult?> _tryRun(String exe, List<String> args) async {
 
 Future<bool> _keychainHasKey() async {
   if (Platform.isMacOS) {
-    final result = await Process.run('security', [
+    final result = await _tryRun('security', [
       'find-generic-password',
       '-s',
       'easy_onvif',
       '-a',
       'easy_onvif',
     ]);
-    return result.exitCode == 0;
+    return result != null && result.exitCode == 0;
   }
   if (Platform.isLinux) {
-    final result = await Process.run('secret-tool', [
+    final result = await _tryRun('secret-tool', [
       'lookup',
       'service',
       'easy_onvif',
       'account',
       'easy_onvif',
     ]);
-    return result.exitCode == 0 && (result.stdout as String).trim().isNotEmpty;
+    return result != null &&
+        result.exitCode == 0 &&
+        (result.stdout as String).trim().isNotEmpty;
   }
   return false;
 }
