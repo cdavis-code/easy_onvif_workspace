@@ -1,0 +1,140 @@
+# Keeps the cdavis-code/homebrew-easy-onvif tap in sync with a native release.
+#
+# Runs after native-release.yml publishes a release (or manually). It copies the
+# template formulas from this repo's homebrew/ into the tap, substitutes the
+# release version and a real SHA-256 for every platform asset, refuses to push
+# if any placeholder survives, and then proves the formulas on a clean macOS
+# runner (ruby syntax, brew audit --strict, install + test).
+#
+# Requires a repo secret HOMEBREW_TAP_TOKEN: a fine-grained PAT that can write
+# to cdavis-code/homebrew-easy-onvif only (least privilege — not the built-in
+# GITHUB_TOKEN, which cannot reach another repository).
+name: Update Homebrew formulas
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to sync from (e.g. onvif-v3.1.6)
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  TAP_REPO: cdavis-code/homebrew-easy-onvif
+
+jobs:
+  sync:
+    name: Seed formulas into the tap
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # Release tag / dispatch input is external data, so it is read through env
+      # and validated (must be an onvif-v* tag) before touching any command.
+      - name: Resolve release tag
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          DISPATCH_TAG: ${{ github.event.inputs.tag }}
+        run: |
+          set -e
+          TAG="${RELEASE_TAG:-$DISPATCH_TAG}"
+          if ! printf '%s' "$TAG" | grep -Eq '^onvif-v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "not an onvif-v<semver> tag: '$TAG'" >&2
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#onvif-v}" >> "$GITHUB_OUTPUT"
+
+      - name: Download release binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -e
+          mkdir -p dl
+          gh release download "$TAG" -R "$GITHUB_REPOSITORY" -D dl \
+            -p 'easy-onvif-cli-*' -p 'easy-onvif-mcp-*'
+          ls -1 dl
+
+      - name: Clone (or initialize) the tap
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          set -e
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          REMOTE="https://x:${TAP_TOKEN}@github.com/${TAP_REPO}.git"
+          if git clone "$REMOTE" tap 2>/dev/null; then
+            cd tap
+          else
+            mkdir -p tap && cd tap && git init -q -b main
+            git remote add origin "$REMOTE"
+          fi
+
+      - name: Substitute version and checksums
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -e
+          sha() { sha256sum "dl/$1" | cut -d' ' -f1; }
+          for tool in cli mcp; do
+            src="homebrew/easy-onvif-$tool.rb"
+            dst="tap/easy-onvif-$tool.rb"
+            cp "$src" "$dst"
+            sed -i \
+              -e "s/^  version \"0.0.0\"/  version \"$VERSION\"/" \
+              -e "s/\"DARWIN_ARM64_SHA256\"/\"$(sha easy-onvif-$tool-darwin-arm64)\"/" \
+              -e "s/\"DARWIN_AMD64_SHA256\"/\"$(sha easy-onvif-$tool-darwin-amd64)\"/" \
+              -e "s/\"LINUX_ARM64_SHA256\"/\"$(sha easy-onvif-$tool-linux-arm64)\"/" \
+              -e "s/\"LINUX_AMD64_SHA256\"/\"$(sha easy-onvif-$tool-linux-amd64)\"/" \
+              "$dst"
+          done
+
+      # A surviving placeholder means a placeholder token and the formula text
+      # drifted apart; better to abort than publish a formula with a fake sha.
+      - name: Fail if any placeholder remains
+        run: |
+          set -e
+          if grep -RnE '_SHA256|version "0\.0\.0"' tap/*.rb; then
+            echo "::error::a version or checksum placeholder was not replaced"
+            exit 1
+          fi
+
+      - name: Commit and push (only on change)
+        working-directory: tap
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -e
+          git add -A
+          if git diff --cached --quiet; then
+            echo "formulas unchanged; nothing to push"
+            exit 0
+          fi
+          git commit -m "easy-onvif $VERSION"
+          git push origin HEAD:main
+
+  audit:
+    name: Audit and install on clean macOS
+    needs: sync
+    runs-on: macos-14
+    steps:
+      # The tap must be public for `brew tap` over https without a token.
+      - name: Tap and audit
+        run: |
+          set -e
+          brew tap cdavis-code/easy-onvif https://github.com/${TAP_REPO}
+          brew audit --strict --online easy-onvif-cli
+          brew audit --strict --online easy-onvif-mcp
+
+      - name: Install and test
+        run: |
+          set -e
+          brew install easy-onvif-cli easy-onvif-mcp
+          brew test easy-onvif-cli
+          brew test easy-onvif-mcp

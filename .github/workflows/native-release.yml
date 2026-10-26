@@ -1,0 +1,139 @@
+# Builds native (AOT-compiled) binaries for the ONVIF CLI and the ONVIF MCP
+# server and attaches them to a GitHub Release with deterministic asset names.
+#
+# The Homebrew formulas in ../homebrew install these assets, so the names are a
+# contract: easy-onvif-cli-<os>-<arch> / easy-onvif-mcp-<os>-<arch> (+ .exe on
+# Windows). homebrew-formula-update.yml reads them to compute checksums.
+#
+# Triggered by an `onvif-v*` tag or manual dispatch. Kept separate from the
+# pub.dev (`v*`) and npm (`easy_onvif_*-v*`) tag triggers so one tag never fans
+# out to two publishing paths.
+name: Native release
+
+on:
+  push:
+    tags:
+      - 'onvif-v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version without the leading v (e.g. 3.1.6)
+        required: true
+
+# A prerelease re-run must not race the previous publish of the same tag.
+concurrency:
+  group: native-release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14          # Apple silicon
+            target: darwin-arm64
+            exe: ''
+          - os: macos-13          # Intel
+            target: darwin-amd64
+            exe: ''
+          - os: ubuntu-24.04-arm
+            target: linux-arm64
+            exe: ''
+          - os: ubuntu-latest
+            target: linux-amd64
+            exe: ''
+          - os: windows-latest
+            target: windows-amd64
+            exe: '.exe'
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dart-lang/setup-dart@v1
+
+      # The CLI and MCP are workspace members; resolving from the root gives
+      # `dart compile exe` the package config it needs to compile each bin.
+      - name: Install dependencies
+        run: dart pub get
+
+      # Matrix values go through env, not inline ${{ }}: `run:` receives them as
+      # shell variables, so nothing from the workflow context is interpolated
+      # into the command line.
+      - name: Compile and smoke-test
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+          EXE: ${{ matrix.exe }}
+        run: |
+          set -e
+          mkdir -p dist
+          dart compile exe packages/easy_onvif_cli/bin/onvif.dart -o "dist/easy-onvif-cli-$TARGET$EXE"
+          dart compile exe packages/easy_onvif_mcp/bin/easy_onvif_mcp_server.dart -o "dist/easy-onvif-mcp-$TARGET$EXE"
+          # Zero-exit smoke on the runner that built each binary; a crash here
+          # would surface as a failed `brew test` on a clean host.
+          "./dist/easy-onvif-cli-$TARGET$EXE" --help    > /dev/null
+          "./dist/easy-onvif-mcp-$TARGET$EXE" --help    > /dev/null
+          "./dist/easy-onvif-mcp-$TARGET$EXE" --version > /dev/null
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.target }}
+          path: dist/
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: native-*
+          path: assets
+          merge-multiple: true
+
+      # Resolve the version from the tag (push) or the dispatch input, then
+      # require it to look like semver before it reaches any shell or the
+      # release tag. The dispatch input is user-supplied, so it is validated,
+      # not trusted.
+      - name: Resolve version
+        id: version
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          set -e
+          if [ "$REF_TYPE" = "tag" ]; then
+            VERSION="${REF_NAME#onvif-v}"
+          else
+            VERSION="$INPUT_VERSION"
+          fi
+          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$'; then
+            echo "invalid release version: '$VERSION'" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Checksums
+        working-directory: assets
+        run: sha256sum easy-onvif-* > checksums.txt
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: onvif-v${{ steps.version.outputs.version }}
+          name: easy-onvif ${{ steps.version.outputs.version }} (native binaries)
+          body: >
+            Native CLI (`onvif`) and MCP server (`easy-onvif-mcp`) binaries for
+            macOS ARM64/x64, Linux ARM64/x64 and Windows x64, compiled with
+            `dart compile exe`. Consumed by the cdavis-code/homebrew-easy-onvif
+            tap.
+          files: |
+            assets/*
+          make_latest: false
