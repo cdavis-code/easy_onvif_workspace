@@ -379,14 +379,23 @@ abstract final class CredentialStoreKey {
 
 Future<bool> _keychainAvailable() async {
   if (Platform.isMacOS) {
-    final result = await Process.run('security', ['-h']);
-    return result.exitCode == 0 || result.exitCode == 1;
+    final result = await _tryRun('security', ['-h']);
+    return result != null && (result.exitCode == 0 || result.exitCode == 1);
   }
   if (Platform.isLinux) {
-    final result = await Process.run('secret-tool', ['--version']);
-    return result.exitCode == 0;
+    final result = await _tryRun('secret-tool', ['--version']);
+    return result != null && result.exitCode == 0;
   }
   return false;
+}
+
+/// "Not installed" is not an error here: it just means no keychain.
+Future<ProcessResult?> _tryRun(String exe, List<String> args) async {
+  try {
+    return await Process.run(exe, args);
+  } on ProcessException {
+    return null;
+  }
 }
 
 Future<bool> _keychainHasKey() async {
