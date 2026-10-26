@@ -312,9 +312,25 @@ final class CredentialStore {
 // OS keychain
 // ---------------------------------------------------------------------------
 
+/// Runs a keychain helper, treating "not installed" as "nothing stored".
+///
+/// A minimal Linux box has no `secret-tool`; that must surface as the
+/// actionable [KeyUnavailableException], not a `ProcessException` escaping from
+/// a credential read.
+Future<ProcessResult?> _tryRun(
+  String executable,
+  List<String> arguments,
+) async {
+  try {
+    return await Process.run(executable, arguments);
+  } on ProcessException {
+    return null;
+  }
+}
+
 Future<String?> _keychainRead() async {
   if (Platform.isMacOS) {
-    final result = await Process.run('security', [
+    final result = await _tryRun('security', [
       'find-generic-password',
       '-s',
       _keychainService,
@@ -322,17 +338,21 @@ Future<String?> _keychainRead() async {
       _keychainAccount,
       '-w',
     ]);
-    return result.exitCode == 0 ? (result.stdout as String).trim() : null;
+    return result != null && result.exitCode == 0
+        ? (result.stdout as String).trim()
+        : null;
   }
   if (Platform.isLinux) {
-    final result = await Process.run('secret-tool', [
+    final result = await _tryRun('secret-tool', [
       'lookup',
       'service',
       _keychainService,
       'account',
       _keychainAccount,
     ]);
-    return result.exitCode == 0 ? (result.stdout as String).trim() : null;
+    return result != null && result.exitCode == 0
+        ? (result.stdout as String).trim()
+        : null;
   }
   if (Platform.isWindows) return _dpapiRead();
   return null;
@@ -342,7 +362,7 @@ Future<bool> _keychainStore(String secret) async {
   if (Platform.isMacOS) {
     // The secret is an argument here because `security` offers no stdin form;
     // it is visible to same-user processes for the lifetime of the call.
-    final result = await Process.run('security', [
+    final result = await _tryRun('security', [
       'add-generic-password',
       '-U',
       '-s',
@@ -352,21 +372,25 @@ Future<bool> _keychainStore(String secret) async {
       '-w',
       secret,
     ]);
-    return result.exitCode == 0;
+    return result != null && result.exitCode == 0;
   }
   if (Platform.isLinux) {
-    final process = await Process.start('secret-tool', [
-      'store',
-      '--label',
-      _keychainService,
-      'service',
-      _keychainService,
-      'account',
-      _keychainAccount,
-    ]);
-    process.stdin.write(secret);
-    await process.stdin.close();
-    return await process.exitCode == 0;
+    try {
+      final process = await Process.start('secret-tool', [
+        'store',
+        '--label',
+        _keychainService,
+        'service',
+        _keychainService,
+        'account',
+        _keychainAccount,
+      ]);
+      process.stdin.write(secret);
+      await process.stdin.close();
+      return await process.exitCode == 0;
+    } on ProcessException {
+      return false;
+    }
   }
   if (Platform.isWindows) return _dpapiStore(secret);
   return false;
