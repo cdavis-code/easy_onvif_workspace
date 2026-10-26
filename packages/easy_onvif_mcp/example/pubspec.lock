@@ -50,7 +50,7 @@ packages:
     source: hosted
     version: "3.0.7"
   dart_mcp:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: dart_mcp
       sha256: "852b51da915d679be8d051e2e3b6c68ed19fe685f1c676bb35272a2d73ceac7a"
@@ -73,6 +73,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.2"
+  easy_api_annotations:
+    dependency: transitive
+    description:
+      name: easy_api_annotations
+      sha256: f38c70f4b471c82411724b63b39250b651eef69999cb02b17801cea832f72c11
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2"
   easy_onvif:
     dependency: transitive
     description:
@@ -87,7 +95,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.1.0"
+    version: "0.1.1"
   ffi:
     dependency: transitive
     description:

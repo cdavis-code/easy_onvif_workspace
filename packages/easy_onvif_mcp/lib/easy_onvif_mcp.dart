@@ -1,12 +1,19 @@
-/// MCP server exposing ONVIF device control over stdio.
+/// The ONVIF MCP server.
 ///
-/// The exports here are all host-agnostic: the tool registry, the server, and
-/// the [McpRuntime] seam.  A target supplies a runtime implementation —
-/// `package:easy_onvif_mcp/io.dart` for the Dart VM, or the Node.js runtime in
-/// `package:easy_onvif_mcp_js` for the `dart compile js` build.
+/// `EasyOnvifMcpServer` carries the `@Server` / `@Tool` annotations the
+/// `easy_api_generator` reads, so its stdio dispatcher is generated code — see
+/// `bin/easy_onvif_mcp_server.dart`. This barrel re-exports the annotated class
+/// and the host hooks it expects; the Node.js bundle additionally uses
+/// `src/js/js_server.dart`, which is not exported here because it is an
+/// implementation detail of the npm artifact.
 library;
 
-export 'src/mcp_runtime.dart';
-export 'src/onvif_mcp_server.dart';
-export 'src/onvif_tools.dart';
-export 'src/tool_defs.dart';
+export 'meta.dart';
+export 'src/easy_onvif_mcp_server.dart'
+    show
+        EasyOnvifMcpServer,
+        DioFactory,
+        envHost,
+        envUsername,
+        envPassword,
+        stderrWriteln;

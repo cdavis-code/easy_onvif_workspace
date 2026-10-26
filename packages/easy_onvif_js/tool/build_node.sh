@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Build the `easy-onvif-node` npm artifact with dart2js.
+# Build the Node.js runtime of the `easy-onvif` npm package with dart2js.
 #
 # Outputs:
 #   build/node/easy_onvif.raw.js   (raw dart2js output)
 #   build/node/easy_onvif.js       (preamble + raw output, staged to npm)
 #
-# And stages a copy into `npm/easy-onvif-node/dist/`.
+# And stages a copy into `dist/node/`.
 
 set -euo pipefail
 
@@ -14,7 +14,7 @@ PKG_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 WS_ROOT="$(cd "$PKG_DIR/../.." && pwd)"
 
 BUILD_DIR="$PKG_DIR/build/node"
-NPM_DIST="$WS_ROOT/npm/easy-onvif-node/dist"
+NPM_DIST="$PKG_DIR/dist/node"
 
 mkdir -p "$BUILD_DIR" "$NPM_DIST"
 

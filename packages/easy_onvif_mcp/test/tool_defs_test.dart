@@ -1,17 +1,38 @@
-/// Guards the registry, which is hand-authored on purpose: with no code
-/// generator there is nothing else checking that schemas and argument reads
-/// agree, and a mismatch only shows up as a confusing tool failure at runtime.
+/// Guards the Node.js tool registry and its parity with the generated
+/// dispatcher.
+///
+/// The Dart VM dispatcher is generated from the `@Tool` annotations, but the
+/// npm bundle keeps a hand-written registry (the generated code imports
+/// `dart:io`). These tests are what stop the two lists drifting apart.
 library;
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:easy_onvif/ptz.dart';
-import 'package:easy_onvif_mcp/easy_onvif_mcp.dart';
+import 'package:easy_onvif_mcp/src/js/tool_defs.dart';
+import 'package:easy_onvif_mcp/src/js/tools.dart';
+import 'package:easy_onvif_mcp/src/json_safe.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('tool registry', () {
     final tools = buildOnvifTools();
+
+    test('matches the generated Dart VM dispatcher exactly', () {
+      final source = File(
+        'lib/src/easy_onvif_mcp_server.mcp.dart',
+      ).readAsStringSync();
+      final generated = RegExp(
+        r"name: '(onvif_[a-z0-9_]+)'",
+      ).allMatches(source).map((m) => m.group(1)!).toSet();
+      final registry = tools.map((t) => t.name).toSet();
+
+      expect(generated, isNotEmpty, reason: 'run build_runner first');
+      // Both directions: a tool missing from either list is a parity bug.
+      expect(registry.difference(generated), isEmpty);
+      expect(generated.difference(registry), isEmpty);
+    });
 
     test('names are unique and prefixed', () {
       final names = tools.map((t) => t.name).toList();

@@ -26,31 +26,30 @@ if ! USER=$(npm whoami 2>/dev/null); then
 fi
 echo "==> publishing as '$USER'"
 
-# Rebuild first: npm/*/dist is what ships, and a stale tracked artifact would
-# otherwise be published verbatim.
-echo "==> rebuilding npm artifacts"
+# Rebuild first: each package's dist/ is what ships, and a stale tracked
+# artifact would otherwise be published verbatim.
+echo "==> rebuilding npm packages"
 melos run build:npm
-melos run build:npm:mcp
 
-for PKG in easy-onvif-node easy-onvif-web easy-onvif-mcp; do
-  echo "==> $PKG"
+for DIR in packages/easy_onvif_js packages/easy_onvif_mcp; do
+  echo "==> $DIR"
   if [ "$DRY_RUN" = "--dry-run" ]; then
-    (cd "npm/$PKG" && npm publish --dry-run 2>&1 | tail -4)
+    (cd "$DIR" && npm publish --dry-run 2>&1 | tail -4)
   else
-    (cd "npm/$PKG" && npm publish)
-    VERSION=$(node -p "require('./npm/$PKG/package.json').version")
-    echo "    published $PKG@$VERSION"
+    (cd "$DIR" && npm publish)
+    VERSION=$(node -p "require('./$DIR/package.json').version")
+    echo "    published $(basename "$DIR")@$VERSION"
   fi
 done
 
 if [ "$DRY_RUN" != "--dry-run" ]; then
   # The rebuild may have changed tracked artifacts; say so instead of leaving
   # the repo inconsistent with what the registry now serves.
-  if [ -n "$(git status --porcelain -- npm)" ]; then
+  if [ -n "$(git status --porcelain -- packages)" ]; then
     echo ""
-    echo "note: the rebuild changed tracked files under npm/ - commit them so the"
+    echo "note: the rebuild changed tracked artifact files - commit them so the"
     echo "      repository matches what is now on the registry:"
-    git status --short -- npm
+    git status --short -- packages
   fi
   echo ""
   echo "verify: https://www.npmjs.com/settings/$USER/packages"

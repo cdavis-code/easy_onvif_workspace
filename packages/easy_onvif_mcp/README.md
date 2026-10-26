@@ -10,22 +10,28 @@ writing a single SOAP request by hand.
 
 [![Pub Version](https://img.shields.io/pub/v/easy_onvif_mcp.svg?logo=dart)](https://pub.dev/packages/easy_onvif_mcp)
 
-## Why is there a second package?
+## How it is built
 
-The server exists exactly once, in
-`lib/src/onvif_tools.dart` + `lib/src/onvif_mcp_server.dart`, and neither file
-touches `dart:io`. Two hosts then plug themselves in through the small
-[`McpRuntime`](lib/src/mcp_runtime.dart) seam (stdio, stderr logging,
-environment, HTTP client, discovery probe, credentials file):
+The tools are declared once, as `@Tool`-annotated methods on
+[`EasyOnvifMcpServer`](lib/src/easy_onvif_mcp_server.dart).
+[`easy_api_generator`](https://pub.dev/packages/easy_api_generator) turns those
+annotations into the stdio dispatcher, so there is no hand-maintained schema and
+no separate registry to keep in step:
 
-| Host | Entry point | How you run it |
+```sh
+cd packages/easy_onvif_mcp
+dart run build_runner build   # regenerates src/easy_onvif_mcp_server.mcp.dart
+```
+
+| Artifact | Entry point | How you run it |
 | --- | --- | --- |
-| Dart VM | `bin/easy_onvif_mcp_server.dart` | `dart pub global activate easy_onvif_mcp` |
-| Node.js | [`easy_onvif_mcp_js`](../easy_onvif_mcp_js) (this package compiled with `dart compile js`) | `npx easy-onvif-mcp` |
+| pub.dev / Dart VM | `bin/easy_onvif_mcp_server.dart` (generated dispatcher) | `dart pub global activate easy_onvif_mcp` |
+| npm / Node.js | `lib/src/js/entry.dart` → `dist/` (compiled with `dart compile js`) | `npx -y easy-onvif-mcp` |
 
-Adding a tool means adding one entry to `buildOnvifTools()` — both hosts pick it
-up. See [`test/tool_defs_test.dart`](test/tool_defs_test.dart), which checks the
-hand-written schemas stay self-consistent.
+The generated dispatcher imports `dart:io`, which cannot be compiled to JS, so
+the npm artifact keeps a small registry of tool names and JSON schemas in
+`lib/src/js/tools.dart` and calls the same annotated methods.
+`test/tool_defs_test.dart` fails if the two lists ever diverge.
 
 ## Credentials
 
@@ -36,7 +42,10 @@ file:
 2. `$HOME/.onvif/credentials.json` — the same file `easy_onvif_cli` reads, so
    `onvif authorize` sets up this server too. Override the path with
    `ONVIF_CONFIG_FILE`.
-3. Or call the `onvif_connect` tool explicitly.
+3. Or call the `onvif_connect` tool explicitly. On the Dart VM it takes `host`
+   and `username`, and reads the password from the sources above; the npm build
+   accepts `host`, `username` and `password` directly, because an `npx` process
+   has no reliable home directory for the credentials file.
 
 `ONVIF_HOST` may carry a port (`192.168.1.10:8080`) or a scheme. Nothing is read
 until a tool needs it, so the server always starts.
@@ -113,12 +122,14 @@ Add them once the core exposes those requests — one `ToolDef` entry each.
 
 ### Credentials are never echoed back
 
-`onvif_connect` deliberately skips `dart_mcp`'s automatic argument validation
-and validates in-handler. The library's validation failure message quotes the
-rejected value — ``Value `12345` is not of type `String` at
+`dart_mcp`'s automatic argument validation quotes the rejected value in its
+failure message — ``Value `12345` is not of type `String` at
 path #root["password"]`` — and numeric default passwords are common on ONVIF
-cameras, so a mistyped credential would otherwise be written into the model's
-transcript. Errors name the offending field only.
+cameras. The password is therefore never a schema-validated argument: the Dart
+VM build does not accept one at all (it comes from the environment or the
+credentials file), and the npm build registers `onvif_connect` with
+`validateArguments: false` and validates in-handler. Errors name the offending
+field only.
 
 ### One device at a time
 
@@ -139,7 +150,14 @@ with `isError: true` and a one-line message.
 
 ```sh
 dart test
-{ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"smoke","version":"0"}}}' '{"jsonrpc":"2.0","method":"notifications/initialized"}' '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'; sleep 2; } | dart run bin/easy_onvif_mcp_server.dart
+dart run build_runner build   # after touching any @Tool method
+```
+
+To poke the server by hand:
+
+```sh
+{ printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"smoke","version":"0"}}}' '{"jsonrpc":"2.0","method":"notifications/initialized"}' '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'; sleep 2; } \
+  | dart run bin/easy_onvif_mcp_server.dart
 ```
 
 The `sleep` matters: closing stdin ends the session, and a piped heredoc

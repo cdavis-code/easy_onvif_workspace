@@ -18,7 +18,7 @@
 //   CAMERA_USERNAME=admin
 //   CAMERA_PASSWORD=123456
 
-import { loadEasyOnvif } from '../../../npm/easy-onvif-node/index.mjs';
+import { loadEasyOnvif } from '../src/node/index.mjs';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -88,7 +88,7 @@ function hasEnvConfig() {
 
 (async () => {
   // 1. Load the ONVIF engine (lazy; cached after first call).
-  console.log('Loading easy-onvif-node…');
+  console.log('Loading easy-onvif/node…');
   const onvif = await loadEasyOnvif();
 
   // ── Discovery phase ──────────────────────────────────────────────

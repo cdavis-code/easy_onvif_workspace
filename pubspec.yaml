@@ -8,7 +8,6 @@ workspace:
   - packages/easy_onvif_cli
   - packages/easy_onvif_js
   - packages/easy_onvif_mcp
-  - packages/easy_onvif_mcp_js
 
 dev_dependencies:
   melos: ^8.2.2
@@ -17,6 +16,11 @@ melos:
   packages:
   - packages/**
   - '!packages/**/example'
+  # The Flutter simulator resolves against the Flutter SDK, whose flutter_test
+  # pins test_api 0.7.12 — incompatible with this workspace's `test` for
+  # easy_onvif. It lives under packages/ for layout only; resolve and test it
+  # with `flutter pub get` / `flutter test` inside the directory.
+  - '!packages/easy_onvif_server'
 
   command:
     version:
@@ -43,40 +47,44 @@ melos:
       exec: dart run build_runner build
 
     build:npm:
-      description: Build both `easy-onvif-node` and `easy-onvif-web` npm artifacts via dart2wasm.
-      run: melos run build:npm:node && melos run build:npm:web
+      description: Build the `easy-onvif` npm package and the `easy-onvif-mcp` npm package.
+      run: melos run build:npm:library && melos run build:npm:mcp
 
-    build:npm:node:
-      description: Build the `easy-onvif-node` npm artifact via dart2wasm.
-      run: bash packages/easy_onvif_js/tool/build_node.sh
+    build:npm:library:
+      description: Build both runtimes of the `easy-onvif` npm package into packages/easy_onvif_js/dist.
+      run: bash packages/easy_onvif_js/tool/build_node.sh && bash packages/easy_onvif_js/tool/build_web.sh
 
-    build:npm:web:
-      description: Build the `easy-onvif-web` npm artifact via dart2wasm.
-      run: bash packages/easy_onvif_js/tool/build_web.sh
+    test:npm:library:
+      description: Exercise the `easy-onvif` node loader over real interop and verify the browser artifacts and export map.
+      run: node packages/easy_onvif_js/tool/smoke_test_node.mjs && node packages/easy_onvif_js/test/web/artifacts.mjs
+
+    pack:npm:library:
+      description: Show the exact packed file list for the `easy-onvif` npm package.
+      run: bash -c 'cd packages/easy_onvif_js && npm pack --dry-run'
 
     build:npm:mcp:
       description: Build the `easy-onvif-mcp` npm artifact (the ONVIF MCP server) via dart2js.
-      run: bash packages/easy_onvif_mcp_js/tool/build_mcp_node.sh
+      run: bash packages/easy_onvif_mcp/tool/build_mcp_node.sh
+
+    test:npm:mcp:
+      description: Smoke-test the compiled `easy-onvif-mcp` bundle over a real MCP handshake.
+      run: node --test packages/easy_onvif_mcp/test/npm/smoke.mjs
+
+    pack:npm:mcp:
+      description: Verify the `easy-onvif-mcp` bin wiring and show its packed file list.
+      run: bash -c 'cd packages/easy_onvif_mcp && node tool/check_bin.mjs && npm pack --dry-run'
 
     release:npm:
-      description: Bump, build, commit and tag the `easy-onvif-node` / `easy-onvif-web` npm artifacts. Does not publish - pushing the tag triggers CI publish.
+      description: Bump, build, commit and tag the `easy-onvif` npm package. Does not publish - pushing the tag triggers CI publish.
       run: bash packages/easy_onvif_js/tool/publish_npm.sh
 
     release:npm:mcp:
-      description: Bump, build, commit and tag the `easy-onvif-mcp` npm artifact. Does not publish - pushing the tag triggers CI publish.
-      run: bash packages/easy_onvif_mcp_js/tool/publish_npm.sh
+      description: Bump, build, commit and tag the `easy-onvif-mcp` npm package. Does not publish - pushing the tag triggers CI publish.
+      run: bash packages/easy_onvif_mcp/tool/publish_npm.sh
 
     publish:npm:
-      description: Publish all three npm artifacts to the registry immediately, from the current working tree.
+      description: Publish both npm packages to the registry immediately, from the current working tree.
       run: bash tool/publish_npm_now.sh
-
-    smoke:npm:mcp:
-      description: Smoke-test the compiled `easy-onvif-mcp` bundle over a real MCP handshake.
-      run: node --test npm/easy-onvif-mcp/test/smoke.mjs
-
-    smoke:npm:node:
-      description: Smoke-test the compiled `easy-onvif-node` bundle.
-      run: node packages/easy_onvif_js/tool/smoke_test_node.mjs
 
     build:delete:
       run: false

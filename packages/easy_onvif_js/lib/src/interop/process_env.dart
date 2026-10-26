@@ -1,7 +1,7 @@
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
-import 'js_globals.dart';
+import 'package:easy_onvif/node.dart';
 
 /// Thin accessor for `globalThis.process.env` under Node.js.
 ///

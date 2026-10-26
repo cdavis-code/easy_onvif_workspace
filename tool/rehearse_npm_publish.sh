@@ -11,18 +11,27 @@
 # It has caught: a declared-but-missing LICENSE (silently never shipped), a
 # stale tracked wasm artifact, and missing files in the `files` allowlist.
 #
-# Usage: bash tool/rehearse_npm_publish.sh [path-to-npm-dir]
-#   default path is <repo>/npm, i.e. the working tree; CI passes the directory
-#   it downloaded from the build-npm artifact so the rehearsal matches the
-#   publish inputs byte for byte.
+# Usage: bash tool/rehearse_npm_publish.sh [path-to-tree-root]
+#   default root is the repo itself, i.e. the working tree; CI passes the
+#   checkout root it downloaded the build-npm artifact into, so the rehearsal
+#   matches the publish inputs byte for byte.
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WS_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-NPM_DIR="${1:-$WS_ROOT/npm}"
+TREE="${1:-$WS_ROOT}"
 
-PACKAGES=(easy-onvif-node easy-onvif-web easy-onvif-mcp)
+PACKAGES=(easy-onvif easy-onvif-mcp)
+
+# Each npm package is published straight from its owning Dart package
+# directory: one manifest per package, no staging tree.
+pkg_dir() {
+  case "$1" in
+    easy-onvif) echo "$TREE/packages/easy_onvif_js" ;;
+    easy-onvif-mcp) echo "$TREE/packages/easy_onvif_mcp" ;;
+  esac
+}
 PORT=4873
 # npm wants a trailing slash on --registry; the HTTP API paths must not be
 # joined onto it (http://host:4873//-/ping 404s, which looks like a server that
@@ -89,7 +98,7 @@ NPMRC
 
 for PKG in "${PACKAGES[@]}"; do
   echo "==> publishing $PKG (rehearsal only, local registry)"
-  (cd "$NPM_DIR/$PKG" && npm --userconfig "$WORK/npmrc" publish --registry "$REGISTRY" >"$WORK/publish-$PKG.log" 2>&1) \
+  (cd "$(pkg_dir "$PKG")" && npm --userconfig "$WORK/npmrc" publish --registry "$REGISTRY" >"$WORK/publish-$PKG.log" 2>&1) \
     || { echo "publish failed for $PKG:" >&2; tail -20 "$WORK/publish-$PKG.log" >&2; exit 1; }
 done
 
@@ -113,7 +122,7 @@ const check = (label, ok, detail = '') => {
 
 // 1. Every package must ship the files its package.json promises. A missing
 //    LICENSE here means it was declared in `files` but does not exist on disk.
-for (const name of ['easy-onvif-node', 'easy-onvif-web', 'easy-onvif-mcp']) {
+for (const name of ['easy-onvif', 'easy-onvif-mcp']) {
   const dir = pkg(name);
   check(`${name}: installed`, existsSync(join(dir, 'package.json')));
   for (const required of ['package.json', 'README.md', 'LICENSE']) {
@@ -157,11 +166,22 @@ if (init && list) {
 
 // 3. The node library bundle must load from its installed location.
 try {
-  const api = await (await import('file://' + join(pkg('easy-onvif-node'), 'index.mjs'))).loadEasyOnvif();
-  check('easy-onvif-node loads and exposes its API', typeof api.connect === 'function' && typeof api.probe === 'function',
+  const entry = await import('file://' + join(pkg('easy-onvif'), 'src', 'node', 'index.mjs'));
+  const api = await entry.loadEasyOnvif();
+  check('easy-onvif/node loads and exposes its API', typeof api.connect === 'function' && typeof api.probe === 'function',
     Object.keys(api).length + ' methods');
 } catch (e) {
-  check('easy-onvif-node loads and exposes its API', false, String(e).slice(0, 200));
+  check('easy-onvif/node loads and exposes its API', false, String(e).slice(0, 200));
+}
+
+// 4. The browser subpath must resolve to its own loader with its own surface
+//    (no probe): consolidating the runtimes must not silently re-expose UDP
+//    discovery where a browser cannot do it.
+try {
+  const entry = await import('file://' + join(pkg('easy-onvif'), 'src', 'web', 'index.mjs'));
+  check('easy-onvif/web exposes its loader', typeof entry.loadEasyOnvif === 'function');
+} catch (e) {
+  check('easy-onvif/web exposes its loader', false, String(e).slice(0, 200));
 }
 
 if (failures.length) {

@@ -1,0 +1,6 @@
+targets:
+  $default:
+    builders:
+      easy_api_generator|mcpBuilder:
+        generate_for:
+          - lib/src/easy_onvif_mcp_server.dart

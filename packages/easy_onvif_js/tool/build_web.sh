@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Build the `easy-onvif-web` npm artifact with dart2wasm.
+# Build the browser runtime of the `easy-onvif` npm package with dart2wasm.
 #
 # Outputs:
 #   build/web/easy_onvif.wasm
 #   build/web/easy_onvif.mjs
 #   build/web/easy_onvif.support.js
 #
-# And stages a copy into `npm/easy-onvif-web/dist/`.
+# And stages a copy into `dist/web/`.
 
 set -euo pipefail
 
@@ -15,7 +15,7 @@ PKG_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 WS_ROOT="$(cd "$PKG_DIR/../.." && pwd)"
 
 BUILD_DIR="$PKG_DIR/build/web"
-NPM_DIST="$WS_ROOT/npm/easy-onvif-web/dist"
+NPM_DIST="$PKG_DIR/dist/web"
 
 mkdir -p "$BUILD_DIR" "$NPM_DIST"
 

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Example programs demonstrating the easy-onvif-node npm package from @packages/easy_onvif_js.",
+  "description": "Example programs demonstrating the easy-onvif npm package from @packages/easy_onvif_js.",
   "scripts": {
     "discover": "node discover_and_info.mjs",
     "ptz": "node ptz_demo.mjs"

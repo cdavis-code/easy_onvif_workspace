@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.0
+
+* Added `package:easy_onvif/node.dart`: the Node.js host bindings (`NodeFetchAdapter`, `NodeMulticastProbe`, `dgram` and the JS-global helpers) moved here from the unpublished `easy_onvif_js` package, so the npm library and the npm MCP server share one copy. Purely additive; no existing API changed.
+
 ## 3.1.6
 
 * Moved the package metadata to the `cdavis-code` GitHub organization (repository, homepage and issue-tracker URLs); no functional changes. This also clears the pub.dev repository-URL verification failure

@@ -1,13 +1,13 @@
 # easy_onvif_js — Example programs
 
 This directory contains example Node.js programs that exercise the
-[`easy-onvif-node`](../../../npm/easy-onvif-node) npm package compiled from
+`easy-onvif` npm package (`easy-onvif/node` runtime) compiled from
 `@packages/easy_onvif_js`.
 
 ## Prerequisites
 
 - **Node.js ≥ 20** (WasmGC is on by default).
-- The `easy-onvif-node` npm artifacts must be **built** before running the
+- The `easy-onvif` npm runtimes must be **built** before running the
   examples. From the workspace root:
 
   ```sh
@@ -19,7 +19,7 @@ This directory contains example Node.js programs that exercise the
   ```
 
   This stages the compiled `.wasm` + `.mjs` loader into
-  `../../../npm/easy-onvif-node/dist/`.
+  `../dist/node/`.
 
 ## Quick reference
 
@@ -123,14 +123,14 @@ CAMERA_PASSWORD=secret \
 Both examples import the npm package via a **relative path**:
 
 ```js
-import { loadEasyOnvif } from '../../../npm/easy-onvif-node/index.mjs';
+import { loadEasyOnvif } from '../src/node/index.mjs';
 ```
 
 This keeps the example self-contained inside the monorepo. If you want to
 test the published package instead, replace the import with the package name:
 
 ```js
-import { loadEasyOnvif } from 'easy-onvif-node';
+import { loadEasyOnvif } from 'easy-onvif/node';
 ```
 
-and then `npm install easy-onvif-node`.
+and then `npm install easy-onvif`.

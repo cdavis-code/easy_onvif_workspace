@@ -8,14 +8,19 @@
 
 This package is the JavaScript interop layer for the pure-Dart
 [`easy_onvif`](https://pub.dev/packages/easy_onvif) ONVIF client. It compiles
-with **`dart compile js` (dart2js)** to produce two npm artifacts that expose
-the same operations — device management, media streaming, PTZ control, imaging,
-recording, replay and search — to Node.js and browser applications.
+with **`dart compile js` (dart2js)** and **`dart compile wasm` (dart2wasm)** into a
+single npm package — `easy-onvif` — that exposes the same operations (device
+management, media streaming, PTZ control, imaging, recording, replay and search)
+to Node.js and browser applications through two runtimes.
 
-| npm package | Target | Discovery | Notes |
+| Import path | Target | Discovery | Notes |
 |---|---|---|---|
-| [`easy-onvif-node`](https://www.npmjs.com/package/easy-onvif-node) | Node.js ≥ 20 | ✅ WS-Discovery via `node:dgram` | CLI / server workloads |
-| [`easy-onvif-web`](https://www.npmjs.com/package/easy-onvif-web) | Browsers (modern ESM) | ❌ `UnsupportedError` | SOAP-over-`fetch` only; CORS proxy required |
+| `easy-onvif/node` | Node.js ≥ 20 | ✅ WS-Discovery via `node:dgram` | CLI / server workloads |
+| `easy-onvif/web` | Browsers (WasmGC: Chromium 119+, Firefox 120+, Safari 18.2+) | ❌ `UnsupportedError` | SOAP-over-`fetch` only; CORS proxy required |
+
+The bare `easy-onvif` import resolves to the Node runtime under Node and the
+browser runtime under a bundler that requests the `browser` condition; import the
+explicit `./node` / `./web` subpath when you want to be unambiguous.
 
 This package is **not published to pub.dev**. It is a build harness that
 consumes the pure-Dart `easy_onvif` package and emits a JavaScript bundle
@@ -48,14 +53,10 @@ wrapped with hand-written ESM loaders and TypeScript declarations.
 
 ### Dependency
 
-Install the appropriate npm package depending on your target:
+Install the one package; pick the runtime by import path:
 
 ```sh
-# Node.js
-npm install easy-onvif-node
-
-# Browser (bundled with webpack / vite / rollup)
-npm install easy-onvif-web
+npm install easy-onvif
 ```
 
 ### Usage Example
@@ -64,7 +65,7 @@ Import the loader, connect to a device, and grab service proxies through the
 returned handle.
 
 ```js
-import { loadEasyOnvif } from 'easy-onvif-node';
+import { loadEasyOnvif } from 'easy-onvif/node';
 
 const onvif = await loadEasyOnvif();
 
@@ -129,15 +130,16 @@ onvif.disconnect(handle);
 # One-time
 dart pub get
 
-# Produce build/node/easy_onvif.js (staged into npm/easy-onvif-node/dist/)
+# Produce build/node/easy_onvif.js (staged into dist/node/)
 ./tool/build_node.sh
 
-# Produce build/web/easy_onvif.js  (staged into npm/easy-onvif-web/dist/)
+# Produce build/web/easy_onvif.wasm + loader (staged into dist/web/)
 ./tool/build_web.sh
 ```
 
-Outputs are staged into `npm/easy-onvif-node/dist/` and
-`npm/easy-onvif-web/dist/` ready for `npm publish`.
+Both runtimes are staged inside this one package — `dist/node/` and `dist/web/` —
+and shipped together as `easy-onvif` by the single `package.json` at the package
+root. There is no root `npm/` staging directory.
 
 ## Smoke test (Node)
 
@@ -268,12 +270,12 @@ with `2` delegate to the Media2 service when the device advertises it.
 
 ## Onvif Probe
 
-The `easy-onvif-node` artifact ships a top-level `probe()` method that
+The `easy-onvif/node` runtime ships a top-level `probe()` method that
 executes WS-Discovery over UDP multicast (239.255.255.250:3702) using
 `node:dgram` and returns the raw probe matches.
 
 ```js
-import { loadEasyOnvif } from 'easy-onvif-node';
+import { loadEasyOnvif } from 'easy-onvif/node';
 
 const onvif   = await loadEasyOnvif();
 const matches = await onvif.probe(3); // seconds
@@ -284,7 +286,7 @@ for (const m of matches) {
 ```
 
 WS-Discovery is **not** available in the browser build — calling `probe()` on
-`easy-onvif-web` throws `UnsupportedError`.
+`easy-onvif/web` throws `UnsupportedError`.
 
 ## Known limitations
 

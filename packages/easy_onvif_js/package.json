@@ -1,0 +1,66 @@
+{
+  "name": "easy-onvif",
+  "version": "3.2.0",
+  "description": "ONVIF client for Node.js and browsers, compiled from the Dart `easy_onvif` package. One package, two runtimes: `easy-onvif/node` is a dart2js bundle for Node.js >= 20 with WS-Discovery over UDP multicast, `easy-onvif/web` is a dart2wasm (WasmGC) bundle for browsers.",
+  "type": "module",
+  "main": "./src/node/index.mjs",
+  "types": "./src/node/index.d.ts",
+  "exports": {
+    ".": {
+      "browser": {
+        "types": "./src/web/index.d.ts",
+        "import": "./src/web/index.mjs"
+      },
+      "node": {
+        "types": "./src/node/index.d.ts",
+        "import": "./src/node/index.mjs"
+      },
+      "default": {
+        "types": "./src/node/index.d.ts",
+        "import": "./src/node/index.mjs"
+      }
+    },
+    "./node": {
+      "types": "./src/node/index.d.ts",
+      "import": "./src/node/index.mjs"
+    },
+    "./web": {
+      "types": "./src/web/index.d.ts",
+      "import": "./src/web/index.mjs"
+    }
+  },
+  "files": [
+    "src/",
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "onvif",
+    "ws-discovery",
+    "rtsp",
+    "ip-camera",
+    "nvr",
+    "ptz",
+    "browser",
+    "wasm",
+    "dart"
+  ],
+  "author": "cdavis-code",
+  "license": "MIT",
+  "homepage": "https://github.com/cdavis-code/easy_onvif_workspace/tree/main/packages/easy_onvif_js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cdavis-code/easy_onvif_workspace.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cdavis-code/easy_onvif_workspace/issues"
+  },
+  "scripts": {
+    "test": "node --no-warnings test/node/smoke.mjs",
+    "test:web": "node test/web/artifacts.mjs"
+  }
+}

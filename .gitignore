@@ -22,11 +22,12 @@ build/
 *.js.map
 *.wasm
 
-# JS/npm build output. The published artifacts under npm/*/dist are deliberately
-# tracked (they are what `npm publish` ships), so re-include exactly those.
+# JS/npm build output. The published artifacts under packages/*/dist and
+# packages/easy_onvif_js/easy-onvif-*/dist are deliberately tracked (they are
+# what `npm publish` ships), so re-include exactly those.
 dist/
 node_modules/
-!/npm/**/dist/
+!/packages/**/dist/
 
 # Logs
 *.log

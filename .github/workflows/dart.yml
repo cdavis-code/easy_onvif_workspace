@@ -8,7 +8,7 @@
 # release tag — npm versions cannot be overwritten without penalty:
 #   - repository secret NPM_TOKEN, with publish rights on the npm account
 #   - the npm names easy-onvif-node / easy-onvif-web / easy-onvif-mcp claimed
-#   - the version in each npm/*/package.json equals the tag it publishes
+#   - the version in each artifact package.json equals the tag it publishes
 
 name: Dart
 
@@ -16,12 +16,12 @@ on:
   push:
     branches: [main]
     # npm releases are tagged per artifact, e.g. `easy_onvif_js-v3.1.5` or
-    # `easy_onvif_mcp_js-v0.1.0`. Bare `v*` tags belong to pub.dev publishing
+    # `easy_onvif_mcp-v0.1.1`. Bare `v*` tags belong to pub.dev publishing
     # (see publish-pub-dev.yaml) and are deliberately NOT matched here, so a
     # single tag can never trigger two publishing paths.
     tags:
       - 'easy_onvif_js-v*'
-      - 'easy_onvif_mcp_js-v*'
+      - 'easy_onvif_mcp-v*'
   pull_request:
     branches: [main]
 
@@ -64,6 +64,21 @@ jobs:
 
       - name: Install dependencies
         run: melos bootstrap
+
+      # Layout guards. The npm artifacts are owned by their Dart packages and
+      # the Flutter simulator lives under packages/, so a root `npm/` or
+      # `server/` directory reappearing means a script or habit regressed.
+      # Stale-path patterns are concatenated so this step does not match itself.
+      - name: Verify repository layout
+        run: |
+          test ! -d npm || { echo "::error::root npm/ must not exist; npm manifests belong to their packages"; exit 1; }
+          test ! -d server || { echo "::error::root server/ must not exist; the simulator is packages/easy_onvif_server"; exit 1; }
+          STALE='npm/easy''-onvif'
+          if grep -rn --include='*.yml' --include='*.yaml' --include='*.sh' --include='*.mjs' \
+               -e "$STALE" -e 'cd serve''r ' .github tool packages/*/tool ; then
+            echo "::error::obsolete root staging paths found in build surfaces"
+            exit 1
+          fi
 
       - name: Verify formatting
         run: melos run format-check
@@ -109,22 +124,38 @@ jobs:
       - name: Install dependencies
         run: melos bootstrap
 
-      - name: Build npm artifacts
+      - name: Build npm packages
+        run: melos run build:npm
+
+      - name: Test the easy-onvif library runtimes
+        run: melos run test:npm:library
+
+      - name: Test the MCP bundle over a real handshake
+        run: melos run test:npm:mcp
+
+      - name: Inspect packed file lists
         run: |
-          melos run build:npm
-          melos run build:npm:mcp
-
-      - name: Smoke-test the node library bundle
-        run: melos run smoke:npm:node
-
-      - name: Smoke-test the MCP bundle over a real handshake
-        run: melos run smoke:npm:mcp
+          melos run pack:npm:library
+          melos run pack:npm:mcp
 
       - name: Upload npm packages
         uses: actions/upload-artifact@v4
         with:
           name: npm-packages
-          path: npm/
+          path: |
+            packages/easy_onvif_js/package.json
+            packages/easy_onvif_js/src
+            packages/easy_onvif_js/dist
+            packages/easy_onvif_js/test
+            packages/easy_onvif_js/README.md
+            packages/easy_onvif_js/LICENSE
+            packages/easy_onvif_mcp/package.json
+            packages/easy_onvif_mcp/bin/easy-onvif-mcp.js
+            packages/easy_onvif_mcp/dist
+            packages/easy_onvif_mcp/test/npm
+            packages/easy_onvif_mcp/tool/check_bin.mjs
+            packages/easy_onvif_mcp/README.md
+            packages/easy_onvif_mcp/LICENSE
           if-no-files-found: error
 
   # Publishes the built artifacts to a throwaway registry, installs them back
@@ -148,13 +179,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: npm-packages
-          path: npm
+          path: .
 
       - name: Publish, install and run against an ephemeral registry
-        run: bash tool/rehearse_npm_publish.sh "$GITHUB_WORKSPACE/npm"
+        run: bash tool/rehearse_npm_publish.sh "$GITHUB_WORKSPACE"
 
-  publish-easy-onvif-node:
-    name: Publish easy-onvif-node
+  publish-easy-onvif:
+    name: Publish easy-onvif
     needs: [build, build-npm, publish-rehearsal]
     if: startsWith(github.ref, 'refs/tags/easy_onvif_js-v')
     runs-on: ubuntu-latest
@@ -163,7 +194,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-packages
-          path: npm
+          path: .
 
       - uses: actions/setup-node@v5
         with:
@@ -171,7 +202,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Check the tag matches the package version
-        working-directory: npm/easy-onvif-node
+        working-directory: packages/easy_onvif_js
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#easy_onvif_js-v}"
           PKG_VERSION="$(node -p "require('./package.json').version")"
@@ -182,41 +213,7 @@ jobs:
           fi
 
       - name: Publish to npm
-        working-directory: npm/easy-onvif-node
-        run: npm publish --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  publish-easy-onvif-web:
-    name: Publish easy-onvif-web
-    needs: [build, build-npm, publish-rehearsal]
-    if: startsWith(github.ref, 'refs/tags/easy_onvif_js-v')
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: npm-packages
-          path: npm
-
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Check the tag matches the package version
-        working-directory: npm/easy-onvif-web
-        run: |
-          TAG_VERSION="${GITHUB_REF_NAME#easy_onvif_js-v}"
-          PKG_VERSION="$(node -p "require('./package.json').version")"
-          echo "tag=$TAG_VERSION package=$PKG_VERSION"
-          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
-            echo "::error::Tag says $TAG_VERSION but package.json says $PKG_VERSION"
-            exit 1
-          fi
-
-      - name: Publish to npm
-        working-directory: npm/easy-onvif-web
+        working-directory: packages/easy_onvif_js
         run: npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -224,14 +221,14 @@ jobs:
   publish-easy-onvif-mcp:
     name: Publish easy-onvif-mcp
     needs: [build, build-npm, publish-rehearsal]
-    if: startsWith(github.ref, 'refs/tags/easy_onvif_mcp_js-v')
+    if: startsWith(github.ref, 'refs/tags/easy_onvif_mcp-v')
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: npm-packages
-          path: npm
+          path: .
 
       - uses: actions/setup-node@v5
         with:
@@ -239,9 +236,9 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Check the tag matches the package version
-        working-directory: npm/easy-onvif-mcp
+        working-directory: packages/easy_onvif_mcp
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#easy_onvif_mcp_js-v}"
+          TAG_VERSION="${GITHUB_REF_NAME#easy_onvif_mcp-v}"
           PKG_VERSION="$(node -p "require('./package.json').version")"
           echo "tag=$TAG_VERSION package=$PKG_VERSION"
           if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
@@ -250,7 +247,7 @@ jobs:
           fi
 
       - name: Publish to npm
-        working-directory: npm/easy-onvif-mcp
+        working-directory: packages/easy_onvif_mcp
         run: npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

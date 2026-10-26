@@ -6,8 +6,7 @@ import 'dart:js_interop_unsafe';
 import 'package:dio/dio.dart';
 import 'package:easy_onvif/onvif.dart';
 
-import '../node/node_fetch_adapter.dart';
-import '../node/node_multicast_probe.dart';
+import 'package:easy_onvif/node.dart';
 import 'onvif_api_core.dart';
 
 /// Node.js-flavored ONVIF JS API.

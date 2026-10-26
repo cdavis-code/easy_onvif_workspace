@@ -18,7 +18,7 @@
 //   will detect this and exit gracefully. Run against a real ONVIF PTZ camera
 //   to exercise the full move sequence.
 
-import { loadEasyOnvif } from '../../../npm/easy-onvif-node/index.mjs';
+import { loadEasyOnvif } from '../src/node/index.mjs';
 
 // ---------------------------------------------------------------------------
 // Helpers

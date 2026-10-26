@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.2.0] - 2026-10-26
+
+* No CLI changes; version bumped to stay locked with `easy_onvif` 3.2.0, which moved the Node.js host bindings into `package:easy_onvif/node.dart`.
+
 ## [3.1.6] - 2026-10-25
 
 ### Changed

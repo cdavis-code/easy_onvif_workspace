@@ -1,31 +1,29 @@
-// Two ways to use the MCP server: inspect its tool surface, or run it.
+// Serve the ONVIF tools to an MCP host over stdio.
 //
-//   dart run serve_stdio.dart --list-tools   # no camera required
-//   dart run serve_stdio.dart                # serve MCP over stdio
+//   dart run example/serve_stdio.dart
 //
-// An MCP host normally launches the server and keeps stdin open, so the second
-// form is what `claude_desktop_config.json` / OpenCode would run. The first is
-// a quick way to see what a model would be handed.
-// ignore_for_file: avoid_print
+// An MCP host normally launches the server and keeps stdin open, so this is
+// what `claude_desktop_config.json` / OpenCode would run. To see the tool
+// surface without a camera, ask the server directly:
+//
+//   printf '%s\n' \
+//     '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"x","version":"0"}}}' \
+//     '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
+//     '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
+//     | dart run bin/easy_onvif_mcp_server.dart
 
-import 'package:easy_onvif_mcp/easy_onvif_mcp.dart';
-import 'package:easy_onvif_mcp/io.dart';
+import 'dart:io' as io;
+
+import 'package:dart_mcp/stdio.dart';
+import 'package:easy_onvif_mcp/src/easy_onvif_mcp_server.mcp.dart';
+import 'package:easy_onvif_mcp/vm.dart';
 
 Future<void> main(List<String> args) async {
-  if (args.contains('--list-tools')) {
-    final tools = buildOnvifTools();
-    print('${tools.length} tools:');
-    for (final tool in tools) {
-      final required = tool.inputSchema.required ?? const <String>[];
-      print(
-        '  ${tool.name}${required.isEmpty ? '' : ' (requires ${required.join(', ')})'}',
-      );
-    }
-    return;
-  }
-
   // Credentials come from ONVIF_HOST / ONVIF_USERNAME / ONVIF_PASSWORD, or
   // ~/.onvif/credentials.json — the file `onvif authorize` writes.
-  final server = OnvifMcpServer(IoMcpRuntime(), '0.1.0');
+  configureVmHooks();
+  final server = MCPServerWithTools(
+    stdioChannel(input: io.stdin, output: io.stdout),
+  );
   await server.done;
 }
