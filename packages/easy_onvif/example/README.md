@@ -40,7 +40,7 @@ A Flutter application ([`lib/main.dart`](lib/main.dart)) that demonstrates:
    ```
 
 > **No ONVIF device handy?** Run the workspace's software ONVIF camera,
-> [`easy_onvif_server`](../../../server/README.md), and point `config.yaml` at
+> [`easy_onvif_server`](../../easy_onvif_server/README.md), and point `config.yaml` at
 > it instead — for example `host: "localhost:8080"`, `username: "admin"`,
 > `password: "admin"`.
 

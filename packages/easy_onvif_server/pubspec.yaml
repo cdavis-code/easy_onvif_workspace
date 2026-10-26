@@ -16,7 +16,7 @@ dependencies:
   camera_desktop: ^1.2.1
   crypto: ^3.0.7
   easy_onvif:
-    path: ../packages/easy_onvif
+    path: ../easy_onvif
   flutter_loggy: ^2.0.2
   geolocator: ^14.0.3
   loggy: ^2.0.3

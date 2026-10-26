@@ -2,7 +2,7 @@
 
 A Flutter application that turns a device (desktop or mobile) into an
 ONVIF-compatible IP camera. It implements the same SOAP API surface that the
-[`easy_onvif`](../packages/easy_onvif) client library consumes, so you can
+[`easy_onvif`](../easy_onvif) client library consumes, so you can
 develop and test ONVIF integrations without physical camera hardware.
 
 ## Features
@@ -226,7 +226,7 @@ returns the URL for a given recording token, and `PLAY` accepts a
 
 ## Using the server with the example project
 
-The [`packages/easy_onvif/example`](../packages/easy_onvif/example) Flutter app
+The [`packages/easy_onvif/example`](../easy_onvif/example) Flutter app
 is an `easy_onvif` **client**. Pointing it at this server lets you see the
 client and server working together end to end — no real camera required.
 
