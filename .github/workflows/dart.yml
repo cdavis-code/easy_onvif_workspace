@@ -179,7 +179,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: npm-packages
-          path: .
+          # upload-artifact stores entries relative to the common ancestor of
+          # the listed paths, which is `packages/` here - so restoring into
+          # `packages` recreates packages/easy_onvif_js and
+          # packages/easy_onvif_mcp exactly as the publish jobs expect.
+          path: packages
 
       - name: Publish, install and run against an ephemeral registry
         run: bash tool/rehearse_npm_publish.sh "$GITHUB_WORKSPACE"
@@ -194,7 +198,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-packages
-          path: .
+          # upload-artifact stores entries relative to the common ancestor of
+          # the listed paths, which is `packages/` here - so restoring into
+          # `packages` recreates packages/easy_onvif_js and
+          # packages/easy_onvif_mcp exactly as the publish jobs expect.
+          path: packages
 
       - uses: actions/setup-node@v5
         with:
@@ -228,7 +236,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: npm-packages
-          path: .
+          # upload-artifact stores entries relative to the common ancestor of
+          # the listed paths, which is `packages/` here - so restoring into
+          # `packages` recreates packages/easy_onvif_js and
+          # packages/easy_onvif_mcp exactly as the publish jobs expect.
+          path: packages
 
       - uses: actions/setup-node@v5
         with:
