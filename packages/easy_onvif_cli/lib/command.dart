@@ -1,6 +1,7 @@
 /// cli supporting classes
 library;
 
+export 'src/command/credentials_command.dart';
 export 'src/command/onvif_authorize_command.dart';
 export 'src/command/onvif_debug_command.dart';
 export 'src/command/onvif_device_management_command.dart';

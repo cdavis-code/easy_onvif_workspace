@@ -7,10 +7,12 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
 import 'package:dio/dio.dart';
+import 'package:easy_onvif/credentials.dart';
 import 'package:easy_onvif/node.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -32,9 +34,39 @@ void configureNodeHooks() {
     await multicastProbe.probe();
     return [for (final match in multicastProbe.matches) match.toJson()];
   };
-  // Credentials come from the environment only: an `npx` process has no
-  // reliable filesystem home. The Dart VM entry reads
-  // `~/.onvif/credentials.json`.
+  // An `npx` process has no reliable filesystem home, so credentials arrive as
+  // data: `ONVIF_BUNDLE` (the envelope JSON) + `ONVIF_KEY`, or the
+  // `ONVIF_*` host trio. The Dart VM entry reads the credential file instead.
+  EasyOnvifMcpServer.credentialsHook = _bundleCredentials;
+}
+
+/// Decrypts `ONVIF_BUNDLE` with `ONVIF_KEY` and selects the device
+/// (`ONVIF_DEVICE`, else the bundle default). Null when no bundle is set, so
+/// the server falls back to the ambient environment.
+Future<Map<String, String>?> _bundleCredentials() async {
+  final envelopeJson = getEnvVar('ONVIF_BUNDLE');
+  if (envelopeJson == null) return null;
+
+  final keyMaterial = getEnvVar('ONVIF_KEY');
+  if (keyMaterial == null) {
+    throw StateError(
+      'ONVIF_BUNDLE is set but ONVIF_KEY is missing; both are required for an '
+      'encrypted bundle',
+    );
+  }
+
+  final decoded = jsonDecode(envelopeJson);
+  if (decoded is! Map<String, dynamic>) {
+    throw StateError('ONVIF_BUNDLE must be the envelope JSON object');
+  }
+
+  final bundle = await openBundle(decoded, key: parseKeyMaterial(keyMaterial));
+  final device = bundle.resolve(getEnvVar('ONVIF_DEVICE'));
+  return {
+    'host': device.host,
+    'username': device.username,
+    'password': device.password,
+  };
 }
 
 /// A line-framed stdio channel over `process.stdin` / `process.stdout`.

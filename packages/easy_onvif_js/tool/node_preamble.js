@@ -42,4 +42,14 @@
   if (typeof g.self.location === 'undefined') {
     g.self.location = { href: 'file:///' };
   }
+  // `cryptography`'s JS backend gates WebCrypto on
+  // `globalThis.crypto.subtle && globalThis.window.isSecureContext`. Node has
+  // the former but neither `window` nor `isSecureContext` (both browser
+  // concepts), so the AES-GCM path for the encrypted credential bundle died on
+  // a null check. Node's WebCrypto is a real implementation, so report true.
+  if (typeof g.window === 'undefined') g.window = g;
+  if (typeof g.isSecureContext === 'undefined') g.isSecureContext = true;
+  if (typeof g.window.isSecureContext === 'undefined') {
+    g.window.isSecureContext = true;
+  }
 })();

@@ -1,5 +1,5 @@
 name: easy_onvif_mcp
-version: 0.2.0
+version: 0.3.0
 homepage: https://github.com/cdavis-code/easy_onvif_workspace/tree/main/packages/easy_onvif_mcp
 description: MCP server exposing ONVIF IP camera and NVR control (device management, media, PTZ, imaging, recordings) over stdio.
 repository: https://github.com/cdavis-code/easy_onvif_workspace/tree/main/packages/easy_onvif_mcp
@@ -27,7 +27,7 @@ dependencies:
   dart_mcp: ^0.5.1
   dio: ^5.10.0
   easy_api_annotations: ^1.2.2
-  easy_onvif: ^3.1.5
+  easy_onvif: ^3.3.0
   loggy: ^2.0.3
   stream_channel: ^2.1.4
 

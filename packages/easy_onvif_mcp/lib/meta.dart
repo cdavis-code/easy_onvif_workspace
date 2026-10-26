@@ -8,4 +8,4 @@ library;
 const String serverName = 'easy-onvif-mcp';
 
 /// The package version, mirroring `pubspec.yaml`.
-const String serverVersion = '0.2.0';
+const String serverVersion = '0.3.0';

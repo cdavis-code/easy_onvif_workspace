@@ -10,54 +10,76 @@ writing a single SOAP request by hand.
 
 [![Pub Version](https://img.shields.io/pub/v/easy_onvif_mcp.svg?logo=dart)](https://pub.dev/packages/easy_onvif_mcp)
 
+## Installation
+
+Homebrew (native binary, macOS and Linux):
+
+```sh
+brew tap cdavis-code/easy-onvif
+brew install easy-onvif-mcp
+```
+
+Or install the Dart package and run the compiled entry point:
+
+```sh
+dart pub global activate easy_onvif_mcp
+```
+
+Both install the same server and speak MCP over stdio. The command they place
+on your PATH is `easy-onvif-mcp` (Homebrew) or `easy_onvif_mcp` (Dart global
+activation). `--help` and `--version` print and exit without starting the
+server. The Homebrew tap serves binaries from the project's GitHub Releases, so
+it becomes available with the first native release.
+
 ## How it is built
 
 The tools are declared once, as `@Tool`-annotated methods on
 [`EasyOnvifMcpServer`](lib/src/easy_onvif_mcp_server.dart).
 [`easy_api_generator`](https://pub.dev/packages/easy_api_generator) turns those
-annotations into the stdio dispatcher, so there is no hand-maintained schema and
-no separate registry to keep in step:
+annotations into the stdio dispatcher behind `bin/easy_onvif_mcp_server.dart`,
+so there is no hand-maintained schema to keep in step:
 
 ```sh
 cd packages/easy_onvif_mcp
 dart run build_runner build   # regenerates src/easy_onvif_mcp_server.mcp.dart
 ```
 
-| Artifact | Entry point | How you run it |
-| --- | --- | --- |
-| pub.dev / Dart VM | `bin/easy_onvif_mcp_server.dart` (generated dispatcher) | `dart pub global activate easy_onvif_mcp` |
-| npm / Node.js | `lib/src/js/entry.dart` → `dist/` (compiled with `dart compile js`) | `npx -y easy-onvif-mcp` |
-
-The generated dispatcher imports `dart:io`, which cannot be compiled to JS, so
-the npm artifact keeps a small registry of tool names and JSON schemas in
-`lib/src/js/tools.dart` and calls the same annotated methods.
-`test/tool_defs_test.dart` fails if the two lists ever diverge.
+`bin/easy_onvif_mcp_server.dart` is the file both installation methods above
+run — Homebrew installs it as the `easy-onvif-mcp` binary and `dart pub global
+activate` exposes it as `easy_onvif_mcp`.
 
 ## Credentials
 
 Resolved lazily on the first tool call, environment winning over the config
 file:
 
-1. `ONVIF_HOST`, `ONVIF_USERNAME`, `ONVIF_PASSWORD`
-2. `$HOME/.onvif/credentials.json` — the same file `easy_onvif_cli` reads, so
-   `onvif authorize` sets up this server too. Override the path with
-   `ONVIF_CONFIG_FILE`.
-3. Or call the `onvif_connect` tool explicitly. On the Dart VM it takes `host`
-   and `username`, and reads the password from the sources above; the npm build
-   accepts `host`, `username` and `password` directly, because an `npx` process
-   has no reliable home directory for the credentials file.
+1. `ONVIF_HOST`, `ONVIF_USERNAME`, `ONVIF_PASSWORD` — all three, or none.
+2. `$HOME/.onvif/credentials.json` — the encrypted bundle `easy_onvif_cli`
+   writes (`onvif credentials init`), or a plaintext file from an older
+   version. Override the path with `ONVIF_CONFIG_FILE`; choose a device with
+   `ONVIF_DEVICE` (otherwise the bundle's default).
+3. Or call the `onvif_connect` tool with `host` and `username`; the password
+   still comes from the sources above.
+
+The bundle is sealed with AES-256-GCM. Its key is read from `ONVIF_KEY_FILE` /
+`ONVIF_KEY`, the OS keychain, or a passphrase prompt — the same providers the
+CLI uses, so `onvif credentials key init` provisions this server too. A file
+that exists but cannot be opened (missing key, wrong key, tampering) fails with
+the precise remedy instead of silently ignoring the file.
+
 
 `ONVIF_HOST` may carry a port (`192.168.1.10:8080`) or a scheme. Nothing is read
 until a tool needs it, so the server always starts.
 
 ## Client configuration
 
+Point the MCP host at the installed command:
+
 ```json
 {
   "mcpServers": {
     "onvif": {
-      "command": "npx",
-      "args": ["-y", "easy-onvif-mcp"],
+      "command": "easy-onvif-mcp",
       "env": {
         "ONVIF_HOST": "192.168.1.10",
         "ONVIF_USERNAME": "admin",
@@ -68,13 +90,15 @@ until a tool needs it, so the server always starts.
 }
 ```
 
-With the Dart VM binary, use `"command": "dart", "args": ["run", "easy_onvif_mcp:easy_onvif_mcp_server"]`.
+If you installed with `dart pub global activate`, use `"command":
+"easy_onvif_mcp"` instead (or `"command": "dart", "args": ["pub", "global",
+"run", "easy_onvif_mcp"]`).
 
 ## Tools
 
 52 tools, all prefixed `onvif_`. Media and PTZ tools take a `profile_token`;
-get one from `onvif_get_profiles`. Run `dart run example/serve_stdio.dart
---list-tools` to print the live list with each tool's required arguments.
+get one from `onvif_get_profiles`. The handshake snippet under
+[Development](#development) prints the live list with each tool's schema.
 
 **Connection** — `onvif_connect`, `onvif_disconnect`, `onvif_is_connected`,
 `onvif_status`, `onvif_probe`
@@ -118,18 +142,16 @@ button by default. Everything exposed is either a read or a camera movement.
 Two reads the ONVIF spec defines have no counterpart in the `easy_onvif` API and
 so are absent: `GetScopes`, and imaging options/settings beyond
 `ImagingStatus20` (`onvif_imaging_get_status` is the closest available).
-Add them once the core exposes those requests — one `ToolDef` entry each.
+Add them once the core exposes those requests — one `@Tool` method each.
 
 ### Credentials are never echoed back
 
 `dart_mcp`'s automatic argument validation quotes the rejected value in its
 failure message — ``Value `12345` is not of type `String` at
 path #root["password"]`` — and numeric default passwords are common on ONVIF
-cameras. The password is therefore never a schema-validated argument: the Dart
-VM build does not accept one at all (it comes from the environment or the
-credentials file), and the npm build registers `onvif_connect` with
-`validateArguments: false` and validates in-handler. Errors name the offending
-field only.
+cameras. The password is therefore never a tool argument at all: `onvif_connect`
+takes a host and a username, and the password comes only from the environment or
+the credentials file. Errors name the offending field only.
 
 ### One device at a time
 

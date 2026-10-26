@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.3.0] - 2026-10-26
+
+* Credentials are read through `easy_onvif`'s encrypted bundle; plaintext files
+  keep working. New global options `--device` and `--key-file`, plus `--prompt`
+  to seal writes with a passphrase.
+* New `onvif credentials` command group: `init`, `add`, `remove`, `list`
+  (`--site`/`--tag`), `default`, `migrate`, `key init`, `key rotate`.
+* `onvif authorize` is now an alias for `credentials init` and never writes a
+  plaintext file.
+* `ONVIF_HOST` / `ONVIF_USERNAME` / `ONVIF_PASSWORD` still override any file;
+  setting only some of them is now an error instead of a mix of sources.
+
 ## [3.2.0] - 2026-10-26
 
 * No CLI changes; version bumped to stay locked with `easy_onvif` 3.2.0, which moved the Node.js host bindings into `package:easy_onvif/node.dart`.

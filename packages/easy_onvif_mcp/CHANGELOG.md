@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.3.0]
+
+* Credentials come from `easy_onvif`'s encrypted bundle: the Dart VM binary
+  reads `ONVIF_CONFIG_FILE` / `~/.onvif/credentials.json` (plaintext files still
+  work) and honours `ONVIF_DEVICE`; the Node bundle reads `ONVIF_BUNDLE` +
+  `ONVIF_KEY` instead, since an `npx` process has no filesystem home.
+* A credential file that exists but cannot be opened (missing key, wrong key,
+  tampering) now fails with the precise remedy instead of silently falling back
+  to the environment.
+
 ## [0.2.0]
 
 * Added `--version` / `--help` to the stdio binary so `brew test` (and a human) get a

@@ -244,3 +244,27 @@ and browser builds gain the decrypt entry point.
 
 Steps 1–2 are the minimum that removes plaintext from the primary path; 3–4
 bring the remaining builds to parity. Each step is independently releasable.
+
+## Implementation status (2026-10-26)
+
+Shipped in `easy_onvif` / `easy_onvif_cli` 3.3.0 and `easy_onvif_mcp` 0.3.0:
+
+- §3–§5 core: `lib/src/credentials/{bundle,envelope,keys,store_io,store_stub}.dart`
+  behind `package:easy_onvif/credentials.dart`, plus `cryptography: ^2.9.0`.
+- §6 CLI and MCP VM/Node readers; §6 browser `loadCredentials(envelopeJson,
+  keyBase64)` on the JS API (`connect()` falls back to that device).
+- §7 CLI `credentials` group with `authorize` as an alias.
+- §10 tests: `packages/easy_onvif/test/credentials_test.dart` (16, one skipped
+  keychain case gated behind `ONVIF_TEST_KEYCHAIN=1` so a routine run never
+  touches the operator's keychain), wired into CI.
+
+Verified end to end: CLI init/list/migrate with a `0600` key file, fail-closed
+exit 2 without a key, Node MCP bundle decrypting `ONVIF_BUNDLE` + `ONVIF_KEY`
+(right key reaches the network, wrong key reports both kids), and the browser
+runtime compiling the crypto to dartwasm (dart2js needs the `window` /
+`isSecureContext` polyfill now in `tool/node_preamble.js`).
+
+Deferred, unchanged from §11 step 4's second half: the Flutter example app still
+loads `assets/config.yaml`. Moving it to an encrypted asset plus
+`flutter_secure_storage` is its own change (plugin dependency, asset pipeline,
+key bootstrap) and does not block the CLI, MCP or browser paths.

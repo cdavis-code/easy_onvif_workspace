@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.3.0
+
+* Added `package:easy_onvif/credentials.dart`: an encrypted, multi-device
+  credential store. The bundle is a flat device list sealed with AES-256-GCM
+  (`cryptography`), with the header authenticated as AAD. Keys come from
+  `ONVIF_KEY` / `ONVIF_KEY_FILE`, a `0600` key file, the OS keychain
+  (`security` / `secret-tool` / DPAPI) or an Argon2id-derived passphrase.
+  The pure parts compile to the VM, dart2js and dartwasm; the file/OS layer
+  resolves to an unsupported stub in a browser.
+* Legacy `{"host","username","password"}` files are still readable as a single
+  `default` device.
+
 ## 3.2.0
 
 * Added `package:easy_onvif/node.dart`: the Node.js host bindings (`NodeFetchAdapter`, `NodeMulticastProbe`, `dgram` and the JS-global helpers) moved here from the unpublished `easy_onvif_js` package, so the npm library and the npm MCP server share one copy. Purely additive; no existing API changed.

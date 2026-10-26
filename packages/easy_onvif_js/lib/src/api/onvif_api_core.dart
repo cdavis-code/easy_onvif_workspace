@@ -1,8 +1,10 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
+import 'package:easy_onvif/credentials.dart';
 import 'package:easy_onvif/media1.dart';
 import 'package:easy_onvif/onvif.dart';
 import 'package:easy_onvif/probe.dart' as probe_models;
@@ -143,16 +145,64 @@ JSArray<JSObject> _toListJs<T>(List<T> items) {
 
 @JSExport()
 class OnvifApiCore {
+  /// The device selected by [loadCredentials], if the host called it.
+  Map<String, String>? _bundleDevice;
+
+  /// Decrypts a credential envelope the host already fetched and remembers one
+  /// device for subsequent [connect] calls.
+  ///
+  /// A browser has no filesystem, environment or keychain, so nothing is
+  /// persisted here: the ciphertext arrives as a string, the key arrives as a
+  /// string, and both live in memory for the page's lifetime. `deviceId`
+  /// defaults to the bundle's default device.
+  JSPromise<JSAny?> loadCredentials(
+    String envelopeJson,
+    String keyBase64, [
+    String? deviceId,
+  ]) {
+    return (() async {
+      final decoded = jsonDecode(envelopeJson);
+      if (decoded is! Map<String, dynamic>) {
+        throw ArgumentError(
+          'envelopeJson must be the credential envelope JSON',
+        );
+      }
+      final bundle = await openBundle(
+        decoded,
+        key: parseKeyMaterial(keyBase64),
+      );
+      final device = bundle.resolve(deviceId);
+      _bundleDevice = {
+        'host': device.host,
+        'username': device.username,
+        'password': device.password,
+      };
+    })().toJS;
+  }
+
   JSPromise<JSNumber> connect(JSObject options) {
     return (() async {
       final onvif = await Onvif.connect(
-        host: _readString(options, 'host'),
-        username: _readString(options, 'username'),
-        password: _readString(options, 'password'),
+        host: _resolveOption(options, 'host'),
+        username: _resolveOption(options, 'username'),
+        password: _resolveOption(options, 'password'),
       );
 
       return registerHandle(onvif).toJS;
     })().toJS;
+  }
+
+  /// Reads an option, falling back to the device from [loadCredentials].
+  String _resolveOption(JSObject options, String key) {
+    if (options.getProperty<JSAny?>(key.toJS) != null) {
+      return _readString(options, key);
+    }
+    final fromBundle = _bundleDevice?[key];
+    if (fromBundle != null) return fromBundle;
+    throw StateError(
+      'connect() is missing "$key"; pass it in the options object, or call '
+      'loadCredentials(envelopeJson, keyBase64) first',
+    );
   }
 
   void disconnect(int handle) {

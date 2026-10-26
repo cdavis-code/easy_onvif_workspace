@@ -18,6 +18,7 @@ A command line interface application for controlling an Onvif device through ter
   - [Installation](#installation)
   - [Quick start](#quick-start)
   - [Commands](#commands)
+    - [credentials](#credentials)
     - [authorize](#authorize)
     - [device-management](#device-management)
       - [device-management create-users](#device-management-create-users)
@@ -171,10 +172,14 @@ Usage: onvif <command> [arguments]
 Global options:
 -h, --help           Print this usage information.
     --config-file    (defaults to "$HOME/.onvif/credentials.json")
+    --device         Device id inside the credential file (defaults to its default)
+    --key-file       File holding the 32-byte key (hex or base64)
+    --prompt         Seal credential writes with a passphrase instead of a raw key
     --log-level      [all, debug, info, warning, error, off (default)]
 
 Available commands:
-  authorize           Generate an authentication file for an Onvif device.
+  authorize           Deprecated alias for `credentials init`.
+  credentials         Manage encrypted device credentials (add, remove, list, migrate, keys).
   debug               Generate a debug bundle for an Onvif device.
   device-management   Device management commands.
   media1              Media ver10 commands.
@@ -189,7 +194,8 @@ Available commands:
 
 | command | description |
 | --- | --- |
-| [authorize](#authorize) | Generate a credentials file used to authenticate the command line API requests |
+| [credentials](#credentials) | Create and manage the encrypted credential bundle (devices and keys) |
+| authorize | Deprecated alias for `credentials init` |
 | debug | Generate a debug bundle for an Onvif device. |
 | [device-management](#device-management) | Onvif device management commands, [spec](https://www.onvif.org/onvif/ver10/device/wsdl/devicemgmt.wsdl) |
 | [media1](#media1) | Onvif media ver10 commands, [spec](https://www.onvif.org/ver10/media/wsdl/media.wsdl) |
@@ -206,7 +212,7 @@ Just like the main library, any responses provided by the above commands will be
 
 ```sh
 #step 1
-onvif authorize
+onvif credentials init
 #follow prompts
 
 #step 2
@@ -219,24 +225,74 @@ onvif ptz get-presets --limit 3 --profile-token Profile_1 | jq -r '.[] | ."@toke
 
 ## Commands
 
-### authorize
+### credentials
+
+The credential file is encrypted (AES-256-GCM) and holds a list of devices, so
+one file can serve a whole site. The key never lives in that file: it comes from
+`--key-file` / `ONVIF_KEY_FILE`, `ONVIF_KEY`, the OS keychain (macOS Keychain,
+Linux libsecret, Windows DPAPI), or an Argon2id-derived passphrase (`--prompt`).
 
 ```sh
-onvif authorize --help
+onvif credentials --help
 ```
 
 ```text
-Generate a refresh token used to authenticate the command line API requests
+Manage encrypted device credentials (add, remove, list, migrate, keys).
 
-Usage: onvif authorize [arguments]
+Usage: onvif credentials <subcommand> [arguments]
 -h, --help    Print this usage information.
+
+Available subcommands:
+  add       Add or replace a device in the credential file.
+  default   Choose the device used when --device is omitted.
+  init      Create an encrypted credential file (prompts for one device).
+  key       Create or rotate the encryption key.
+  list      List devices (ids, names, sites, hosts; no secrets).
+  migrate   Seal an existing plaintext credential file, then remove the plaintext.
+  remove    Remove a device from the credential file.
 ```
 
-The authorize command is used to create the default "--config-file" that can be used as the default for all future commands.  In general this command will only need to be run if you want to connect to another onvif device or if the settings (host, username, password) have changed for the current device.  The file contents are as follows:
+A sealed file looks like this — no host, username or password is readable:
 
 ```json
-{"host":"[host name or ip address of device]","username":"[device username]","password":"[device password]"}
+{
+ "v": 1,
+ "alg": "A256GCM",
+ "kid": "2eafac0c68bb775b",
+ "kdf": "none",
+ "nonce": "…",
+ "ct": "…"
+}
 ```
+
+Select a device per command with `--device <id>` (or `ONVIF_DEVICE`); without it
+the bundle's default is used. `ONVIF_HOST` / `ONVIF_USERNAME` / `ONVIF_PASSWORD`
+still override any file, which is the container/CI path — set all three.
+
+An existing plaintext file keeps working; convert it once:
+
+```sh
+onvif credentials migrate
+```
+
+That command seals the file in place, re-reads it to prove it opens, and only
+then replaces the plaintext. Files created by older versions are read as a
+single device with the id `default`.
+
+Key management:
+
+```sh
+onvif credentials key init       # first key: OS keychain, or --key-file <path>
+onvif credentials key rotate     # new key, bundle re-sealed
+```
+
+`init`, `add` and `migrate` create a key automatically when none exists yet, so
+the separate `key init` step is only needed when provisioning ahead of time.
+
+### authorize
+
+Deprecated alias for `onvif credentials init`; it writes the same encrypted file
+and never plaintext. Existing scripts keep working.
 
 ### device-management
 

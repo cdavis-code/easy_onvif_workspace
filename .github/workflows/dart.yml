@@ -100,6 +100,12 @@ jobs:
         working-directory: packages/easy_onvif_mcp
         run: dart test
 
+      # Hermetic (no camera fixtures, no OS keychain): envelope round-trips,
+      # tamper detection, KDF determinism, provider precedence, migration.
+      - name: Run credential tests
+        working-directory: packages/easy_onvif
+        run: dart test test/credentials_test.dart
+
   # Compiles every npm artifact once. Publishing jobs reuse this output so a
   # release tag never pays for `dart compile js` / `dart compile wasm` twice.
   build-npm:

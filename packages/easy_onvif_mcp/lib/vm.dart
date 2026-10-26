@@ -4,16 +4,16 @@
 /// import `dart:io`, still shares the server class and its tool annotations.
 library;
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:easy_onvif/credentials.dart';
 import 'package:easy_onvif/probe.dart';
 
 import 'src/easy_onvif_mcp_server.dart';
 
 /// Points the server's host hooks at Dart VM facilities: real environment,
-/// the `easy_onvif_cli` credentials file and the io multicast probe.
+/// the encrypted credential bundle and the io multicast probe.
 void configureVmHooks() {
   stderrWriteln = stderr.writeln;
   EasyOnvifMcpServer.envReader = (name) => Platform.environment[name];
@@ -32,22 +32,25 @@ void configureVmHooks() {
 }
 
 const String _configPathEnvVar = 'ONVIF_CONFIG_FILE';
+const String _deviceEnvVar = 'ONVIF_DEVICE';
 
-/// Reads `$ONVIF_CONFIG_FILE` or the `easy_onvif_cli` default
-/// `$HOME/.onvif/credentials.json`, when present.
+/// Reads `$ONVIF_CONFIG_FILE` or `$HOME/.onvif/credentials.json`.
+///
+/// Returns null only when the file does not exist, so the server falls back to
+/// `ONVIF_HOST/USERNAME/PASSWORD` exactly as before. A file that exists but
+/// cannot be opened (missing key, wrong key, tampering) throws instead of
+/// silently degrading to "no credentials", because that error names the fix.
 Future<Map<String, String>?> _readCredentialsFile() async {
-  final file = File(_configPath());
-  if (!file.existsSync()) return null;
-  try {
-    final decoded = jsonDecode(file.readAsStringSync());
-    if (decoded is! Map) return null;
-    return {
-      for (final entry in decoded.entries)
-        if (entry.value is String) entry.key.toString(): entry.value as String,
-    };
-  } on FormatException {
-    return null;
-  }
+  final path = _configPath();
+  if (!File(path).existsSync()) return null;
+
+  final file = await CredentialStore.readBundle(path);
+  final device = file.bundle.resolve(Platform.environment[_deviceEnvVar]);
+  return {
+    'host': device.host,
+    'username': device.username,
+    'password': device.password,
+  };
 }
 
 String _configPath() {
